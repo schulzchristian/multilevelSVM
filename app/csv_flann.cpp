@@ -8,23 +8,17 @@
 #include "../lib/tools/timer.h"
 
 using namespace std;
-using namespace Eigen;
 
 typedef double MyItem;
 typedef vector<vector<MyItem>> MyMat;
 typedef vector<MyItem> MyRow;
 
-void readCSV(const string filename, MyMat & min_data, vector<int> & maj_data);
+void readCSV(const string filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
 
-MatrixXd toMatrixXd(const MyMat & data);
 
 MyMat normalizeIP(const MyMat & data);
 
 void normalize(MyMat & data);
-
-void normalize(MatrixXd & data);
-
-void split(const MatrixXd & m, const vector<int> label, MatrixXd & min, MatrixXd & maj);
 
 void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj);
 
@@ -41,14 +35,21 @@ int main(int argc, char *argv[]) {
   MyMat data;
   vector<int> label;
 
+  int label_col = 0;
+  if (argc >= 4) {
+    label_col = stoi(argv[3]);
+  }
+
   timer t;
 
-  readCSV(inputfile, data, label);
+  readCSV(inputfile, data, label, label_col);
 
   cout << "read csv took " << t.elapsed() << endl;
 
   size_t rows = data.size();
   size_t cols = data[0].size();
+
+  cout << "rows: " << rows << " cols: " << cols << endl;
 
   t.restart();
 
@@ -73,13 +74,6 @@ int main(int argc, char *argv[]) {
   vector<vector<int>> maj_indices;
   MyMat maj_distances;
 
-  for (size_t i = 0; i < rows; i++) {
-    for (size_t j = 0; j < cols; j++) {
-      // cout << " " << min_data[i][j];
-    }
-    // cout << endl;
-  }
-
   t.restart();
 
   run_flann(min_data, min_indices, min_distances, 10);
@@ -99,37 +93,27 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void readCSV(const string filename, MyMat & data, vector<int> & label) {
+void readCSV(const string filename, MyMat & data, vector<int> & label, int label_col) {
   ifstream file;
   file.open(filename);
 
   for (string line; getline(file, line); ) {
     stringstream sep(line);
 
-    string main_class;
-    getline(sep, main_class, ',');
-    int main_c = stoi(main_class);
-    label.push_back(main_c);
-
     data.push_back(MyRow());
 
+    int col=0;
     for (string item; getline(sep, item, ','); ) {
-      MyItem val = stod(item);
-      data.back().push_back(val);
+      if (col == label_col) {
+        int val = stoi(item);
+        label.push_back(val);
+      } else{
+        MyItem val = stod(item);
+        data.back().push_back(val);
+      }
+      col++;
     }
   }
-}
-
-MatrixXd toMatrixXd(const MyMat & data) {
-  size_t rows = data.size();
-  size_t cols = data[0].size();
-
-  MatrixXd result(rows,cols);
-  for (size_t i = 0; i < rows; i++)
-    for (size_t j = 0; j < cols; j++)
-      result(i,j) = data[i][j];
-
-  return result;
 }
 
 MyMat normalizeIP(const MyMat & data) {
@@ -207,7 +191,11 @@ void normalize(MyMat & data) {
 void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj) {
   size_t rows = data.size();
   size_t cols = data[0].size();
+  cout << "matrix null" << endl;
   MyMat data_cpy(data);
+  cout << "matrix copied" << endl;
+
+
 
   for (int i = rows - 1; i >= 0; --i) {
     MyMat * target = nullptr;
@@ -222,32 +210,6 @@ void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj
 
   reverse(min.begin(), min.end());
   reverse(maj.begin(), maj.end());
-}
-
-void normalize(MatrixXd & data) {
-  // calc mean
-  VectorXd mean = data.colwise().sum() / (double) data.rows();
-
-  // (data.array().colwise() - mean).pow(2).sum();
-
-  // calc standard derivation
-  VectorXd stds(data.cols());
-  for (Index i = 0; i < data.cols(); ++i) {
-    ArrayXd tmp = data.col(i).array() - mean(i);
-    double variance = tmp.pow(2).sum();
-    stds(i) = sqrt(variance / (double) (data.rows() - 1));
-  }
-
-  // zscore
-  for (Index i = 0; i < data.cols(); ++i) {
-    for (Index j = 0; j < data.rows(); ++j) {
-      data(j,i) = (data(j,i) - mean(i)) / stds(i);
-    }
-  }
-}
-
-void split(const MatrixXd & m, const vector<int> label, MatrixXd & min, MatrixXd & maj) {
-
 }
 
 void run_flann(const MyMat & data, vector<vector<int>> & indices, MyMat & distances, int num_nn) {
