@@ -42,6 +42,7 @@ struct Edge {
 
 struct refinementNode {
     PartitionID partitionIndex; 
+    FeatureVec featureVector;
     //Count queueIndex;
 };
 
@@ -199,6 +200,9 @@ class graph_access {
                 PartitionID getSecondPartitionIndex(NodeID node);
                 void setSecondPartitionIndex(NodeID node, PartitionID id);
 
+                FeatureVec getFeatureVec(NodeID node);
+                void setFeatureVec(NodeID node, FeatureVec & id);
+
                 //to be called if combine in meta heuristic is used
                 void resizeSecondPartitionIndex(unsigned no_nodes);
 
@@ -325,6 +329,23 @@ inline void graph_access::setPartitionIndex(NodeID node, PartitionID id) {
         graphref->m_refinement_node_props.at(node).partitionIndex = id;
 #endif
 }
+
+inline FeatureVec graph_access::getFeatureVec(NodeID node) {
+#ifdef NDEBUG
+  return graphref->m_refinement_node_props[node].featureVector;
+#else
+  return graphref->m_refinement_node_props.at(node).featureVector;
+#endif
+}
+
+inline void graph_access::setFeatureVec(NodeID node, FeatureVec & vec) {
+#ifdef NDEBUG
+  graphref->m_refinement_node_props[node].featureVector = vec;
+#else
+  graphref->m_refinement_node_props.at(node).featureVector = vec;
+#endif
+}
+
 
 inline NodeWeight graph_access::getNodeWeight(NodeID node){
 #ifdef NDEBUG

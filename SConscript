@@ -170,3 +170,9 @@ if env['program'] == 'library':
         env.Append(CXXFLAGS = '-fPIC')
         env.Append(CCFLAGS  = '-fPIC')
         SConscript('interface/SConscript',exports='env')
+
+if env['program'] == 'mlsvm':
+        env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files, LIBS=['libargtable2','gomp'])
+
+if env['program'] == 'csv_flann':
+        env.Program('csv_flann', ['app/csv_flann.cpp'], LIBS=['gomp'])

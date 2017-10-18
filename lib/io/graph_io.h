@@ -54,6 +54,9 @@ class graph_io {
                 static 
                 void writePartition(graph_access& G, std::string filename);
 
+                static
+                int readFeatures(graph_access & G, std::string filename);
+
                 template<typename vectortype> 
                 static void writeVector(std::vector<vectortype> & vec, std::string filename);
 

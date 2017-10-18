@@ -49,6 +49,7 @@ typedef unsigned int 	PathID;
 typedef unsigned int 	PartitionID;
 typedef unsigned int 	NodeWeight;
 typedef int 		EdgeWeight;
+typedef std::vector<float> FeatureVec;
 typedef EdgeWeight 	Gain;
 typedef int 		Color;
 typedef unsigned int 	Count;

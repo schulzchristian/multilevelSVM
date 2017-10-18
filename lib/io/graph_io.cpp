@@ -188,11 +188,13 @@ int graph_io::readGraphWeighted(graph_access & G, std::string filename) {
                 }
         }
 
+        /*
         if( edge_counter != (EdgeID) nmbEdges ) {
                 std::cerr <<  "number of specified edges mismatch"  << std::endl;
                 std::cerr <<  edge_counter <<  " " <<  nmbEdges  << std::endl;
                 exit(0);
         }
+        */
 
         if( node_counter != (NodeID) nmbNodes) {
                 std::cerr <<  "number of specified nodes mismatch"  << std::endl;
@@ -218,3 +220,35 @@ void graph_io::writePartition(graph_access & G, std::string filename) {
 }
 
 
+int graph_io::readFeatures(graph_access & G, std::string filename) {
+        std::string line;
+
+        // open file for reading
+        std::ifstream in(filename.c_str());
+        if (!in) {
+                std::cerr << "Error opening file" << filename << std::endl;
+                return;
+        }
+
+        std::getline(in, line);
+        std::stringstream s(line);
+        int nodes = 0;
+        int features = 0;
+        s >> nodes;
+        s >> features;
+
+        forall_nodes(G, node) {
+                // fetch current line
+                std::getline(in, line);
+                std::stringstream ss(line);
+
+                FeatureVec vec(features);
+                for (int i = 0; i < features; i++) {
+                        ss >> vec[i];
+                }
+
+                G.setFeatureVec(node, vec);
+        } endfor
+
+        in.close();
+}
