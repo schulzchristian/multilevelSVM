@@ -283,26 +283,22 @@ void write_metis(const vector<vector<int>> & indices, const MyMat & distances, c
 
   timer t;
 
-  for (size_t i = 0; i < rows; ++i) {
-    for (size_t j = 0; j < nn; ++j) {
-      if (indices[i][j] > i) {
-        edges++;
-      }
-    }
-  }
+  edges = rows * (nn - 1);
 
   ofstream file;
   file.open(filename);
 
-  file << nodes << " " << edges << " " << " 1" << endl;
+  // edges is NOT the number of edges in the unidirectional graph but an upper boundary
+  file << nodes << " " << edges << " 1" << endl;
 
   for (size_t i = 0; i < rows; ++i) {
     for (size_t j = 0; j < nn; ++j) {
       int target = indices[i][j];
       MyItem weight = distances[i][j];
-      if (target == i)
+      if (target == i) //exclude self loops
         continue;
-      file << target + 1 << " " << weight << " ";
+      file << target + 1 << " " << (int)(weight * 1000000) << " ";
+      // file << target + 1 << " " << weight << " ";
     }
     file << endl;
   }
