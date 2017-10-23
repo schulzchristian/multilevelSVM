@@ -1,5 +1,5 @@
 /******************************************************************************
- * contraction.h 
+ * contraction.h
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -35,34 +35,34 @@ class contraction {
                 contraction();
                 virtual ~contraction();
 
-                void contract(const PartitionConfig & partition_config, 
-                              graph_access & finer, 
-                              graph_access & coarser, 
+                void contract(const PartitionConfig & partition_config,
+                              graph_access & finer,
+                              graph_access & coarser,
                               const Matching & edge_matching,
                               const CoarseMapping & coarse_mapping,
                               const NodeID & no_of_coarse_vertices,
                               const NodePermutationMap & permutation) const;
 
-                void contract_clustering(const PartitionConfig & partition_config, 
-                              graph_access & finer, 
-                              graph_access & coarser, 
+                void contract_clustering(const PartitionConfig & partition_config,
+                              graph_access & finer,
+                              graph_access & coarser,
                               const Matching & edge_matching,
                               const CoarseMapping & coarse_mapping,
                               const NodeID & no_of_coarse_vertices,
                               const NodePermutationMap & permutation) const;
 
 
-                 void contract_partitioned(const PartitionConfig & partition_config, 
-                                           graph_access & G, 
-                                           graph_access & coarser, 
+                 void contract_partitioned(const PartitionConfig & partition_config,
+                                           graph_access & G,
+                                           graph_access & coarser,
                                            const Matching & edge_matching,
                                            const CoarseMapping & coarse_mapping,
                                            const NodeID & no_of_coarse_vertices,
-                                           const NodePermutationMap & permutation) const; 
+                                           const NodePermutationMap & permutation) const;
 
         private:
-                // visits an edge in G (and auxillary graph) and updates/creates and edge in coarser graph 
-                void visit_edge(graph_access & G, 
+                // visits an edge in G (and auxillary graph) and updates/creates and edge in coarser graph
+                void visit_edge(graph_access & G,
                                 graph_access & coarser,
                                 std::vector<NodeID> & edge_positions,
                                 const NodeID coarseNode,
@@ -72,7 +72,7 @@ class contraction {
 
 };
 
-inline void contraction::visit_edge(graph_access & G, 
+inline void contraction::visit_edge(graph_access & G,
                 graph_access & coarser,
                 std::vector<NodeID> & edge_positions,
                 const NodeID coarseNode,
@@ -91,8 +91,8 @@ inline void contraction::visit_edge(graph_access & G,
         } else {
                 //we have seen this target node before and we know its postition in our
                 //edge array of the graph. So we update the weight of the edge!
-                EdgeWeight new_edge_weight = coarser.getEdgeWeight(edge_pos) + G.getEdgeWeight(e); 
-                coarser.setEdgeWeight(edge_pos, new_edge_weight);                               
+                EdgeWeight new_edge_weight = coarser.getEdgeWeight(edge_pos) + G.getEdgeWeight(e);
+                coarser.setEdgeWeight(edge_pos, new_edge_weight);
         }
 }
 

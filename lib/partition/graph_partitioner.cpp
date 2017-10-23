@@ -1,5 +1,5 @@
 /******************************************************************************
- * graph_partitioner.cpp 
+ * graph_partitioner.cpp
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -45,13 +45,13 @@ void graph_partitioner::perform_recursive_partitioning(PartitionConfig & config,
         perform_recursive_partitioning_internal(config, G, 0, config.k-1);
 }
 
-void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig & config, 
-                                                                graph_access & G, 
-                                                                PartitionID lb, 
+void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig & config,
+                                                                graph_access & G,
+                                                                PartitionID lb,
                                                                 PartitionID ub) {
 
         G.set_partition_count(2);
-        
+
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         // configuration of bipartitioning
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,7 +74,7 @@ void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig 
                 epsilon = 3.0/100.0;
         }
 
-        
+
         bipart_config.upper_bound_partition              = ceil((1+epsilon)*config.work_load/(double)bipart_config.k);
         bipart_config.corner_refinement_enabled          = false;
         bipart_config.quotient_graph_refinement_disabled = false;
@@ -90,7 +90,7 @@ void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig 
         NodeID num_blocks_rhs = ub - new_lb_rhs + 1;
 
         if(config.k % 2 != 0) {
-                //otherwise the block weights have to be 
+                //otherwise the block weights have to be
                 bipart_config.target_weights.clear();
                 bipart_config.target_weights.push_back((1+epsilon)*num_blocks_lhs/(double)(num_blocks_lhs+num_blocks_rhs)*config.work_load);
                 bipart_config.target_weights.push_back((1+epsilon)*num_blocks_rhs/(double)(num_blocks_lhs+num_blocks_rhs)*config.work_load);
@@ -106,11 +106,11 @@ void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig 
 
         bipart_config.grow_target = ceil(num_blocks_lhs/(double)(num_blocks_lhs+num_blocks_rhs)*config.work_load);
 
-        perform_partitioning(bipart_config, G);        
+        perform_partitioning(bipart_config, G);
 
         if( config.k > 2 ) {
                graph_extractor extractor;
- 
+
                graph_access extracted_block_lhs;
                graph_access extracted_block_rhs;
                std::vector<NodeID> mapping_extracted_to_G_lhs; // map the new nodes to the nodes in the old graph G
@@ -119,10 +119,10 @@ void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig 
                NodeWeight weight_lhs_block = 0;
                NodeWeight weight_rhs_block = 0;
 
-               extractor.extract_two_blocks(G, extracted_block_lhs, 
-                                               extracted_block_rhs, 
-                                               mapping_extracted_to_G_lhs, 
-                                               mapping_extracted_to_G_rhs, 
+               extractor.extract_two_blocks(G, extracted_block_lhs,
+                                               extracted_block_rhs,
+                                               mapping_extracted_to_G_lhs,
+                                               mapping_extracted_to_G_rhs,
                                                weight_lhs_block, weight_rhs_block);
 
                PartitionConfig rec_config = config;
@@ -132,12 +132,12 @@ void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig 
                        rec_config.largest_graph_weight = weight_lhs_block;
                        rec_config.work_load            = weight_lhs_block;
                        perform_recursive_partitioning_internal( rec_config, extracted_block_lhs, lb, new_ub_lhs);
-                       
+
                        //apply partition
                        forall_nodes(extracted_block_lhs, node) {
                                G.setPartitionIndex(mapping_extracted_to_G_lhs[node], extracted_block_lhs.getPartitionIndex(node));
                        } endfor
- 
+
                } else {
                        //apply partition
                        forall_nodes(extracted_block_lhs, node) {
@@ -171,7 +171,7 @@ void graph_partitioner::perform_recursive_partitioning_internal(PartitionConfig 
                        }
                } endfor
         }
-       
+
         G.set_partition_count(config.k);
 }
 
@@ -199,7 +199,7 @@ void graph_partitioner::single_run( PartitionConfig & config, graph_access & G) 
                                                 config.edge_rating = SEPARATOR_MAX;
                                         } else if ( rnd  == 3 ) {
                                                 config.edge_rating = SEPARATOR_LOG;
-                                        } 
+                                        }
                                 }
                                 coarsen.perform_coarsening(config, G, hierarchy);
                                 init_part.perform_initial_partitioning(config, hierarchy);
@@ -220,7 +220,7 @@ void graph_partitioner::perform_partitioning( PartitionConfig & config, graph_ac
                         initial_partitioning init_part;
                         init_part.perform_initial_partitioning(config, G);
                 }
-                
+
                 if( !config.mh_no_mh ) {
                         complete_boundary boundary(&G);
                         boundary.build();
@@ -262,4 +262,3 @@ void graph_partitioner::perform_partitioning( PartitionConfig & config, graph_ac
 
         }
 }
-

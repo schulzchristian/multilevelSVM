@@ -1,5 +1,5 @@
 /******************************************************************************
- * coarsening.cpp 
+ * coarsening.cpp
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -81,34 +81,32 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
                 coarsening_config.configure_coarsening(copy_of_partition_config, &edge_matcher, level);
                 rating.rate(*finer, level);
 
-                edge_matcher->match(copy_of_partition_config, *finer, edge_matching, 
+                edge_matcher->match(copy_of_partition_config, *finer, edge_matching,
                                     *coarse_mapping, no_of_coarser_vertices, permutation);
 
-                delete edge_matcher; 
+                delete edge_matcher;
 
                 if(partition_config.graph_allready_partitioned) {
-                        contracter->contract_partitioned(copy_of_partition_config, *finer, *coarser, edge_matching, 
+                        contracter->contract_partitioned(copy_of_partition_config, *finer, *coarser, edge_matching,
                                                          *coarse_mapping, no_of_coarser_vertices, permutation);
                 } else {
-                        contracter->contract(copy_of_partition_config, *finer, *coarser, edge_matching, 
+                        contracter->contract(copy_of_partition_config, *finer, *coarser, edge_matching,
                                              *coarse_mapping, no_of_coarser_vertices, permutation);
                 }
 
                 hierarchy.push_back(finer, coarse_mapping);
                 contraction_stop = coarsening_stop_rule->stop(no_of_finer_vertices, no_of_coarser_vertices);
-              
+
                 no_of_finer_vertices = no_of_coarser_vertices;
                 std::cout <<  "no of coarser vertices " << no_of_coarser_vertices <<  " and no of edges " <<  coarser->number_of_edges() << std::endl;
 
                 finer = coarser;
 
                 level++;
-        } while( contraction_stop ); 
+        } while( contraction_stop );
 
         hierarchy.push_back(finer, NULL); // append the last created level
 
         delete contracter;
         delete coarsening_stop_rule;
 }
-
-

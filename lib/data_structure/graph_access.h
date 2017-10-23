@@ -1,5 +1,5 @@
 /******************************************************************************
- * graph_access.h 
+ * graph_access.h
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -41,7 +41,7 @@ struct Edge {
 };
 
 struct refinementNode {
-    PartitionID partitionIndex; 
+    PartitionID partitionIndex;
     FeatureVec featureVector;
     //Count queueIndex;
 };
@@ -97,7 +97,7 @@ private:
     EdgeID new_edge(NodeID source, NodeID target) {
         ASSERT_TRUE(m_building_graph);
         ASSERT_TRUE(e < m_edges.size());
-       
+
         m_edges[e].target = target;
         EdgeID e_bar = e;
         ++e;
@@ -143,10 +143,10 @@ private:
     // split properties for coarsening and uncoarsening
     std::vector<Node> m_nodes;
     std::vector<Edge> m_edges;
-    
+
     std::vector<refinementNode> m_refinement_node_props;
     std::vector<coarseningEdge> m_coarsening_edge_props;
-        
+
     // construction properties
     bool m_building_graph;
     int m_last_source;
@@ -188,8 +188,8 @@ class graph_access {
                 EdgeID get_first_edge(NodeID node);
                 EdgeID get_first_invalid_edge(NodeID node);
 
-                PartitionID get_partition_count(); 
-                void set_partition_count(PartitionID count); 
+                PartitionID get_partition_count();
+                void set_partition_count(PartitionID count);
 
                 PartitionID getSeparatorBlock();
                 void setSeparatorBlock(PartitionID id);
@@ -230,12 +230,12 @@ class graph_access {
                 int build_from_metis(int n, int* xadj, int* adjncy);
                 int build_from_metis_weighted(int n, int* xadj, int* adjncy, int * vwgt, int* adjwgt);
 
-                //void set_node_queue_index(NodeID node, Count queue_index); 
+                //void set_node_queue_index(NodeID node, Count queue_index);
                 //Count get_node_queue_index(NodeID node);
 
                 void copy(graph_access & Gcopy);
         private:
-                basicGraph * graphref;     
+                basicGraph * graphref;
                 bool         m_max_degree_computed;
                 unsigned int m_partition_count;
                 EdgeWeight   m_max_degree;
@@ -349,49 +349,49 @@ inline void graph_access::setFeatureVec(NodeID node, FeatureVec & vec) {
 
 inline NodeWeight graph_access::getNodeWeight(NodeID node){
 #ifdef NDEBUG
-        return graphref->m_nodes[node].weight;        
+        return graphref->m_nodes[node].weight;
 #else
-        return graphref->m_nodes.at(node).weight;        
+        return graphref->m_nodes.at(node).weight;
 #endif
 }
 
 inline void graph_access::setNodeWeight(NodeID node, NodeWeight weight){
 #ifdef NDEBUG
-        graphref->m_nodes[node].weight = weight;        
+        graphref->m_nodes[node].weight = weight;
 #else
-        graphref->m_nodes.at(node).weight = weight;        
+        graphref->m_nodes.at(node).weight = weight;
 #endif
 }
 
 inline EdgeWeight graph_access::getEdgeWeight(EdgeID edge){
 #ifdef NDEBUG
-        return graphref->m_edges[edge].weight;        
+        return graphref->m_edges[edge].weight;
 #else
-        return graphref->m_edges.at(edge).weight;        
+        return graphref->m_edges.at(edge).weight;
 #endif
 }
 
 inline void graph_access::setEdgeWeight(EdgeID edge, EdgeWeight weight){
 #ifdef NDEBUG
-        graphref->m_edges[edge].weight = weight;        
+        graphref->m_edges[edge].weight = weight;
 #else
-        graphref->m_edges.at(edge).weight = weight;        
+        graphref->m_edges.at(edge).weight = weight;
 #endif
 }
 
 inline NodeID graph_access::getEdgeTarget(EdgeID edge){
 #ifdef NDEBUG
-        return graphref->m_edges[edge].target;        
+        return graphref->m_edges[edge].target;
 #else
-        return graphref->m_edges.at(edge).target;        
+        return graphref->m_edges.at(edge).target;
 #endif
 }
 
 inline EdgeRatingType graph_access::getEdgeRating(EdgeID edge) {
 #ifdef NDEBUG
-        return graphref->m_coarsening_edge_props[edge].rating;        
+        return graphref->m_coarsening_edge_props[edge].rating;
 #else
-        return graphref->m_coarsening_edge_props.at(edge).rating;        
+        return graphref->m_coarsening_edge_props.at(edge).rating;
 #endif
 }
 
@@ -408,10 +408,10 @@ inline EdgeWeight graph_access::getNodeDegree(NodeID node) {
 }
 
 inline EdgeWeight graph_access::getWeightedNodeDegree(NodeID node) {
-	EdgeWeight degree = 0;
-	for( unsigned e = graphref->m_nodes[node].firstEdge; e < graphref->m_nodes[node+1].firstEdge; ++e) {
-		degree += getEdgeWeight(e);
-	}
+  EdgeWeight degree = 0;
+  for( unsigned e = graphref->m_nodes[node].firstEdge; e < graphref->m_nodes[node+1].firstEdge; ++e) {
+    degree += getEdgeWeight(e);
+  }
         return degree;
 }
 
@@ -451,7 +451,7 @@ inline int* graph_access::UNSAFE_metis_style_adjncy_array() {
         basicGraph& ref = *graphref;
         forall_edges(ref, e) {
                 adjncy[e] = graphref->m_edges[e].target;
-        } endfor 
+        } endfor
 
         return adjncy;
 }
@@ -473,7 +473,7 @@ inline int* graph_access::UNSAFE_metis_style_adjwgt_array() {
 
         forall_edges(ref, e) {
                 adjwgt[e] = (int)graphref->m_edges[e].weight;
-        } endfor 
+        } endfor
 
         return adjwgt;
 }
@@ -497,7 +497,7 @@ inline int graph_access::build_from_metis(int n, int* xadj, int* adjncy) {
                 }
 
         }
-        
+
         finish_construction();
         return 0;
 }
@@ -516,7 +516,7 @@ inline int graph_access::build_from_metis_weighted(int n, int* xadj, int* adjncy
                         setEdgeWeight(e_bar, adjwgt[e]);
                 }
         }
-        
+
         finish_construction();
         return 0;
 }

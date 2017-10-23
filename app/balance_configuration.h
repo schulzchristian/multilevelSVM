@@ -1,7 +1,7 @@
 /******************************************************************************
  * balance_configuration.h
  *
- * Source of KaHIP -- Karlsruhe High Quality Partitioning 
+ * Source of KaHIP -- Karlsruhe High Quality Partitioning
  ******************************************************************************
  * Copyright (C) 2013-2015 Christian Schulz <christian.schulz@kit.edu>
  *
@@ -43,12 +43,12 @@ public:
                                 NodeWeight weighted_degree = 0;
                                 forall_out_edges(G, e, node) {
                                         weighted_degree += G.getEdgeWeight(e);
-                                } endfor          
+                                } endfor
 
                                 edge_weights += weighted_degree;
                                 G.setNodeWeight(node, G.getNodeWeight(node) + weighted_degree);
                         } endfor
-                        
+
                 }
 
                 double epsilon  = (partition_config.imbalance)/100.0;

@@ -15,48 +15,47 @@
 
 int main(int argn, char *argv[]) {
 
-  PartitionConfig partition_config;
-  std::string filename;
+        PartitionConfig partition_config;
+        std::string filename;
 
-  bool is_graph_weighted = false;
-  bool suppress_output   = false;
-  bool recursive         = false;
+        bool is_graph_weighted = false;
+        bool suppress_output   = false;
+        bool recursive         = false;
 
-  int ret_code = parse_parameters(argn, argv,
-                                  partition_config,
-                                  filename,
-                                  is_graph_weighted,
-                                  suppress_output, recursive);
+        int ret_code = parse_parameters(argn, argv,
+                                        partition_config,
+                                        filename,
+                                        is_graph_weighted,
+                                        suppress_output, recursive);
 
-  if(ret_code) {
-    return 0;
-  }
+        if(ret_code) {
+                return 0;
+        }
 
-  partition_config.LogDump(stdout);
+        partition_config.LogDump(stdout);
 
-  graph_access G_min;
-  graph_access G_maj;
+        graph_access G_min;
+        graph_access G_maj;
 
-  timer t;
-  graph_io::readGraphWeighted(G_min, filename + "_min_graph");
-  graph_io::readFeatures(G_min, filename + "_min_data");
-  graph_io::readGraphWeighted(G_maj, filename + "_maj_graph");
-  graph_io::readFeatures(G_maj, filename + "_maj_data");
-  std::cout << "io time: " << t.elapsed() << std::endl;
+        timer t;
+        graph_io::readGraphWeighted(G_min, filename + "_min_graph");
+        graph_io::readFeatures(G_min, filename + "_min_data");
+        graph_io::readGraphWeighted(G_maj, filename + "_maj_graph");
+        graph_io::readFeatures(G_maj, filename + "_maj_data");
+        std::cout << "io time: " << t.elapsed() << std::endl;
 
-  partition_config.stop_rule = STOP_RULE_SIMPLE;
-  partition_config.sep_num_vert_stop = 500;
+        partition_config.stop_rule = STOP_RULE_SIMPLE;
+        partition_config.sep_num_vert_stop = 500;
 
-  partition_config.k = 10;
+        partition_config.k = 2;
 
-  coarsening coarsen;
+        coarsening coarsen;
 
-  graph_hierarchy hierarchy;
+        graph_hierarchy hierarchy;
 
-  coarsen.perform_coarsening(partition_config, G_maj, hierarchy);
+        coarsen.perform_coarsening(partition_config, G_maj, hierarchy);
 
-  std::cout << "hierarchy size: " << hierarchy.size() << std::endl;
+        std::cout << "hierarchy size: " << hierarchy.size() << std::endl;
 
-
-  return 0;
+        return 0;
 }

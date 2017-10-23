@@ -1,5 +1,5 @@
 /******************************************************************************
- * kaffpa.cpp 
+ * kaffpa.cpp
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -26,7 +26,7 @@
 #include <regex.h>
 #include <sstream>
 #include <stdio.h>
-#include <string.h> 
+#include <string.h>
 
 #include "balance_configuration.h"
 #include "data_structure/graph_access.h"
@@ -52,11 +52,11 @@ int main(int argn, char **argv) {
         bool suppress_output   = false;
         bool recursive         = false;
 
-        int ret_code = parse_parameters(argn, argv, 
-                        partition_config, 
-                        graph_filename, 
-                        is_graph_weighted, 
-                        suppress_output, recursive); 
+        int ret_code = parse_parameters(argn, argv,
+                        partition_config,
+                        graph_filename,
+                        is_graph_weighted,
+                        suppress_output, recursive);
 
         if(ret_code) {
                 return 0;
@@ -66,17 +66,17 @@ int main(int argn, char **argv) {
         std::ofstream ofs;
         ofs.open("/dev/null");
         if(suppress_output) {
-                std::cout.rdbuf(ofs.rdbuf()); 
+                std::cout.rdbuf(ofs.rdbuf());
         }
 
         partition_config.LogDump(stdout);
-        graph_access G;     
+        graph_access G;
 
         timer t;
         graph_io::readGraphWeighted(G, graph_filename);
         std::cout << "io time: " << t.elapsed()  << std::endl;
 
-        G.set_partition_count(partition_config.k); 
+        G.set_partition_count(partition_config.k);
 
         balance_configuration bc;
         bc.configurate_balance( partition_config, G);
@@ -85,7 +85,7 @@ int main(int argn, char **argv) {
         random_functions::setSeed(partition_config.seed);
 
         std::cout <<  "graph has " <<  G.number_of_nodes() <<  " nodes and " <<  G.number_of_edges() <<  " edges"  << std::endl;
-        // ***************************** perform partitioning ***************************************       
+        // ***************************** perform partitioning ***************************************
         t.restart();
         graph_partitioner partitioner;
         quality_metrics qm;
@@ -130,7 +130,7 @@ int main(int argn, char **argv) {
         int qap = 0;
         if(partition_config.enable_mapping) {
                 std::cout <<  "performing mapping!"  << std::endl;
-                //check if k is a power of 2 
+                //check if k is a power of 2
                 bool power_of_two = (partition_config.k & (partition_config.k-1)) == 0;
                 std::vector< NodeID > perm_rank(partition_config.k);
                 graph_access C;
@@ -169,7 +169,7 @@ int main(int argn, char **argv) {
                         qap = qm.total_qap(C, D, perm_rank );
                 }
 
-                // solution check 
+                // solution check
                 std::vector< NodeID > tbsorted = perm_rank;
                 std::sort( tbsorted.begin(), tbsorted.end() );
                 for( unsigned int i = 0; i < tbsorted.size(); i++) {
@@ -184,8 +184,8 @@ int main(int argn, char **argv) {
                         G.setPartitionIndex(node, perm_rank[G.getPartitionIndex(node)]);
                 } endfor
         }
-        // ******************************* done partitioning *****************************************       
-        // output some information about the partition that we have computed 
+        // ******************************* done partitioning *****************************************
+        // output some information about the partition that we have computed
         std::cout << "cut \t\t"         << qm.edge_cut(G)                 << std::endl;
         std::cout << "finalobjective  " << qm.edge_cut(G)                 << std::endl;
         std::cout << "bnd \t\t"         << qm.boundary_nodes(G)           << std::endl;
@@ -193,7 +193,7 @@ int main(int argn, char **argv) {
         std::cout << "max_comm_vol \t"  << qm.max_communication_volume(G) << std::endl;
         if(partition_config.enable_mapping) std::cout <<  "quadratic assignment objective J(C,D,Pi') = " << qap << std::endl;
 
-        // write the partition to the disc 
+        // write the partition to the disc
         std::stringstream filename;
         if(!partition_config.filename_output.compare("")) {
                 filename << "tmppartition" << partition_config.k;

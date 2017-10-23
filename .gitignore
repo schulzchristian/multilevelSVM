@@ -1,0 +1,12 @@
+GTAGS
+GRTAGS
+GPATH
+.clang_complete
+.sconsign.dblite
+config.log
+deploy
+optimized
+optimized_output
+debug
+parallel/parallel_src/extern/kaHIP_lib/libkahip.a
+parallel/parallel_src/optimized_nooutput
