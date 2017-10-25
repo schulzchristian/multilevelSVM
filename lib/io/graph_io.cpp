@@ -227,7 +227,7 @@ int graph_io::readFeatures(graph_access & G, std::string filename) {
         std::ifstream in(filename.c_str());
         if (!in) {
                 std::cerr << "Error opening file" << filename << std::endl;
-                return;
+                return 1;
         }
 
         std::getline(in, line);

@@ -200,8 +200,8 @@ class graph_access {
                 PartitionID getSecondPartitionIndex(NodeID node);
                 void setSecondPartitionIndex(NodeID node, PartitionID id);
 
-                FeatureVec getFeatureVec(NodeID node);
-                void setFeatureVec(NodeID node, FeatureVec & id);
+                const FeatureVec & getFeatureVec(NodeID node);
+                void setFeatureVec(NodeID node, const FeatureVec & vec);
 
                 //to be called if combine in meta heuristic is used
                 void resizeSecondPartitionIndex(unsigned no_nodes);
@@ -330,7 +330,7 @@ inline void graph_access::setPartitionIndex(NodeID node, PartitionID id) {
 #endif
 }
 
-inline FeatureVec graph_access::getFeatureVec(NodeID node) {
+inline const FeatureVec & graph_access::getFeatureVec(NodeID node) {
 #ifdef NDEBUG
   return graphref->m_refinement_node_props[node].featureVector;
 #else
@@ -338,7 +338,7 @@ inline FeatureVec graph_access::getFeatureVec(NodeID node) {
 #endif
 }
 
-inline void graph_access::setFeatureVec(NodeID node, FeatureVec & vec) {
+inline void graph_access::setFeatureVec(NodeID node, const FeatureVec & vec) {
 #ifdef NDEBUG
   graphref->m_refinement_node_props[node].featureVector = vec;
 #else

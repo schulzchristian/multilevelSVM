@@ -71,6 +71,7 @@ void contraction::contract(const PartitionConfig & partition_config,
 
                 NodeID coarseNode = coarser.new_node();
                 coarser.setNodeWeight(coarseNode, G.getNodeWeight(node));
+                coarser.setFeatureVec(coarseNode, G.getFeatureVec(node));
 
                 if(partition_config.combine) {
                         coarser.setSecondPartitionIndex(coarseNode, G.getSecondPartitionIndex(node));
@@ -84,9 +85,20 @@ void contraction::contract(const PartitionConfig & partition_config,
                 //this node was really matched
                 NodeID matched_neighbor = edge_matching[node];
                 if(node != matched_neighbor) {
+                        NodeWeight node_weight = G.getNodeWeight(node);
+                        NodeWeight neighbor_weight = G.getNodeWeight(matched_neighbor);
+
                         //update weight of coarser node
-                        NodeWeight new_coarse_weight = G.getNodeWeight(node) + G.getNodeWeight(matched_neighbor);
+                        NodeWeight new_coarse_weight = node_weight + neighbor_weight;
                         coarser.setNodeWeight(coarseNode, new_coarse_weight);
+
+                        //update feature vector weighted
+                        FeatureVec v1 = G.getFeatureVec(node);
+                        FeatureVec v2 = G.getFeatureVec(matched_neighbor);
+
+                        FeatureVec new_feature_vec = combineFeatureVec(v1, node_weight, v2, neighbor_weight);
+
+                        coarser.setFeatureVec(coarseNode, new_feature_vec);
 
                         forall_out_edges(G, e, matched_neighbor) {
                                 visit_edge(G, coarser, edge_positions, coarseNode, e, new_edge_targets);
@@ -133,9 +145,21 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
         bnd.getUnderlyingQuotientGraph(coarser);
 
         G.set_partition_count(k);
+
+        // variables for calculating the feature vec of the coarse nodes
+        std::vector<NodeWeight> block_size(no_of_coarse_vertices);
+        int num_features = G.getFeatureVec(0).size();
+        std::vector<FeatureVec> combined_feature_vecs(no_of_coarse_vertices, FeatureVec(num_features, 0));
+
         forall_nodes(G, node) {
+                NodeID coarsed_node = coarse_mapping[node];
                 G.setPartitionIndex(node, partition_map[node]);
-                coarser.setPartitionIndex(coarse_mapping[node], G.getPartitionIndex(node));
+                coarser.setPartitionIndex(coarsed_node, G.getPartitionIndex(node));
+
+                addWeightedToVec(combined_feature_vecs[coarsed_node],
+                                 G.getFeatureVec(node),
+                                 G.getNodeWeight(node));
+                block_size[coarsed_node] += G.getNodeWeight(node);
 
                 if(partition_config.combine) {
                         coarser.setSecondPartitionIndex(coarse_mapping[node], G.getSecondPartitionIndex(node));
@@ -143,6 +167,10 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
 
         } endfor
 
+        forall_nodes(coarser, node) {
+                divideVec(combined_feature_vecs[node], block_size[node]);
+                coarser.setFeatureVec(node, combined_feature_vecs[node]);
+        endfor }
 }
 
 
@@ -221,4 +249,34 @@ void contraction::contract_partitioned(const PartitionConfig & partition_config,
 
         //this also resizes the edge fields ...
         coarser.finish_construction();
+}
+
+FeatureVec contraction::combineFeatureVec(const FeatureVec & vec1, NodeWeight weight1,
+                                          const FeatureVec & vec2, NodeWeight weight2) const {
+        size_t features = vec1.size();
+        FeatureVec combined_features(features);
+
+        for (size_t i = 0; i < features; ++i) {
+                combined_features[i] = (weight1 * vec1[i] + weight2 * vec2[i])
+                        / ((float)(weight1 + weight2));
+        }
+
+        return combined_features;
+}
+
+void contraction::divideVec(FeatureVec & vec, NodeWeight weights) const {
+        //use map??
+        size_t features = vec.size();
+
+        for (size_t i = 0; i < features; ++i) {
+                vec[i] /= (float) weights;
+        }
+}
+
+void contraction::addWeightedToVec(FeatureVec & vec, const FeatureVec & vecToAdd, NodeWeight weight) const {
+        size_t features = vec.size();
+
+        for (size_t i = 0; i < features; ++i) {
+                vec[i] += vecToAdd[i] * weight;
+        }
 }

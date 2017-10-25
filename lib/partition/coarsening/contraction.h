@@ -70,6 +70,12 @@ class contraction {
                                 const std::vector<NodeID> & new_edge_targets) const;
 
 
+                FeatureVec combineFeatureVec(const FeatureVec & vec1, NodeWeight weight1,
+                                             const FeatureVec & vec2, NodeWeight weight2) const;
+
+                void divideVec(FeatureVec & vec, NodeWeight weights) const;
+
+                void addWeightedToVec(FeatureVec & vec, const FeatureVec & vecToAdd, NodeWeight weight) const;
 };
 
 inline void contraction::visit_edge(graph_access & G,
@@ -95,7 +101,6 @@ inline void contraction::visit_edge(graph_access & G,
                 coarser.setEdgeWeight(edge_pos, new_edge_weight);
         }
 }
-
 
 
 #endif /* end of include guard: CONTRACTION_VIXZ9K0F */
