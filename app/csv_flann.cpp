@@ -3,15 +3,17 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <eigen3/Eigen/Dense>
 #include <flann/flann.hpp>
-#include "../lib/tools/timer.h"
+#include <argtable2.h>
+#include "timer.h"
 
 using namespace std;
 
 typedef double MyItem;
 typedef vector<vector<MyItem>> MyMat;
 typedef vector<MyItem> MyRow;
+
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & inputfile, string & outputfile);
 
 void readCSV(const string filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
 
@@ -28,16 +30,16 @@ void write_metis(const vector<vector<int>> & indices, const MyMat & distances, c
 void write_features(const MyMat & data, const string filename);
 
 int main(int argc, char *argv[]) {
-        string inputfile = argv[1];
-        string outputfile = argv[2];
+        int nn_num = 10;
+        int label_col = 0;
+        string inputfile;
+        string outputfile;
+
+        if (parse_args(argc, argv, nn_num, label_col, inputfile, outputfile))
+                return 1;
 
         MyMat data;
         vector<int> label;
-
-        int label_col = 0;
-        if (argc >= 4) {
-                label_col = stoi(argv[3]);
-        }
 
         timer t;
 
@@ -52,7 +54,7 @@ int main(int argc, char *argv[]) {
 
         t.restart();
 
-        normalize(data);
+        // normalize(data);
 
         cout << "normalization took " << t.elapsed() << endl;
 
@@ -75,8 +77,8 @@ int main(int argc, char *argv[]) {
 
         t.restart();
 
-        run_flann(min_data, min_indices, min_distances, 10);
-        run_flann(maj_data, maj_indices, maj_distances, 10);
+        run_flann(min_data, min_indices, min_distances, nn_num);
+        run_flann(maj_data, maj_indices, maj_distances, nn_num);
 
         cout << "flann time " << t.elapsed() << endl;
 
@@ -92,12 +94,65 @@ int main(int argc, char *argv[]) {
         return 0;
 }
 
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & inputfile, string & outputfile) {
+        // Setup argtable parameters.
+        struct arg_end *end                 = arg_end(100);
+        struct arg_lit *help                = arg_lit0("h", "help","Print help.");
+        struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute.");
+        struct arg_int *label_column        = arg_int0(NULL, "label_col", NULL, "column in which the labels are written (starting at 0)");
+        struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to csv file to process.");
+        struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
+
+        void* argtable[] = {help, nearest_neighbors, label_column, filename, filename_output
+                            ,end};
+
+        // Parse arguments.
+        int nerrors = arg_parse(argc, argv, argtable);
+
+        const char *progname = argv[0];
+
+        // help or error
+        if (nerrors > 0 || help->count > 0) {
+                printf("Usage: %s", progname);
+                arg_print_syntax(stdout, argtable, "\n");
+                arg_print_glossary(stdout, argtable,"  %-40s %s\n");
+                arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
+                return 1;
+        }
+
+        if (nearest_neighbors->count > 0) {
+                // plus one because we don't count the vertex it self as neighbor but flann does
+                nn_num = nearest_neighbors->ival[0] + 1;
+        }
+
+        if (label_column->count > 0) {
+                label_col= label_column->ival[0];
+        }
+
+        if (filename->count > 0) {
+                inputfile = filename->sval[0];
+                outputfile = inputfile.substr(0,inputfile.find_last_of('.'));
+        }
+
+        if (filename_output->count > 0) {
+                outputfile = filename_output->sval[0];
+        }
+
+        arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
+
+        return 0;
+}
+
 void readCSV(const string filename, MyMat & data, vector<int> & label, int label_col) {
         ifstream file;
         file.open(filename);
 
         for (string line; getline(file, line); ) {
                 stringstream sep(line);
+
+                // ignore comments
+                if (line[0] == '#')
+                        continue;
 
                 data.push_back(MyRow());
 
@@ -189,12 +244,7 @@ void normalize(MyMat & data) {
 
 void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj) {
         size_t rows = data.size();
-        size_t cols = data[0].size();
-        cout << "matrix null" << endl;
         MyMat data_cpy(data);
-        cout << "matrix copied" << endl;
-
-
 
         for (int i = rows - 1; i >= 0; --i) {
                 MyMat * target = nullptr;
@@ -258,7 +308,7 @@ void write_metis(const vector<vector<int>> & indices, const MyMat & distances, c
                         MyItem weight = distances[i][j];
                         if (target == i) //exclude self loops
                                 continue;
-                        file << target + 1 << " " << (int)(weight * 1000000) << " ";
+                        file << target + 1 << " " << (int)(1 / weight) << " ";
                         // file << target + 1 << " " << weight << " ";
                 }
                 file << endl;
