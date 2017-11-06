@@ -164,6 +164,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *sep_num_loc_fm_reps                  = arg_int0(NULL, "sep_num_loc_fm_reps", NULL, "Number of FM repetitions during uncoarsening on each level.");
         struct arg_int *sep_loc_fm_no_snodes                 = arg_int0(NULL, "sep_loc_fm_no_snodes", NULL, "Number of FM repetitions during uncoarsening on each level.");
         struct arg_int *sep_num_vert_stop                    = arg_int0(NULL, "sep_num_vert_stop", NULL, "Number of vertices to stop coarsening at.");
+        struct arg_int *fix_num_vert_stop                    = arg_int0(NULL, "fix_num_vert_stop", NULL, "Number of vertices to fix stop coarsening at.");
         struct arg_rex *sep_edge_rating_during_ip            = arg_rex0(NULL, "sep_edge_rating_during_ip", "^(weight|expansionstar|expansionstar2|expansionstar2deg|punch|expansionstar2algdist|expansionstar2algdist2|algdist|algdist2|sepmultx|sepaddx|sepmax|seplog|r1|r2|r3|r4|r5|r6|r7|r8)$", "RATING", REG_EXTENDED, "Edge rating to use. One of {weight, expansionstar, expansionstar2, punch, sepmultx, sepaddx, sepmax, seplog, " " expansionstar2deg}. Default: weight"  );
 
         //mapping stuff
@@ -269,6 +270,9 @@ int parse_parameters(int argn, char **argv,
                 cluster_upperbound,
                 label_propagation_iterations,
                 filename_output, 
+#elif defined MODE_MLSVM
+                fix_num_vert_stop,
+                filename_output,
 #endif
                 end
         };
@@ -497,6 +501,10 @@ int parse_parameters(int argn, char **argv,
 
 	if(sep_num_vert_stop->count > 0) {
 		partition_config.sep_num_vert_stop = sep_num_vert_stop->ival[0];
+	}
+
+	if(fix_num_vert_stop->count > 0) {
+          partition_config.fix_num_vert_stop = fix_num_vert_stop->ival[0];
 	}
 
 	if(sep_fm_unsucc_steps->count > 0) {

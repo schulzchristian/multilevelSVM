@@ -130,8 +130,8 @@ inline bool multiple_k_stop_rule::stop(NodeID no_of_finer_vertices, NodeID no_of
 
 class fixed_stop_rule : public stop_rule {
 public:
-        fixed_stop_rule(PartitionConfig & config, NodeID number_of_nodes) {
-                num_stop = number_of_nodes;
+        fixed_stop_rule(PartitionConfig & config) {
+                num_stop = config.fix_num_vert_stop;
         };
         virtual ~fixed_stop_rule() {};
         bool stop( NodeID number_of_finer_vertices, NodeID number_of_coarser_vertices );

@@ -353,6 +353,8 @@ struct PartitionConfig
 
         int sep_num_vert_stop;
 
+        int fix_num_vert_stop;
+
         bool sep_full_boundary_ip;
 
         bool faster_ns;

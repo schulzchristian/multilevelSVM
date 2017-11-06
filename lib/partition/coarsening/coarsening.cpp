@@ -57,7 +57,7 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
 
         stop_rule* coarsening_stop_rule = NULL;
         if( partition_config.stop_rule == STOP_RULE_FIXED) {
-                coarsening_stop_rule = new fixed_stop_rule(copy_of_partition_config, partition_config.sep_num_vert_stop);
+                coarsening_stop_rule = new fixed_stop_rule(copy_of_partition_config);
         }
         else if( partition_config.mode_node_separators ) {
                 coarsening_stop_rule = new separator_simple_stop_rule(copy_of_partition_config, G.number_of_nodes());

@@ -182,43 +182,43 @@ class graph_access {
                 /* ============================================================= */
                 /* graph access methods */
                 /* ============================================================= */
-                NodeID number_of_nodes();
-                EdgeID number_of_edges();
+                NodeID number_of_nodes() const;
+                EdgeID number_of_edges() const;
 
-                EdgeID get_first_edge(NodeID node);
-                EdgeID get_first_invalid_edge(NodeID node);
+                EdgeID get_first_edge(NodeID node) const;
+                EdgeID get_first_invalid_edge(NodeID node) const;
 
-                PartitionID get_partition_count();
+                PartitionID get_partition_count() const;
                 void set_partition_count(PartitionID count);
 
-                PartitionID getSeparatorBlock();
+                PartitionID getSeparatorBlock() const;
                 void setSeparatorBlock(PartitionID id);
 
-                PartitionID getPartitionIndex(NodeID node);
+                PartitionID getPartitionIndex(NodeID node) const;
                 void setPartitionIndex(NodeID node, PartitionID id);
 
-                PartitionID getSecondPartitionIndex(NodeID node);
+                PartitionID getSecondPartitionIndex(NodeID node) const;
                 void setSecondPartitionIndex(NodeID node, PartitionID id);
 
-                const FeatureVec & getFeatureVec(NodeID node);
+                const FeatureVec & getFeatureVec(NodeID node) const;
                 void setFeatureVec(NodeID node, const FeatureVec & vec);
 
                 //to be called if combine in meta heuristic is used
                 void resizeSecondPartitionIndex(unsigned no_nodes);
 
-                NodeWeight getNodeWeight(NodeID node);
+                NodeWeight getNodeWeight(NodeID node) const;
                 void setNodeWeight(NodeID node, NodeWeight weight);
 
-                EdgeWeight getNodeDegree(NodeID node);
-                EdgeWeight getWeightedNodeDegree(NodeID node);
+                EdgeWeight getNodeDegree(NodeID node) const;
+                EdgeWeight getWeightedNodeDegree(NodeID node) const;
                 EdgeWeight getMaxDegree();
 
-                EdgeWeight getEdgeWeight(EdgeID edge);
+                EdgeWeight getEdgeWeight(EdgeID edge) const;
                 void setEdgeWeight(EdgeID edge, EdgeWeight weight);
 
-                NodeID getEdgeTarget(EdgeID edge);
+                NodeID getEdgeTarget(EdgeID edge) const;
 
-                EdgeRatingType getEdgeRating(EdgeID edge);
+                EdgeRatingType getEdgeRating(EdgeID edge) const;
                 void setEdgeRating(EdgeID edge, EdgeRatingType rating);
 
                 int* UNSAFE_metis_style_xadj_array();
@@ -261,11 +261,11 @@ inline void graph_access::finish_construction() {
 }
 
 /* graph access methods */
-inline NodeID graph_access::number_of_nodes() {
+inline NodeID graph_access::number_of_nodes() const {
         return graphref->number_of_nodes();
 }
 
-inline EdgeID graph_access::number_of_edges() {
+inline EdgeID graph_access::number_of_edges() const {
         return graphref->number_of_edges();
 }
 
@@ -273,7 +273,7 @@ inline void graph_access::resizeSecondPartitionIndex(unsigned no_nodes) {
         m_second_partition_index.resize(no_nodes);
 }
 
-inline EdgeID graph_access::get_first_edge(NodeID node) {
+inline EdgeID graph_access::get_first_edge(NodeID node) const {
 #ifdef NDEBUG
         return graphref->m_nodes[node].firstEdge;
 #else
@@ -281,15 +281,15 @@ inline EdgeID graph_access::get_first_edge(NodeID node) {
 #endif
 }
 
-inline EdgeID graph_access::get_first_invalid_edge(NodeID node) {
+inline EdgeID graph_access::get_first_invalid_edge(NodeID node) const {
         return graphref->m_nodes[node+1].firstEdge;
 }
 
-inline PartitionID graph_access::get_partition_count() {
+inline PartitionID graph_access::get_partition_count() const {
         return m_partition_count;
 }
 
-inline PartitionID graph_access::getSecondPartitionIndex(NodeID node) {
+inline PartitionID graph_access::getSecondPartitionIndex(NodeID node) const {
 #ifdef NDEBUG
         return m_second_partition_index[node];
 #else
@@ -306,7 +306,7 @@ inline void graph_access::setSecondPartitionIndex(NodeID node, PartitionID id) {
 }
 
 
-inline PartitionID graph_access::getSeparatorBlock() {
+inline PartitionID graph_access::getSeparatorBlock() const {
         return m_separator_block_ID;
 }
 
@@ -314,7 +314,7 @@ inline void graph_access::setSeparatorBlock(PartitionID id) {
         m_separator_block_ID = id;
 }
 
-inline PartitionID graph_access::getPartitionIndex(NodeID node) {
+inline PartitionID graph_access::getPartitionIndex(NodeID node) const {
 #ifdef NDEBUG
         return graphref->m_refinement_node_props[node].partitionIndex;
 #else
@@ -330,7 +330,7 @@ inline void graph_access::setPartitionIndex(NodeID node, PartitionID id) {
 #endif
 }
 
-inline const FeatureVec & graph_access::getFeatureVec(NodeID node) {
+inline const FeatureVec & graph_access::getFeatureVec(NodeID node) const {
 #ifdef NDEBUG
   return graphref->m_refinement_node_props[node].featureVector;
 #else
@@ -347,7 +347,7 @@ inline void graph_access::setFeatureVec(NodeID node, const FeatureVec & vec) {
 }
 
 
-inline NodeWeight graph_access::getNodeWeight(NodeID node){
+inline NodeWeight graph_access::getNodeWeight(NodeID node)const {
 #ifdef NDEBUG
         return graphref->m_nodes[node].weight;
 #else
@@ -363,7 +363,7 @@ inline void graph_access::setNodeWeight(NodeID node, NodeWeight weight){
 #endif
 }
 
-inline EdgeWeight graph_access::getEdgeWeight(EdgeID edge){
+inline EdgeWeight graph_access::getEdgeWeight(EdgeID edge)const {
 #ifdef NDEBUG
         return graphref->m_edges[edge].weight;
 #else
@@ -379,7 +379,7 @@ inline void graph_access::setEdgeWeight(EdgeID edge, EdgeWeight weight){
 #endif
 }
 
-inline NodeID graph_access::getEdgeTarget(EdgeID edge){
+inline NodeID graph_access::getEdgeTarget(EdgeID edge)const {
 #ifdef NDEBUG
         return graphref->m_edges[edge].target;
 #else
@@ -387,7 +387,7 @@ inline NodeID graph_access::getEdgeTarget(EdgeID edge){
 #endif
 }
 
-inline EdgeRatingType graph_access::getEdgeRating(EdgeID edge) {
+inline EdgeRatingType graph_access::getEdgeRating(EdgeID edge) const {
 #ifdef NDEBUG
         return graphref->m_coarsening_edge_props[edge].rating;
 #else
@@ -403,11 +403,11 @@ inline void graph_access::setEdgeRating(EdgeID edge, EdgeRatingType rating){
 #endif
 }
 
-inline EdgeWeight graph_access::getNodeDegree(NodeID node) {
+inline EdgeWeight graph_access::getNodeDegree(NodeID node) const {
         return graphref->m_nodes[node+1].firstEdge-graphref->m_nodes[node].firstEdge;
 }
 
-inline EdgeWeight graph_access::getWeightedNodeDegree(NodeID node) {
+inline EdgeWeight graph_access::getWeightedNodeDegree(NodeID node) const {
   EdgeWeight degree = 0;
   for( unsigned e = graphref->m_nodes[node].firstEdge; e < graphref->m_nodes[node+1].firstEdge; ++e) {
     degree += getEdgeWeight(e);

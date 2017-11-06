@@ -4,7 +4,7 @@
 #include <regex.h>
 #include <sstream>
 #include <stdio.h>
-#include <string.h> 
+#include <string.h>
 
 #include "balance_configuration.h"
 #include "data_structure/graph_access.h"
@@ -13,6 +13,7 @@
 #include "partition/partition_config.h"
 #include "coarsening/coarsening.h"
 #include "timer.h"
+#include "svm/svm_solver.h"
 
 int main(int argn, char *argv[]) {
 
@@ -52,12 +53,10 @@ int main(int argn, char *argv[]) {
         partition_config.k = 1;
         G_maj.set_partition_count(partition_config.k);
 
-        balance_configuration bc;
-        bc.configurate_balance( partition_config, G_maj);
+        // -------- copied from label_propagation
 
-        partition_config.stop_rule = STOP_RULE_FIXED;
-        partition_config.sep_num_vert_stop = 500;
-        partition_config.matching_type = CLUSTER_COARSENING;
+        balance_configuration bc;
+        bc.configurate_balance(partition_config, G_maj);
 
         if( partition_config.cluster_upperbound == std::numeric_limits< NodeWeight >::max()/2 ) {
                 std::cout <<  "no size-constrained specified" << std::endl;
@@ -68,20 +67,49 @@ int main(int argn, char *argv[]) {
         partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
         partition_config.cluster_coarsening_factor = 1;
 
-        std::cout << "config.k : "  << partition_config.k << std::endl;
-        std::cout << "config.mode_node_separators : " << partition_config.mode_node_separators  << std::endl;
-        std::cout << "config.stop_rule: " << partition_config.stop_rule << std::endl;
-        std::cout << "config.matching_type: " << partition_config.matching_type << std::endl;
-        std::cout << "config.graph_allready_partitioned: " << partition_config.graph_allready_partitioned << std::endl;
+        // -------- end
+
+        partition_config.stop_rule = STOP_RULE_FIXED;
+        partition_config.matching_type = CLUSTER_COARSENING;
 
         coarsening coarsen;
-        graph_hierarchy hierarchy;
+        graph_hierarchy maj_hierarchy;
+        graph_hierarchy min_hierarchy;
 
         t.restart();
-        coarsen.perform_coarsening(partition_config, G_maj, hierarchy);
+
+        coarsen.perform_coarsening(partition_config, G_maj, maj_hierarchy);
+        coarsen.perform_coarsening(partition_config, G_min, min_hierarchy);
 
         std::cout << "coarsening time: " << t.elapsed() << std::endl;
-        std::cout << "hierarchy size: " << hierarchy.size() << std::endl;
+
+        t.restart();
+
+        svm_solver solver;
+        solver.read_problem(*maj_hierarchy.get_coarsest(), *min_hierarchy.get_coarsest());
+        solver.train();
+
+        std::cout << "initial training time: " << t.elapsed() << std::endl;
+
+        int errors = 0;
+
+        graph_access * G = maj_hierarchy.get_coarsest();
+        forall_nodes((*G), n) {
+                int val = solver.predict(G->getFeatureVec(n));
+                if (val != -1) {
+                        errors++;
+                }
+        } endfor
+
+        G = min_hierarchy.get_coarsest();
+        forall_nodes((*G), n) {
+                int val = solver.predict(G->getFeatureVec(n));
+                if (val != 1) {
+                        errors++;
+                }
+        } endfor
+
+        std::cout << "errors: " << errors << " of " << maj_hierarchy.get_coarsest()->number_of_nodes() + G->number_of_nodes() << std::endl;
 
         return 0;
 }

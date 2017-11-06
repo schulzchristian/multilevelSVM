@@ -114,6 +114,7 @@ libmapping                = ['lib/mapping/local_search_mapping.cpp',
                              'lib/mapping/construct_distance_matrix.cpp',
                              'lib/mapping/mapping_algorithms.cpp',
                              'lib/mapping/construct_mapping.cpp' ]
+libmlsvm_files            = ['lib/svm/svm_solver.cpp']
 
 if env['program'] == 'kaffpa':
         env.Append(CXXFLAGS = '-DMODE_KAFFPA')
@@ -172,7 +173,9 @@ if env['program'] == 'library':
         SConscript('interface/SConscript',exports='env')
 
 if env['program'] == 'mlsvm':
-        env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files, LIBS=['libargtable2','gomp'])
+        env.Append(CXXFLAGS = '-DMODE_MLSVM')
+        env.Append(CCFLAGS  = '-DMODE_MLSVM')
+        env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','libsvm','gomp'])
 
 if env['program'] == 'csv_flann':
         env.Program('csv_flann', ['app/csv_flann.cpp'], LIBS=['libargtable2','gomp'])
