@@ -13,13 +13,13 @@ typedef double MyItem;
 typedef vector<vector<MyItem>> MyMat;
 typedef vector<MyItem> MyRow;
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & inputfile, string & outputfile);
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, string & inputfile, string & outputfile);
 
 void readCSV(const string filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
 
-MyMat normalizeIP(const MyMat & data);
-
 void normalize(MyMat & data);
+
+void scale(MyMat & data, MyItem from = 0, MyItem to = 1);
 
 void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj);
 
@@ -32,10 +32,12 @@ void write_features(const MyMat & data, const string filename);
 int main(int argc, char *argv[]) {
         int nn_num = 10;
         int label_col = 0;
+        bool norm = true; //indicates whether to normalize to [-1,1] or scale to [0,1]
+        //the later will preserve null entries
         string inputfile;
         string outputfile;
 
-        if (parse_args(argc, argv, nn_num, label_col, inputfile, outputfile))
+        if (parse_args(argc, argv, nn_num, label_col, norm, inputfile, outputfile))
                 return 1;
 
         MyMat data;
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]) {
 
         readCSV(inputfile, data, label, label_col);
 
-        cout << "read csv took " << t.elapsed() << endl;
+        cout << "read csv time " << t.elapsed() << endl;
 
         size_t rows = data.size();
         size_t cols = data[0].size();
@@ -54,9 +56,13 @@ int main(int argc, char *argv[]) {
 
         t.restart();
 
-        // normalize(data);
-
-        cout << "normalization took " << t.elapsed() << endl;
+        if (norm) {
+                normalize(data);
+                cout << "normalization time " << t.elapsed() << endl;
+        } else {
+                scale(data);
+                cout << "scale time " << t.elapsed() << endl;
+        }
 
         MyMat min_data;
         MyMat maj_data;
@@ -65,10 +71,7 @@ int main(int argc, char *argv[]) {
 
         split(data, label, min_data, maj_data);
 
-        cout << "splitting took " << t.elapsed() << endl;
-
-        // cout << "min " << min_data.size() << 'x' << min_data[0].size() << endl;
-        // cout << "min " << maj_data.size() << 'x' << maj_data[0].size() << endl;
+        cout << "splitting time " << t.elapsed() << endl;
 
         vector<vector<int>> min_indices;
         MyMat min_distances;
@@ -94,16 +97,17 @@ int main(int argc, char *argv[]) {
         return 0;
 }
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & inputfile, string & outputfile) {
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, string & inputfile, string & outputfile) {
         // Setup argtable parameters.
         struct arg_end *end                 = arg_end(100);
         struct arg_lit *help                = arg_lit0("h", "help","Print help.");
         struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute.");
         struct arg_int *label_column        = arg_int0(NULL, "label_col", NULL, "column in which the labels are written (starting at 0)");
+        struct arg_lit *scale               = arg_lit0(NULL, "scale", "don't normalize to [-1,1] just scale to [0,1]");
         struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to csv file to process.");
         struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
 
-        void* argtable[] = {help, nearest_neighbors, label_column, filename, filename_output
+        void* argtable[] = {help, nearest_neighbors, label_column, scale, filename, filename_output
                             ,end};
 
         // Parse arguments.
@@ -127,6 +131,10 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & i
 
         if (label_column->count > 0) {
                 label_col= label_column->ival[0];
+        }
+
+        if (scale->count > 0) {
+                normalize = false;
         }
 
         if (filename->count > 0) {
@@ -170,43 +178,6 @@ void readCSV(const string filename, MyMat & data, vector<int> & label, int label
         }
 }
 
-MyMat normalizeIP(const MyMat & data) {
-        size_t rows = data.size();
-        size_t cols = data[0].size();
-        MyMat data_cpy(data);
-
-        MyRow mean(cols, 0);
-        MyRow stds(cols, 0);
-
-        for (size_t i = 0; i < rows; i++) {
-                for (size_t j = 0; j < cols; j++) {
-                        mean[j] += data[i][j];
-                }
-        }
-
-        for (size_t j = 0; j < cols; j++) {
-                mean[j] /= (MyItem) rows;
-        }
-
-        for (size_t i = 0; i < rows; i++) {
-                for (size_t j = 0; j < cols; j++) {
-                        stds[j] += pow(data[i][j] - mean[j], 2);
-                }
-        }
-
-        for (size_t j = 0; j < cols; j++) {
-                stds[j] = sqrt(stds[j] / (MyItem) (rows - 1));
-        }
-
-        for (size_t i = 0; i < rows; i++) {
-                for (size_t j = 0; j < cols; j++) {
-                        data_cpy[i][j] = (data[i][j] - mean[j]) / stds[j];
-                }
-        }
-
-        return data_cpy;
-}
-
 void normalize(MyMat & data) {
         size_t rows = data.size();
         size_t cols = data[0].size();
@@ -238,6 +209,29 @@ void normalize(MyMat & data) {
         for (size_t i = 0; i < rows; i++) {
                 for (size_t j = 0; j < cols; j++) {
                         data[i][j] = (data[i][j] - mean[j]) / stds[j];
+                }
+        }
+}
+
+void scale(MyMat & data, MyItem from, MyItem to) {
+        size_t rows = data.size();
+        size_t cols = data[0].size();
+        MyItem max = std::numeric_limits<MyItem>::min();
+        MyItem min = std::numeric_limits<MyItem>::max();
+
+        for (size_t i = 0; i < rows; i++) {
+                for (size_t j = 0; j < cols; j++) {
+                        if (data[i][j] > max) {
+                                max = data[i][j];
+                        } else if (data[i][j] < min) {
+                                min = data[i][j];
+                        }
+                }
+        }
+
+        for (size_t i = 0; i < rows; i++) {
+                for (size_t j = 0; j < cols; j++) {
+                        data[i][j] = (data[i][j] - min)/max;
                 }
         }
 }
