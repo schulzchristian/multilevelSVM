@@ -45,7 +45,7 @@ coarsening::~coarsening() {
 void coarsening::perform_coarsening(const PartitionConfig & partition_config, graph_access & G, graph_hierarchy & hierarchy) {
 
         NodeID no_of_coarser_vertices = G.number_of_nodes();
-        NodeID no_of_finer_vertices   = G.number_of_nodes();
+        NodeID no_of_finer_vertices   = std::numeric_limits<NodeID>::max();
 
         edge_ratings rating(partition_config);
         CoarseMapping* coarse_mapping = NULL;
@@ -74,8 +74,8 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
         coarsening_configurator coarsening_config;
 
         unsigned int level    = 0;
-        bool contraction_stop = false;
-        do {
+
+        while (coarsening_stop_rule->stop(no_of_finer_vertices, no_of_coarser_vertices)) {
                 graph_access* coarser = new graph_access();
                 coarse_mapping        = new CoarseMapping();
                 Matching edge_matching;
@@ -98,7 +98,6 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
                 }
 
                 hierarchy.push_back(finer, coarse_mapping);
-                contraction_stop = coarsening_stop_rule->stop(no_of_finer_vertices, no_of_coarser_vertices);
 
                 no_of_finer_vertices = no_of_coarser_vertices;
                 std::cout <<  "no of coarser vertices " << no_of_coarser_vertices <<  " and no of edges " <<  coarser->number_of_edges() << std::endl;
@@ -106,7 +105,7 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
                 finer = coarser;
 
                 level++;
-        } while( contraction_stop );
+        }
 
         hierarchy.push_back(finer, NULL); // append the last created level
 

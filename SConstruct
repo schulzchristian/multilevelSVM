@@ -121,8 +121,9 @@ if "clang" in env['CC'] or "clang" in env['CXX']:
           env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -O3 -std=c++11')
           env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++11')
         else:
-          env.Append(CXXFLAGS = '-O0 -pg -g3 -std=c++11 -fsanitize=address -fno-omit-frame-pointer')
-          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -pg -g -std=c++11')
+          env.Append(CXXFLAGS = '-O0 -g3 -std=c++11')
+          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++11')
+          # env.Append(LDFLAGS  = '-pg')
           if SYSTEM != 'Darwin':
                 env.Append(CXXFLAGS = '-march=native')
                 env.Append(CCFLAGS  = '-march=native')
@@ -136,8 +137,9 @@ else:
           env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -fno-stack-limit -O3 -std=c++11 -fpermissive')
           env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++11 -fpermissive')
         else:
-          env.Append(CXXFLAGS = '-O0 -pg -g3 -std=c++11 -fpermissive -fsanitize=address -fno-omit-frame-pointer')
-          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -pg -g -std=c++11')
+          env.Append(CXXFLAGS = '-O0 -g3 -std=c++11 -fpermissive')
+          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++11')
+          env.Append(LDFLAGS  = '-pg')
 
           if SYSTEM != 'Darwin':
                 env.Append(CXXFLAGS = '-march=native')

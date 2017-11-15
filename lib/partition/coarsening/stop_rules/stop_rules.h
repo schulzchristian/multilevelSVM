@@ -26,6 +26,7 @@
 #include <math.h>
 
 #include "partition_config.h"
+#include <iostream>
 
 class stop_rule {
         public:
