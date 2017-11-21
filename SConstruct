@@ -73,6 +73,8 @@ env = GetEnvironment()
 
 env.Append(CPPPATH=['../extern/argtable-2.10/include'])
 env.Append(CPPPATH=['./extern/argtable-2.10/include'])
+env.Append(CPPPATH=['../extern/flann-1.8.4/include'])
+env.Append(CPPPATH=['./extern/flann-1.8.4/include'])
 env.Append(CPPPATH=['./lib'])
 env.Append(CPPPATH=['./app'])
 env.Append(CPPPATH=['./lib/tools'])
@@ -101,6 +103,9 @@ else:
         env.Append(LIBPATH=['../extern/argtable-2.10/lib'])
         env.Append(LIBPATH=['./extern/argtable-2.10/lib'])
         env.Append(LIBPATH=['../../extern/argtable-2.10/lib'])
+        env.Append(LIBPATH=['../extern/flann-1.8.4/lib'])
+        env.Append(LIBPATH=['./extern/flann-1.8.4/lib'])
+        env.Append(LIBPATH=['../../extern/flann-1.8.4/lib'])
 
 #by D. Luxen
 #if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
