@@ -45,11 +45,14 @@ int main(int argn, char *argv[]) {
         graph_io::readFeatures(G_min, filename + "_min_data");
         graph_io::readGraphWeighted(G_maj, filename + "_maj_graph");
         graph_io::readFeatures(G_maj, filename + "_maj_data");
+
+        std::cout << std::fixed << std::showpoint;
+        std::cout << std::setprecision(3);
         std::cout << "io time: " << t.elapsed() << std::endl;
 
-        std::cout << "min nodes: " << G_min.number_of_nodes() << std::endl;
-        std::cout << "maj nodes: " << G_maj.number_of_nodes() << std::endl;
-        std::cout << "features: " << G_min.getFeatureVec(0).size() << std::endl;
+        std::cout << "full graph - min: " << G_min.number_of_nodes();
+        std::cout << " maj: " << G_maj.number_of_nodes();
+        std::cout << " features: " << G_min.getFeatureVec(0).size() << std::endl;
 
         partition_config.k = 1;
         G_maj.set_partition_count(partition_config.k);
@@ -86,27 +89,28 @@ int main(int argn, char *argv[]) {
         coarsen.perform_coarsening(partition_config, G_min, min_hierarchy);
 
         std::cout << "coarsening time: " << t.elapsed() << std::endl;
-        std::cout << "coarse min nodes: " << min_hierarchy.get_coarsest()->number_of_nodes() << std::endl;
-        std::cout << "coarse maj nodes: " << maj_hierarchy.get_coarsest()->number_of_nodes() << std::endl;
+        std::cout << "coarse nodes - min: " << min_hierarchy.get_coarsest()->number_of_nodes();
+        std::cout << " maj: " << maj_hierarchy.get_coarsest()->number_of_nodes() << std::endl;
 
         t.restart();
 
         std::vector<std::vector<svm_node>> maj_sample = svm_convert::convert_sample_to_nodes(G_maj, 0.1);
         std::vector<std::vector<svm_node>> min_sample = svm_convert::convert_sample_to_nodes(G_min, 0.1);
 
-        std::cout << "maj_sample: " << maj_sample.size() << std::endl;
-        std::cout << "min_sample: " << min_sample.size() << std::endl;
+        std::cout << "sample data - maj: " << maj_sample.size();
+        std::cout << " min: " << min_sample.size() << std::endl;
 
         svm_solver solver;
         solver.read_problem(*maj_hierarchy.get_coarsest(), *min_hierarchy.get_coarsest());
         solver.train_initial(maj_sample, min_sample);
 
-        std::cout << "initial training time: " << t.elapsed() << std::endl;
+        std::cout << "init train time: " << t.elapsed() << std::endl;
 
 
         std::cout << "validation on hole training data:" << std::endl;
         svm_summary summary = solver.predict_validation_data(svm_convert::gaccess_to_nodes(G_maj), svm_convert::gaccess_to_nodes(G_min));
 
+        std::cout << "init train result: ";
         summary.print();
 
         return 0;

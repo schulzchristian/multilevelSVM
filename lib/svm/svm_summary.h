@@ -1,11 +1,13 @@
 #ifndef SVM_SUMMARY_H
 #define SVM_SUMMARY_H
 
+#include <iomanip>
+
 struct svm_summary {
-        double TP;
-        double TN;
-        double FP;
-        double FN;
+        int TP;
+        int TN;
+        int FP;
+        int FN;
         double Acc;
         double Sens;
         double Spec;
@@ -36,17 +38,17 @@ struct svm_summary {
                 this->Spec = (double)tn / (tn+fp) ;
                 this->Gmean = sqrt(this->Sens * this->Spec);
                 this->Acc = (double)(tp+tn) / (tp+tn+fp+fn) ;
-                if(tp+fp == 0)              //prevent nan case
+                if (tp+fp == 0)              //prevent nan case
                         this->PPV = 0;
                 else
-                        this->PPV = tp/ (tp+fp);
+                        this->PPV = (double)tp / (tp+fp);
 
-                if(tn+fn == 0)              //prevent nan case
+                if (tn+fn == 0)              //prevent nan case
                         this->NPV = 0;
                 else
-                        this->NPV = tn/ (tn+fn);
+                        this->NPV = (double)tn / (tn+fn);
 
-                this->F1 = 2*tp / (2*tp+fp+fn);
+                this->F1 = 2.0*tp / (2*tp+fp+fn);
 
                 this->C = model.param.C;
                 this->gamma = model.param.gamma;
@@ -56,14 +58,21 @@ struct svm_summary {
         }
 
         void print() {
-
-                std::cout << "TP: " << this->TP;
-                std::cout << " TN: " << this->TN;
-                std::cout << " FP: " << this->FP;
-                std::cout << " FN: " << this->FN;
-                std::cout << " Acc: " << this->Acc;
-                std::cout << " Sens: " << this->Sens;
-                std::cout << " Gmean: " << this->Gmean << std::endl;
+                std::cout << std::setprecision(3);
+                std::cout << "AC:" << this->Acc;
+                std::cout << " SN:" << this->Sens;
+                std::cout << " SP:" << this->Spec;
+                std::cout << " PPV:" << this->PPV;
+                std::cout << " NPV:" << this->NPV;
+                std::cout << " F1:" << this->F1;
+                std::cout << " GM:" << this->Gmean;
+                std::cout << std::setprecision(0);
+                std::cout << " TP:" << this->TP;
+                std::cout << " TN:" << this->TN;
+                std::cout << " FP:" << this->FP;
+                std::cout << " FN:" << this->FN << std::endl;
+                std::cout << std::defaultfloat;
+                std::cout << std::setprecision(4);
         }
 
 

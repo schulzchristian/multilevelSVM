@@ -59,7 +59,7 @@ inline void coarsening_configurator::configure_coarsening( const PartitionConfig
                         *edge_matcher = new gpa_matching();
                         break;
                case CLUSTER_COARSENING:
-                        PRINT(std::cout <<  "cluster_coarsening"  << std::endl;)
+                        // PRINT(std::cout <<  "cluster_coarsening"  << std::endl;)
                         *edge_matcher = new size_constraint_label_propagation();
                         break;
 
