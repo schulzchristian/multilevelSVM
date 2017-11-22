@@ -117,7 +117,7 @@ libmapping                = ['lib/mapping/local_search_mapping.cpp',
 libmlsvm_files            = ['lib/svm/svm_solver.cpp',
                              'lib/svm/svm_convert.cpp',
                              'lib/svm/grid_search.cpp',
-                             'extern/libsvm/src/svm.cpp']
+                             'extern/libsvm-3.22/src/svm.cpp']
 
 if env['program'] == 'kaffpa':
         env.Append(CXXFLAGS = '-DMODE_KAFFPA')
