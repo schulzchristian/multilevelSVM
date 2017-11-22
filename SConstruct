@@ -108,9 +108,6 @@ else:
         env.Append(LIBPATH=['./extern/flann-1.8.4/lib'])
         env.Append(LIBPATH=['../extern/flann-1.8.4/lib'])
         env.Append(LIBPATH=['../../extern/flann-1.8.4/lib'])
-        env.Append(CPPPATH=['./extern/libsvm-3.22/lib'])
-        env.Append(CPPPATH=['../extern/libsvm-3.22/lib'])
-        env.Append(CPPPATH=['../../extern/libsvm-3.22/lib'])
 
 #by D. Luxen
 #if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
