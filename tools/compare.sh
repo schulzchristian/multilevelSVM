@@ -1,35 +1,16 @@
 #!/bin/sh
 
-start_dir=$(pwd)
-cd $(dirname $1)
-
-path=$(pwd) # get full path
-basefile=$(basename $1 .csv)
-
-cd $start_dir
-
-echo "--------------- mlsvm------------"
-
-cd mlsvm/src
-
-(time ./mlsvm_classifier --ds_p $path/ --ds_f ${basefile})  2>&1 # | \
-#    grep -e "num points" \
-#         -e "initial training" \
-#         -e "\[SV\]\[ETD\]" \
-#         -e "real.*s$"
-
-cd $start_dir
-
-echo
-echo "--------------- mlsvm-KaHIP -------------"
-
-cd multilevelSVM/
+echo "--------------- mlsvm ------------"
+grep -e "num points" \
+     -e "initial training" \
+     -e "\[SV\]\[ETD\]" \
+     -e "real.*s$" \
+     $1"_mlsvm"
 
 
-(time optimized_output/mlsvm $path/$basefile)  2>&1 #| \
-    #grep -e "full graph" \
-	 #-e "coarse nodes" \
-         #-e "init train" \
-         #-e "real.*s$"
-
-cd $start_dir
+echo "---------- multilevelSVM ---------"
+grep -e "full graph" \
+     -e "coarse nodes" \
+     -e "init train" \
+     -e "real.*s$" \
+     $1

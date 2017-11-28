@@ -12,9 +12,9 @@ echo "--------------- mlsvm-classifier -------------"
 
 cd mlsvm/src
 
-time ./mlsvm_csv_petsc --ds_p $path/ --ds_f $basefile  && \
+time /bin/sh -c "./mlsvm_csv_petsc --ds_p $path/ --ds_f $basefile  && \
      ./mlsvm_zscore --ds_p $path/ --ds_f $basefile && \
-     ./mlsvm_knn --ds_p $path/ --ds_f $basefile
+     ./mlsvm_knn --ds_p $path/ --ds_f $basefile"
 
 cd $start_dir
 
