@@ -4,8 +4,7 @@ start_dir=$(pwd)
 cd $(dirname $1)
 
 path=$(pwd) # get full path
-file=$(basename $1)
-basefile=${file%.*}
+basefile=$(basename $1 .csv)
 
 cd $start_dir
 
@@ -23,7 +22,6 @@ echo
 echo "--------------- mlsvm-KaHIP -------------"
 
 cd multilevelSVM/
-pwd
 
 time optimized_output/csv_flann $path/${basefile}.csv
 

@@ -71,7 +71,6 @@ struct svm_summary {
                 std::cout << " TN:" << this->TN;
                 std::cout << " FP:" << this->FP;
                 std::cout << " FN:" << this->FN << std::endl;
-                std::cout << std::defaultfloat;
                 std::cout << std::setprecision(4);
         }
 
