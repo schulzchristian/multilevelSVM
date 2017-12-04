@@ -14,6 +14,9 @@ public:
         static std::vector<svm_node> feature_to_node(const FeatureVec & vec);
 
         static std::vector<std::vector<svm_node>> svm_convert::convert_sample_to_nodes(const graph_access & G, float amount);
+
+        static std::vector<std::vector<svm_node>> svm_convert::convert_sample_to_nodes_int(const graph_access & G, NodeID num_nodes);
+
 };
 
 #endif /* SVM_CONVERT_H */

@@ -94,8 +94,8 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        std::vector<std::vector<svm_node>> maj_sample = svm_convert::convert_sample_to_nodes(G_maj, 0.1);
-        std::vector<std::vector<svm_node>> min_sample = svm_convert::convert_sample_to_nodes(G_min, 0.1);
+        std::vector<std::vector<svm_node>> maj_sample = svm_convert::convert_sample_to_nodes_int(G_maj, 400);
+        std::vector<std::vector<svm_node>> min_sample = svm_convert::convert_sample_to_nodes_int(G_min, 400);
 
         std::cout << "sample data - maj: " << maj_sample.size();
         std::cout << " min: " << min_sample.size() << std::endl;
