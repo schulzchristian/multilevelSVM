@@ -149,6 +149,7 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
         }
 
         svm_summary good = svm_solver::select_best_model(models);
+        int trained_combis = params.size();
 
         std::cout << "GOOD log best C=" << good.C_log << " log gamma=" << good.gamma_log << std::endl;
         good.print();
@@ -184,8 +185,9 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
         }
 
         svm_summary best = svm_solver::select_best_model(models);
+        trained_combis += params.size();
 
-        std::cout << "trained and validated " << params.size() << " parameter combinations." << std::endl;
+        std::cout << "trained and validated " << trained_combis << " parameter combinations." << std::endl;
         std::cout << "trainig time: " << training_time << " validation time: " << validation_time << std::endl;
         std::cout << "BEST log C=" << best.C_log << " log gamma=" << best.gamma_log << std::endl;
         this->param.C = best.C;

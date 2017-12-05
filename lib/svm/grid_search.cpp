@@ -112,11 +112,11 @@ std::vector<std::pair<float,float>> grid_search::mlsvm_method(float c_from, floa
         double c_len = (c_to - c_from) ;                // length for C range
         double g_len = (g_to - g_from) ;                // length for gamma range
 
-        double cen_c = p_center_c - (c_len /pow(lg_base,stage));
-        double cen_g = p_center_g - (g_len /pow(lg_base,stage));
+        double cen_c = p_center_c - (c_len / pow(lg_base, stage));
+        double cen_g = p_center_g - (g_len / pow(lg_base, stage));
 
-        double pow_2_stage_minus_one = pow(lg_base,stage -1);
-        double pattern_minus_one = (pattern -1);
+        double pow_2_stage_minus_one = pow(lg_base, stage - 1);
+        double pattern_minus_one = (pattern - 1);
 
 
         for(int i=0; i < pattern;i++){
