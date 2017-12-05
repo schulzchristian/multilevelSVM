@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 #include "svm_solver.h"
 #include "svm_convert.h"
@@ -119,12 +120,14 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
         double validation_time = 0;
 
         //first grid search
-        grid_search gs(-5,15,2,3,-15,-2);
-        auto params = gs.get_sequence();
+        // grid_search gs(0,10,1,3,-15,-2);
+        // auto params = gs.get_sequence();
+
+        auto params = grid_search::mlsvm_method(-10, 10, -10, 10, true);
 
         // could be done in parallel
         for (auto&& p : params) {
-                svm_solver cur_solver(*this);
+                svm_solver cur_solver(*this); // (copy ctor) use this instances prob and param values
                 cur_solver.param.C = pow(2, p.first);
                 cur_solver.param.gamma = pow(2, p.second);
 
@@ -139,6 +142,9 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
 
                 validation_time += t.elapsed();
 
+                std::cout << "log C=" << cur_summary.C_log << ", log gamma=" << cur_summary.gamma_log
+                          << ", ACC=" << cur_summary.Acc << ", Gmean=" << cur_summary.Gmean << std::endl;
+
                 models.push_back(std::make_pair(cur_solver, cur_summary));
         }
 
@@ -148,8 +154,10 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
         good.print();
 
         //second (finer) grid search
-        grid_search gs2 = grid_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
-        params = gs2.get_sequence();
+        // grid_search gs2 = grid_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
+        // params = gs2.get_sequence();
+        params = grid_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
+
         for (auto&& p : params) {
                 if (abs(p.first - good.C) < svm_convert::EPS && abs(p.second - good.gamma) < svm_convert::EPS)
                         continue; // skip the already processed instance
@@ -168,6 +176,9 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
                 cur_summary.gamma_log = p.second;
 
                 validation_time += t.elapsed();
+
+                std::cout << "log C=" << cur_summary.C_log << ", log gamma=" << cur_summary.gamma_log
+                          << ", ACC=" << cur_summary.Acc << ", Gmean=" << cur_summary.Gmean << std::endl;
 
                 models.push_back(std::make_pair(cur_solver, cur_summary));
         }

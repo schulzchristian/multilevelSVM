@@ -13,6 +13,10 @@ public:
 
         static grid_search around(float c_center, float c_range, float c_step, float g_center, float g_range, float g_step);
 
+        static std::vector<std::pair<float,float>> grid_search::mlsvm_method(float c_from, float c_to, float g_from, float g_to, bool step1, bool inherit = false, float param_c = 0, float param_g = 0);
+
+
+
 private:
         template<class T>
         std::vector<T> range(T from, T to, T step);
