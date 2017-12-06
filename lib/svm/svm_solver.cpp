@@ -71,7 +71,7 @@ void svm_solver::read_problem(const graph_access & G_maj, const graph_access & G
 }
 
 void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID offset) {
-        const FeatureData eps = 0.000001;
+        const FeatureData EPS = 0.000001;
         size_t features = G.getFeatureVec(0).size();
 
         forall_nodes(G, node) {
@@ -81,8 +81,9 @@ void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID 
                 const FeatureVec vec = G.getFeatureVec(node);
                 int att_num = 0;
                 for (size_t i = 0; i < features; ++i) {
-                        if (abs(vec[i]) > eps) // skip zero valued features
+                        if (std::abs(vec[i]) < EPS) {
                                 continue;
+                        }// skip zero valued features
 
                         svm_node n;
                         n.index = i+1;

@@ -17,7 +17,7 @@ std::vector<svm_node> svm_convert::feature_to_node(const FeatureVec & vec) {
         size_t features = vec.size();
 
         for (size_t i = 0; i < features; ++i) {
-                if (abs(vec[i]) > EPS) // skip zero valued features
+                if (std::abs(vec[i]) < EPS) // skip zero valued features
                         continue;
                 svm_node n;
                 n.index = i+1;
