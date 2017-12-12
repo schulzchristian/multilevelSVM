@@ -30,20 +30,9 @@
 
 #include "definitions.h"
 
-struct Node {
-    EdgeID firstEdge;
-    NodeWeight weight;
-};
-
-struct Edge {
-    NodeID target;
-    EdgeWeight weight;
-};
-
 struct refinementNode {
     PartitionID partitionIndex;
     FeatureVec featureVector;
-    //Count queueIndex;
 };
 
 struct coarseningEdge {

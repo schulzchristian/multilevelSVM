@@ -67,6 +67,17 @@ const PartitionID BOUNDARY_STRIPE_NODE = std::numeric_limits<PartitionID>::max()
 const int NOTINQUEUE           = std::numeric_limits<int>::max();
 const int ROOT             = 0;
 
+// for graph_access
+struct Node {
+        EdgeID firstEdge;
+        NodeWeight weight;
+};
+
+struct Edge {
+        NodeID target;
+        EdgeWeight weight;
+};
+
 //for the gpa algorithm
 struct edge_source_pair {
         EdgeID e;

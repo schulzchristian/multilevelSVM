@@ -119,6 +119,8 @@ libmlsvm_files            = ['lib/svm/svm_solver.cpp',
                              'lib/svm/grid_search.cpp',
                              'extern/libsvm-3.22/src/svm.cpp']
 
+libcsv_flann_files        = ['lib/svm/svm_flann.cpp']
+
 if env['program'] == 'kaffpa':
         env.Append(CXXFLAGS = '-DMODE_KAFFPA')
         env.Append(CCFLAGS  = '-DMODE_KAFFPA')
@@ -181,4 +183,4 @@ if env['program'] == 'mlsvm':
         env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','gomp'])
 
 if env['program'] == 'csv_flann':
-        env.Program('csv_flann', ['app/csv_flann.cpp'], LIBS=['libargtable2','gomp'])
+        env.Program('csv_flann', ['app/csv_flann.cpp']+libcsv_flann_files, LIBS=['flann','libargtable2','gomp'])

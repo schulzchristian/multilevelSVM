@@ -3,15 +3,16 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <flann/flann.hpp>
+#include <algorithm>
 #include <argtable2.h>
+#include "svm/svm_flann.h"
 #include "timer.h"
+#include "definitions.h"
 
 using namespace std;
 
-typedef double MyItem;
-typedef vector<vector<MyItem>> MyMat;
-typedef vector<MyItem> MyRow;
+typedef vector<FeatureVec> MyMat;
+
 
 int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, string & inputfile, string & outputfile);
 
@@ -19,13 +20,11 @@ void readCSV(const string filename, MyMat & min_data, vector<int> & maj_data, in
 
 void normalize(MyMat & data);
 
-void scale(MyMat & data, MyItem from = 0, MyItem to = 1);
+void scale(MyMat & data, FeatureData from = 0, FeatureData to = 1);
 
 void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj);
 
-void run_flann(const MyMat & data, vector<vector<int>> & indices, MyMat & distances, int num_nn);
-
-void write_metis(const vector<vector<int>> & indices, const MyMat & distances, const string output);
+void write_metis(const vector<vector<Edge>> & edges, const string output);
 
 void write_features(const MyMat & data, const string filename);
 
@@ -73,22 +72,20 @@ int main(int argc, char *argv[]) {
 
         cout << "splitting time " << t.elapsed() << endl;
 
-        vector<vector<int>> min_indices;
-        MyMat min_distances;
-        vector<vector<int>> maj_indices;
-        MyMat maj_distances;
+        vector<vector<Edge>> min_edges;
+        vector<vector<Edge>> maj_edges;
 
         t.restart();
 
-        run_flann(min_data, min_indices, min_distances, nn_num);
-        run_flann(maj_data, maj_indices, maj_distances, nn_num);
+        svm_flann::run_flann(min_data, min_edges, nn_num);
+        svm_flann::run_flann(maj_data, maj_edges, nn_num);
 
         cout << "flann time " << t.elapsed() << endl;
 
         t.restart();
 
-        write_metis(min_indices, min_distances, outputfile + "_min_graph");
-        write_metis(maj_indices, maj_distances, outputfile + "_maj_graph");
+        write_metis(min_edges, outputfile + "_min_graph");
+        write_metis(maj_edges, outputfile + "_maj_graph");
         write_features(min_data, outputfile + "_min_data");
         write_features(maj_data, outputfile + "_maj_data");
 
@@ -125,8 +122,7 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & nor
         }
 
         if (nearest_neighbors->count > 0) {
-                // plus one because we don't count the vertex it self as neighbor but flann does
-                nn_num = nearest_neighbors->ival[0] + 1;
+                nn_num = nearest_neighbors->ival[0];
         }
 
         if (label_column->count > 0) {
@@ -162,7 +158,7 @@ void readCSV(const string filename, MyMat & data, vector<int> & label, int label
                 if (line[0] == '#')
                         continue;
 
-                data.push_back(MyRow());
+                data.push_back(FeatureVec());
 
                 int col=0;
                 for (string item; getline(sep, item, ','); ) {
@@ -170,7 +166,7 @@ void readCSV(const string filename, MyMat & data, vector<int> & label, int label
                                 int val = stoi(item);
                                 label.push_back(val);
                         } else{
-                                MyItem val = stod(item);
+                                FeatureData val = stod(item);
                                 data.back().push_back(val);
                         }
                         col++;
@@ -182,9 +178,9 @@ void normalize(MyMat & data) {
         size_t rows = data.size();
         size_t cols = data[0].size();
 
-        MyRow mean(cols, 0);
-        MyRow stds(cols);
-        MyRow variance(cols, 0);
+        FeatureVec mean(cols, 0);
+        FeatureVec stds(cols);
+        FeatureVec variance(cols, 0);
 
         for (size_t i = 0; i < rows; i++) {
                 for (size_t j = 0; j < cols; j++) {
@@ -193,7 +189,7 @@ void normalize(MyMat & data) {
         }
 
         for (size_t j = 0; j < cols; j++) {
-                mean[j] /= (MyItem) rows;
+                mean[j] /= (FeatureData) rows;
         }
 
         for (size_t i = 0; i < rows; i++) {
@@ -203,7 +199,7 @@ void normalize(MyMat & data) {
         }
 
         for (size_t j = 0; j < cols; j++) {
-                stds[j] = sqrt(variance[j] / (MyItem) (rows - 1));
+                stds[j] = sqrt(variance[j] / (FeatureData) (rows - 1));
         }
 
         for (size_t i = 0; i < rows; i++) {
@@ -213,11 +209,11 @@ void normalize(MyMat & data) {
         }
 }
 
-void scale(MyMat & data, MyItem from, MyItem to) {
+void scale(MyMat & data, FeatureData from, FeatureData to) {
         size_t rows = data.size();
         size_t cols = data[0].size();
-        MyItem max = std::numeric_limits<MyItem>::min();
-        MyItem min = std::numeric_limits<MyItem>::max();
+        FeatureData max = std::numeric_limits<FeatureData>::min();
+        FeatureData min = std::numeric_limits<FeatureData>::max();
 
         for (size_t i = 0; i < rows; i++) {
                 for (size_t j = 0; j < cols; j++) {
@@ -255,55 +251,29 @@ void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj
         reverse(maj.begin(), maj.end());
 }
 
-void run_flann(const MyMat & data, vector<vector<int>> & indices, MyMat & distances, int num_nn) {
-        size_t rows = data.size();
-        size_t cols = data[0].size();
-
-        cout << "data points: " << rows << " features: " << cols << endl;
-
-        timer t;
-        vector<MyItem> tmp;
-        for (size_t i = 0; i < rows; ++i) {
-                tmp.insert(tmp.end(), data[i].begin(), data[i].end());
-        }
-
-        cout << "build tmp " << t.elapsed() << endl;
-        t.restart();
-
-        flann::Matrix<MyItem> mat(tmp.data(), rows, cols);
-        flann::Index<flann::L2<MyItem>> index(mat, flann::KDTreeIndexParams(1));
-        index.buildIndex();
-        flann::SearchParams params(64);
-        params.cores = 0;
-        index.knnSearch(mat, indices, distances, num_nn, params);
-
-        cout << "build knn " << t.elapsed() << endl;
-}
-
-void write_metis(const vector<vector<int>> & indices, const MyMat & distances, const string filename) {
-        size_t rows = indices.size();
+void write_metis(const vector<vector<Edge>> & edges, const string filename) {
+        size_t rows = edges.size();
         size_t nodes = rows;
-        size_t edges = 0; // unidirected edges
-        size_t nn = indices[0].size();
+        size_t num_edges = 0; // unidirected edges
+        size_t nn = edges[0].size();
 
         timer t;
 
-        edges = rows * (nn - 1);
+        num_edges = rows * nn;
 
         ofstream file;
         file.open(filename);
 
         // edges is NOT the number of edges in the unidirectional graph but an upper boundary
-        file << nodes << " " << edges << " 1" << endl;
+        file << nodes << " " << num_edges << " 1" << endl;
 
         for (size_t i = 0; i < rows; ++i) {
                 for (size_t j = 0; j < nn; ++j) {
-                        int target = indices[i][j];
-                        MyItem weight = distances[i][j];
+                        int target = edges[i][j].target;
+                        float weight = edges[i][j].weight;
                         if (target == i) //exclude self loops
                                 continue;
-                        file << target + 1 << " " << (int)(1 / weight) << " ";
-                        // file << target + 1 << " " << weight << " ";
+                        file << target + 1 << " " << (int)weight << " ";
                 }
                 file << endl;
         }
