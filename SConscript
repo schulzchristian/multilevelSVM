@@ -114,9 +114,12 @@ libmapping                = ['lib/mapping/local_search_mapping.cpp',
                              'lib/mapping/construct_distance_matrix.cpp',
                              'lib/mapping/mapping_algorithms.cpp',
                              'lib/mapping/construct_mapping.cpp' ]
+
 libmlsvm_files            = ['lib/svm/svm_solver.cpp',
                              'lib/svm/svm_convert.cpp',
                              'lib/svm/grid_search.cpp',
+                             'lib/svm/k_fold.cpp',
+                             'lib/svm/svm_flann.cpp',
                              'extern/libsvm-3.22/src/svm.cpp']
 
 libcsv_flann_files        = ['lib/svm/svm_flann.cpp']

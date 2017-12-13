@@ -93,7 +93,7 @@ std::vector<std::pair<float,float>> grid_search::mlsvm_method(float c_from, floa
         // {{1, 2}, {2, 5}, {4, 1}, {5, 4}, {3, 3}}, //round5
         // {{5, 5}, {1, 4}, {7, 8}, {2, 7}, {3, 2}, {9, 6}, {8, 3}, {6, 1}, {4, 9}}, //round9
 
-        int pattern = step1 ? 16 : 5;
+        int pattern = step1 ? 9 : 5;
         int stage = step1 ? 1 : 2;
 
         double lg_base = 2;

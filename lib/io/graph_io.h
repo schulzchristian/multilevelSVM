@@ -55,7 +55,17 @@ class graph_io {
                 void writePartition(graph_access& G, std::string filename);
 
                 static
-                int readFeatures(graph_access & G, std::string filename);
+                int readFeatures(graph_access & G, const std::string & filename);
+
+                static
+                int readFeatures(graph_access & G, const std::vector<FeatureVec> & data);
+
+                static void readFeaturesLines(const std::string & filename, std::vector<FeatureVec> & data);
+
+                static int readGraphFromVec(graph_access & G,
+                                        const std::vector<std::vector<Edge>> & data,
+                                        EdgeID num_edges);
+
 
                 template<typename vectortype> 
                 static void writeVector(std::vector<vectortype> & vec, std::string filename);

@@ -100,7 +100,8 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
                 hierarchy.push_back(finer, coarse_mapping);
 
                 no_of_finer_vertices = no_of_coarser_vertices;
-                std::cout <<  "no of coarser vertices " << no_of_coarser_vertices <<  " and no of edges " <<  coarser->number_of_edges() << std::endl;
+                std::cout <<  "no of coarser vertices " << no_of_coarser_vertices
+                          <<  " and no of edges " <<  coarser->number_of_edges() << std::endl;
 
                 finer = coarser;
 

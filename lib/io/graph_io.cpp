@@ -119,7 +119,8 @@ int graph_io::readGraphWeighted(graph_access & G, std::string filename) {
         ss >> nmbEdges;
         ss >> ew;
 
-        if( 2*nmbEdges > std::numeric_limits<int>::max() || nmbNodes > std::numeric_limits<int>::max()) {
+        nmbEdges *= 2; //since we have forward and backward edges
+        if( nmbEdges > std::numeric_limits<int>::max() || nmbNodes > std::numeric_limits<int>::max()) {
                 std::cerr <<  "The graph is too large. Currently only 32bit supported!"  << std::endl;
                 exit(0);
         }
@@ -135,7 +136,6 @@ int graph_io::readGraphWeighted(graph_access & G, std::string filename) {
         } else if (ew == 10) {
                 read_nw = true;
         }
-        nmbEdges *= 2; //since we have forward and backward edges
         
         NodeID node_counter   = 0;
         EdgeID edge_counter   = 0;
@@ -220,11 +220,11 @@ void graph_io::writePartition(graph_access & G, std::string filename) {
 }
 
 
-int graph_io::readFeatures(graph_access & G, std::string filename) {
+int graph_io::readFeatures(graph_access & G, const std::string & filename) {
         std::string line;
 
         // open file for reading
-        std::ifstream in(filename.c_str());
+        std::ifstream in(filename);
         if (!in) {
                 std::cerr << "Error opening file" << filename << std::endl;
                 return 1;
@@ -249,6 +249,65 @@ int graph_io::readFeatures(graph_access & G, std::string filename) {
 
                 G.setFeatureVec(node, vec);
         } endfor
-
-        in.close();
 }
+
+int graph_io::readFeatures(graph_access & G, const std::vector<FeatureVec> & data) {
+        forall_nodes(G, node) {
+                G.setFeatureVec(node, data[node]);
+        } endfor
+        return 0;
+}
+
+void graph_io::readFeaturesLines(const std::string & filename, std::vector<FeatureVec> & data) {
+        std::string line;
+
+        // open file for reading
+        std::ifstream in(filename);
+        if (!in) {
+                std::cerr << "Error opening file" << filename << std::endl;
+                exit(1);
+        }
+
+        std::getline(in, line);
+        std::stringstream s(line);
+        int nodes = 0;
+        int features = 0;
+        s >> nodes;
+        s >> features;
+
+        data.reserve(nodes);
+
+        while(std::getline(in, line)) {
+                std::stringstream ss(line);
+
+                FeatureVec vec(features);
+                for (int i = 0; i < features; i++) {
+                        ss >> vec[i];
+                }
+
+                data.push_back(vec);
+        }
+
+        return data;
+}
+
+int graph_io::readGraphFromVec(graph_access & G, const std::vector<std::vector<Edge>> & data, EdgeID num_edges) {
+        G.start_construction(data.size(), num_edges);
+
+        EdgeID last = 0;
+        for (auto& nodeData : data) {
+                NodeID node = G.new_node();
+                G.setPartitionIndex(node, 0);
+                G.setNodeWeight(node, 1);
+
+                for (auto & edge : nodeData) {
+                        EdgeID e = G.new_edge(node, edge.target);
+                        G.setEdgeWeight(e, edge.weight);
+                        last = e;
+                }
+        }
+
+        G.finish_construction();
+        return 0;
+}
+

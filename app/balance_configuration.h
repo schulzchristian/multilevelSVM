@@ -30,7 +30,7 @@ public:
         balance_configuration() {};
         virtual ~balance_configuration() {};
 
-        void configurate_balance( PartitionConfig & partition_config, graph_access & G ) {
+        static void configurate_balance( PartitionConfig & partition_config, graph_access & G ) {
                 NodeWeight largest_graph_weight = 0;
                 forall_nodes(G, node) {
                         largest_graph_weight += G.getNodeWeight(node);
@@ -64,9 +64,6 @@ public:
                 partition_config.graph_allready_partitioned = false;
                 partition_config.kway_adaptive_limits_beta  = log(G.number_of_nodes());
                 partition_config.work_load                  = largest_graph_weight + edge_weights;
-
-                std::cout <<  "block weight upper bound " <<  partition_config.upper_bound_partition  << std::endl;
-
         }
 
 };

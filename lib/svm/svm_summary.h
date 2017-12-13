@@ -36,7 +36,7 @@ struct svm_summary {
                 this->FN = fn;
                 this->Sens = (double)tp / (tp+fn) ;
                 this->Spec = (double)tn / (tn+fp) ;
-                this->Gmean = sqrt(this->Sens * this->Spec);
+                this->Gmean = std::sqrt(this->Sens * this->Spec);
                 this->Acc = (double)(tp+tn) / (tp+tn+fp+fn) ;
                 if (tp+fp == 0)              //prevent nan case
                         this->PPV = 0;
