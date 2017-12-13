@@ -16,13 +16,13 @@ public:
         void read_problem(const graph_access & G_maj, const graph_access & G_min);
 
         void train();
-        void train_initial(const std::vector<std::vector<svm_node>>& maj_sample,
-                           const std::vector<std::vector<svm_node>>& min_sample);
+        void train_initial(const std::vector<std::vector<svm_node>>& min_sample,
+                           const std::vector<std::vector<svm_node>>& maj_sample);
 
         int predict(const std::vector<svm_node> & node);
 
-        svm_summary predict_validation_data(const std::vector<std::vector<svm_node>> & maj,
-                                            const std::vector<std::vector<svm_node>> & min);
+        svm_summary predict_validation_data(const std::vector<std::vector<svm_node>> & min,
+                                            const std::vector<std::vector<svm_node>> & maj);
 
 private:
         void add_graph_to_problem(const graph_access & G, int label, NodeID offset);

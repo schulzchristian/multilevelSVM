@@ -107,8 +107,8 @@ void svm_solver::train() {
         this->model = svm_train(&(this->prob), &(this->param));
 }
 
-void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sample,
-                               const std::vector<std::vector<svm_node>>& min_sample) {
+void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sample,
+                               const std::vector<std::vector<svm_node>>& maj_sample) {
         const char * error_msg = svm_check_parameter(&(this->prob), &(this->param));
         if (error_msg != NULL) {
                 std::cout << error_msg << std::endl;
@@ -121,7 +121,7 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& maj_sam
         double validation_time = 0;
 
         //first grid search
-        // grid_search gs(0,10,1,3,-15,-2);
+        // grid_search gs(-5,15,2,3,-15,-2);
         // auto params = gs.get_sequence();
 
         auto params = grid_search::mlsvm_method(-10, 10, -10, 10, true);
@@ -206,28 +206,20 @@ svm_summary svm_solver::select_best_model(std::vector<std::pair<svm_solver,svm_s
 
 
         for (size_t i = 0; i < vec.size(); ++i){
-                if(vec[i].second.Gmean > 0.05)  // ignore the gmean zero
+                if(vec[i].second.Gmean > 0.05)
                         return vec[i].second;
 
         }
-        return vec[0].second;   // in case there is model with gmean larger than zero, return the 1st one
+        return vec[0].second;   // in case there is no model with gmean larger than zero, return the 1st one
 }
 
 int svm_solver::predict(const std::vector<svm_node> & nodes) {
         return svm_predict(this->model, nodes.data());
 }
 
-svm_summary svm_solver::predict_validation_data(const std::vector<std::vector<svm_node>> & maj,
-                                                const std::vector<std::vector<svm_node>> & min) {
+svm_summary svm_solver::predict_validation_data(const std::vector<std::vector<svm_node>> & min,
+                                                const std::vector<std::vector<svm_node>> & maj) {
         size_t tp = 0, tn = 0, fp = 0, fn = 0;
-        for (const auto& instance : maj) {
-                int res = this->predict(instance);
-                if (res == -1) {
-                        tn++;
-                } else {
-                        fp++;
-                }
-        }
 
         for (const auto& instance : min) {
                 int res = this->predict(instance);
@@ -235,6 +227,15 @@ svm_summary svm_solver::predict_validation_data(const std::vector<std::vector<sv
                         tp++;
                 } else {
                         fn++;
+                }
+        }
+
+        for (const auto& instance : maj) {
+                int res = this->predict(instance);
+                if (res == -1) {
+                        tn++;
+                } else {
+                        fp++;
                 }
         }
 

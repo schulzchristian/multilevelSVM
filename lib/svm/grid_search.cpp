@@ -40,7 +40,7 @@ std::vector<std::pair<float,float> > grid_search::get_sequence() {
         return seq;
 }
 
-template<class T>
+template<typename T>
 std::vector<T> grid_search::range(T from, T to, T step) {
         std::vector<T> seq;
         while (true) {
