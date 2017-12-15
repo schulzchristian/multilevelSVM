@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
         cout << "splitting time " << t.elapsed() << endl;
 
-        std::cou << "min nodes " << min_data.size()
+        std::cout << "min nodes " << min_data.size()
                  << " maj nodes " << maj_data.size();
 
         vector<vector<Edge>> min_edges;
@@ -271,22 +271,22 @@ void normalize(MyMat & data) {
 void scale(MyMat & data, FeatureData from, FeatureData to) {
         size_t rows = data.size();
         size_t cols = data[0].size();
-        FeatureData max = std::numeric_limits<FeatureData>::min();
-        FeatureData min = std::numeric_limits<FeatureData>::max();
+        FeatureVec max = FeatureVec(cols,std::numeric_limits<FeatureData>::min());
+        FeatureVec min = FeatureVec(cols,std::numeric_limits<FeatureData>::max());
 
         for (size_t i = 0; i < rows; i++) {
                 for (size_t j = 0; j < cols; j++) {
-                        if (data[i][j] > max) {
-                                max = data[i][j];
-                        } else if (data[i][j] < min) {
-                                min = data[i][j];
+                        if (data[i][j] > max[j]) {
+                                max[j] = data[i][j];
+                        } else if (data[i][j] < min[j]) {
+                                min[j] = data[i][j];
                         }
                 }
         }
 
         for (size_t i = 0; i < rows; i++) {
                 for (size_t j = 0; j < cols; j++) {
-                        data[i][j] = (data[i][j] - min)/max;
+                        data[i][j] = (data[i][j] - min[j])/(max[j] - min[j]);
                 }
         }
 }
