@@ -71,14 +71,19 @@ int main(int argn, char *argv[]) {
                 auto kfold_time = t.elapsed();
 
                 std::cout << "fold time: " << kfold_time << std::endl;
+                kfold.setResult("KFOLD_TIME", kfold_time);
 
                 G_min->set_partition_count(partition_config.k);
                 G_maj->set_partition_count(partition_config.k);
 
                 std::cout << "graph -"
                           << " min: " << G_min->number_of_nodes()
-                          << " maj: " << G_maj->number_of_nodes()
-                          << " features: " << G_min->getFeatureVec(0).size() << std::endl;
+                          << " maj: " << G_maj->number_of_nodes() << std::endl;
+
+                std::cout << "test -"
+                          << " min: " << kfold.getMinTestData()->size()
+                          << " maj: " << kfold.getMajTestData()->size() << std::endl;
+
 
                 // ------------- COARSENING -----------------
 
@@ -107,6 +112,8 @@ int main(int argn, char *argv[]) {
                           << "coarse nodes - min: " << min_hierarchy.get_coarsest()->number_of_nodes()
                           << " maj: " << maj_hierarchy.get_coarsest()->number_of_nodes() << std::endl;
 
+                kfold.setResult("COARSE_TIME", coarsening_time);
+
                 // ------------- INITIAL TRAINING -----------------
 
                 t.restart();
@@ -114,7 +121,8 @@ int main(int argn, char *argv[]) {
                 std::vector<std::vector<svm_node>> min_sample = svm_convert::take_sample(*(kfold.getMinTestData()), 0.1f);
                 std::vector<std::vector<svm_node>> maj_sample = svm_convert::take_sample(*(kfold.getMajTestData()), 0.1f);
 
-                std::cout << "sample data - min: " << min_sample.size()
+                std::cout << "sample -"
+                          << " min: " << min_sample.size()
                           << " maj: " << maj_sample.size() << std::endl;
 
                 svm_solver solver;
@@ -123,6 +131,7 @@ int main(int argn, char *argv[]) {
 
                 auto init_train_time = t.elapsed();
                 std::cout << "init train time: " << init_train_time << std::endl;
+                kfold.setResult("INIT_TRAIN_TIME", init_train_time);
 
 
                 std::cout << "validation on hole training data:" << std::endl;
@@ -131,11 +140,17 @@ int main(int argn, char *argv[]) {
                 std::cout << "init train result: ";
                 summary.print();
 
+                kfold.setResult("INIT_ACC", summary.Acc);
+                kfold.setResult("INIT_GMEAN", summary.Gmean);
+
                 // ------------- REFINEMENT -----------------
                 // TODO
 
                 t.restart();
         }
+
+        kfold.printAverages();
+
 
         return 0;
 }

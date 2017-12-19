@@ -186,4 +186,6 @@ if env['program'] == 'mlsvm':
         env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','gomp'])
 
 if env['program'] == 'csv_flann':
+        env.Append(CXXFLAGS = '-DMODE_MLSVM')
+        env.Append(CCFLAGS  = '-DMODE_MLSVM')
         env.Program('csv_flann', ['app/csv_flann.cpp']+libcsv_flann_files, LIBS=['flann','libargtable2','gomp'])

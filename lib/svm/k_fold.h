@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include "definitions.h"
 #include "data_structure/graph_access.h"
@@ -22,7 +23,7 @@ public:
         std::vector<std::vector<svm_node>>* getMinTestData();
         std::vector<std::vector<svm_node>>* getMajTestData();
 
-        void setResult(const std::string & tag, const std::string & text, float result);
+        void setResult(const std::string & tag, float result);
         void printAverages();
 
 
@@ -34,6 +35,10 @@ private:
 
         int iterations;
         int cur_iteration;
+        std::unordered_map<std::string, std::vector<float>> results;
+        std::vector<std::string> tag_order;
+
+
         std::vector<FeatureVec> min_features;
         std::vector<FeatureVec> maj_features;
         graph_access cur_min_graph;

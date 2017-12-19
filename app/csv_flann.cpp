@@ -81,8 +81,8 @@ int main(int argc, char *argv[]) {
 
         cout << "splitting time " << t.elapsed() << endl;
 
-        std::cout << "min nodes " << min_data.size()
-                 << " maj nodes " << maj_data.size();
+        std::cout << "nodes - min " << min_data.size()
+                  << " maj " << maj_data.size() << std::endl;
 
         vector<vector<Edge>> min_edges;
         vector<vector<Edge>> maj_edges;

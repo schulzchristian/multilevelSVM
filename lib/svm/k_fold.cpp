@@ -103,10 +103,27 @@ std::vector<std::vector<svm_node>>* k_fold::getMajTestData() {
         return &this->cur_maj_test;
 }
 
-void k_fold::setResult(const std::string &tag, const std::string &text, float result) {
-
+void k_fold::setResult(const std::string &tag, float result) {
+        if (this->results.count(tag) <= 0) {
+                this->results[tag] = std::vector<float>(this->iterations, 0);
+                this->tag_order.push_back(tag);
+        }
+        this->results[tag][this->cur_iteration] = result;
 }
 
 void k_fold::printAverages() {
+        for (const auto& tag : this->tag_order) {
+                std::vector<float> & results = this->results[tag];
+                float average = 0;
+                for (const float res : results){
+                        average += res;
+                }
+                if (this->cur_iteration >= this->iterations) {
+                        average /= this->iterations;
+                } else {
+                        average /= this->cur_iteration + 1;
+                }
 
+                std::cout << tag << "\t" << average << std::endl;
+        }
 }
