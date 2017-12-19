@@ -13,9 +13,4 @@ cd multilevelSVM/
 
 (time optimized_output/mlsvm $path/$basefile)  2>&1
 
-    #grep -e "full graph" \
-	 #-e "coarse nodes" \
-         #-e "init train" \
-         #-e "real.*s$"
-
 cd $start_dir

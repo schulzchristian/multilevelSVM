@@ -11,6 +11,6 @@ echo "--------------- mlsvm ------------"
 
 cd mlsvm/src
 
-(time ./mlsvm_classifier --ds_p $path/ --ds_f ${basefile})  2>&1
+time ./mlsvm_classifier --ds_p "$path/" --ds_f $basefile  2>&1
 
 cd $start_dir
