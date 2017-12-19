@@ -11,6 +11,6 @@ echo "--------------- mulitlevelSVM -------------"
 
 cd multilevelSVM/
 
-(time optimized_output/mlsvm $path/$basefile)  2>&1
+optimized_output/mlsvm $path/$basefile 2>&1
 
 cd $start_dir

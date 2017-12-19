@@ -21,7 +21,7 @@ void svm_flann::run_flann(const std::vector<FeatureVec> & data, std::vector<std:
         flann::Index<flann::L2<float>> index(mat, flann::KDTreeIndexParams(1));
         index.buildIndex();
         flann::SearchParams params(64);
-        params.cores = 0;
+        params.cores = 1;
 
         std::vector<std::vector<int>> indices;
         std::vector<std::vector<float>> distances;

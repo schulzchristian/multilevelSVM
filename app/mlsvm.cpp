@@ -62,6 +62,7 @@ int main(int argn, char *argv[]) {
 
         k_fold kfold(5, filename);
 
+        timer t_all;
         timer t;
 
         while (kfold.next()) {
@@ -146,7 +147,12 @@ int main(int argn, char *argv[]) {
                 // ------------- REFINEMENT -----------------
                 // TODO
 
+                auto time_complete = t_all.elapsed();
+
+                kfold.setResult("TIME", time_complete);
+
                 t.restart();
+                t_all.restart();
         }
 
         kfold.printAverages();
