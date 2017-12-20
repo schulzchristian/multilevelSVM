@@ -16,6 +16,7 @@ public:
         template<typename T>
         static std::vector<T> take_sample(const std::vector<T> & data, float percentage);
 
+        static std::vector<std::vector<svm_node>> sample_from_graph(const graph_access & G, float amount);
 };
 
 template<typename T>

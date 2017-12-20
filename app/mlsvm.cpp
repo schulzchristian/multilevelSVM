@@ -98,14 +98,12 @@ int main(int argn, char *argv[]) {
                 partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
                 partition_config.cluster_coarsening_factor = 1;
 
-                std::cout << "coarse min graph" << "\n";
                 coarsen.perform_coarsening(partition_config, *G_min, min_hierarchy);
 
                 balance_configuration::configurate_balance(partition_config, *G_maj);
                 partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
                 partition_config.cluster_coarsening_factor = 1;
 
-                std::cout << "coarse maj graph" << "\n";
                 coarsen.perform_coarsening(partition_config, *G_maj, maj_hierarchy);
 
                 auto coarsening_time = t.elapsed();
@@ -119,8 +117,8 @@ int main(int argn, char *argv[]) {
 
                 t.restart();
 
-                std::vector<std::vector<svm_node>> min_sample = svm_convert::take_sample(*(kfold.getMinTestData()), 0.1f);
-                std::vector<std::vector<svm_node>> maj_sample = svm_convert::take_sample(*(kfold.getMajTestData()), 0.1f);
+                std::vector<std::vector<svm_node>> min_sample = svm_convert::sample_from_graph(*(kfold.getMinGraph()), 0.1f);
+                std::vector<std::vector<svm_node>> maj_sample = svm_convert::sample_from_graph(*(kfold.getMajGraph()), 0.1f);
 
                 std::cout << "sample -"
                           << " min: " << min_sample.size()
