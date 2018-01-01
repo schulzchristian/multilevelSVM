@@ -117,16 +117,16 @@ int main(int argn, char *argv[]) {
 
                 t.restart();
 
-                std::vector<std::vector<svm_node>> min_sample = svm_convert::sample_from_graph(*(kfold.getMinGraph()), 0.1f);
-                std::vector<std::vector<svm_node>> maj_sample = svm_convert::sample_from_graph(*(kfold.getMajGraph()), 0.1f);
+                auto min_sample = svm_convert::sample_from_graph(*(kfold.getMinGraph()), 0.1f);
+                auto maj_sample = svm_convert::sample_from_graph(*(kfold.getMajGraph()), 0.1f);
 
                 std::cout << "sample -"
                           << " min: " << min_sample.size()
                           << " maj: " << maj_sample.size() << std::endl;
 
                 svm_solver solver;
-                solver.read_problem(*maj_hierarchy.get_coarsest(), *min_hierarchy.get_coarsest());
-                solver.train_initial(maj_sample, min_sample);
+                solver.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
+                solver.train_initial(min_sample, maj_sample);
 
                 auto init_train_time = t.elapsed();
                 std::cout << "init train time: " << init_train_time << std::endl;
@@ -145,9 +145,12 @@ int main(int argn, char *argv[]) {
                 // ------------- REFINEMENT -----------------
                 // TODO
 
-                auto time_complete = t_all.elapsed();
 
-                kfold.setResult("TIME", time_complete);
+                auto time_iteration = t_all.elapsed();
+
+                std::cout << "iteration time: " << time_iteration << std::endl;
+
+                kfold.setResult("TIME", time_iteration);
 
                 t.restart();
                 t_all.restart();

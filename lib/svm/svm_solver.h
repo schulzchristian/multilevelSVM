@@ -13,7 +13,7 @@ public:
         svm_solver(const svm_solver & solver);
         virtual ~svm_solver();
 
-        void read_problem(const graph_access & G_maj, const graph_access & G_min);
+        void read_problem(const graph_access & G_min, const graph_access & G_maj);
 
         void train();
         void train_initial(const std::vector<std::vector<svm_node>>& min_sample,

@@ -67,6 +67,8 @@ struct svm_summary {
                 std::cout << " F1:" << this->F1;
                 std::cout << " GM:" << this->Gmean;
                 std::cout << std::setprecision(0);
+                std::cout << " SV_min:" << this->num_SV_p;
+                std::cout << " SV_maj:" << this->num_SV_n;
                 std::cout << " TP:" << this->TP;
                 std::cout << " TN:" << this->TN;
                 std::cout << " FP:" << this->FP;

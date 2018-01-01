@@ -51,12 +51,12 @@ svm_solver::~svm_solver() {
         // }
 }
 
-void svm_solver::read_problem(const graph_access & G_maj, const graph_access & G_min) {
-        size_t features = G_maj.getFeatureVec(0).size();
+void svm_solver::read_problem(const graph_access & G_min, const graph_access & G_maj) {
+        size_t features = G_min.getFeatureVec(0).size();
 
         this->param.gamma = 1/(float) features;
 
-        this->prob.l = G_maj.number_of_nodes() + G_min.number_of_nodes();
+        this->prob.l = G_min.number_of_nodes() + G_maj.number_of_nodes();
         this->prob.y = new double [this->prob.l];
         this->prob.x = new svm_node* [this->prob.l];
         for (int i = 0; i < this->prob.l; ++i) {
@@ -66,8 +66,8 @@ void svm_solver::read_problem(const graph_access & G_maj, const graph_access & G
 
         // vector<vector<svm_node> > nodes(prob.l, vector<svm_node>());
 
-        add_graph_to_problem(G_maj, -1, 0);
-        add_graph_to_problem(G_min, 1, G_maj.number_of_nodes());
+        add_graph_to_problem(G_min, 1, 0);
+        add_graph_to_problem(G_maj, -1, G_min.number_of_nodes());
 }
 
 void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID offset) {
@@ -137,14 +137,14 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sam
                 training_time += t.elapsed();
 
                 t.restart();
-                svm_summary cur_summary = cur_solver.predict_validation_data(maj_sample, min_sample);
+                svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
                 cur_summary.C_log = p.first;
                 cur_summary.gamma_log = p.second;
 
                 validation_time += t.elapsed();
 
-                std::cout << "log C=" << cur_summary.C_log << ", log gamma=" << cur_summary.gamma_log
-                          << ", ACC=" << cur_summary.Acc << ", Gmean=" << cur_summary.Gmean << std::endl;
+                std::cout << "log C=" << cur_summary.C_log << " \tlog gamma=" << cur_summary.gamma_log
+                          << "\tACC=" << cur_summary.Acc << "\tGmean=" << cur_summary.Gmean << std::endl;
 
                 models.push_back(std::make_pair(cur_solver, cur_summary));
         }
@@ -173,14 +173,14 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sam
                 training_time += t.elapsed();
 
                 t.restart();
-                svm_summary cur_summary = cur_solver.predict_validation_data(maj_sample, min_sample);
+                svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
                 cur_summary.C_log = p.first;
                 cur_summary.gamma_log = p.second;
 
                 validation_time += t.elapsed();
 
-                std::cout << "log C=" << cur_summary.C_log << ", log gamma=" << cur_summary.gamma_log
-                          << ", ACC=" << cur_summary.Acc << ", Gmean=" << cur_summary.Gmean << std::endl;
+                std::cout << "log C=" << cur_summary.C_log << " \tlog gamma=" << cur_summary.gamma_log
+                          << "\tACC=" << cur_summary.Acc << "\tGmean=" << cur_summary.Gmean << std::endl;
 
                 models.push_back(std::make_pair(cur_solver, cur_summary));
         }
@@ -191,10 +191,12 @@ void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sam
         std::cout << "trained and validated " << trained_combis << " parameter combinations." << std::endl;
         std::cout << "trainig time: " << training_time << " validation time: " << validation_time << std::endl;
         std::cout << "BEST log C=" << best.C_log << " log gamma=" << best.gamma_log << std::endl;
-        this->param.C = best.C;
-        this->param.gamma = best.gamma;
+
         best.print();
 
+        // train this solver to the best found parameters
+        this->param.C = best.C;
+        this->param.gamma = best.gamma;
         this->train();
 }
 
