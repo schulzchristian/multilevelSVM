@@ -1,6 +1,6 @@
 #include "svm_convert.h"
 
-std::vector<svm_node> svm_convert::feature_to_node(const FeatureVec & vec) {
+svm_feature svm_convert::feature_to_node(const FeatureVec & vec) {
         std::vector<svm_node> nodes;
         size_t features = vec.size();
 
@@ -21,7 +21,7 @@ std::vector<svm_node> svm_convert::feature_to_node(const FeatureVec & vec) {
         return nodes;
 }
 
-std::vector<std::vector<svm_node>> svm_convert::sample_from_graph(const graph_access & G, float amount) {
+svm_data svm_convert::sample_from_graph(const graph_access & G, float amount) {
         std::vector<std::vector<svm_node>> nodes;
 
         forall_nodes(G, n) {

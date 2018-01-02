@@ -41,33 +41,31 @@ svm_solver::svm_solver(const svm_solver & solver) {
 svm_solver::~svm_solver() {
         svm_free_and_destroy_model(&(this->model));
         // svm_destroy_param(&(this->param));
-        // if (prob.y) {
-        //         delete[] prob.y;
-        // }
-        // if (prob.x) {
-        //         for (int i = 0; i < this->prob.l; ++i) {
-        //                 delete [] this->prob.x[i];
-        //         }
-        // }
+        if (original) {
+                delete[] prob.y;
+                delete[] prob.x;
+        }
+}
+
 }
 
 void svm_solver::read_problem(const graph_access & G_min, const graph_access & G_maj) {
-        size_t features = G_min.getFeatureVec(0).size();
-
-        this->param.gamma = 1/(float) features;
-
-        this->prob.l = G_min.number_of_nodes() + G_maj.number_of_nodes();
-        this->prob.y = new double [this->prob.l];
-        this->prob.x = new svm_node* [this->prob.l];
-        for (int i = 0; i < this->prob.l; ++i) {
-                //this is probably bigger than needed because we omit zero valued entries
-                this->prob.x[i] = new svm_node[features+1];
-        }
-
-        // vector<vector<svm_node> > nodes(prob.l, vector<svm_node>());
+        allocate_prob(G_min.number_of_nodes() + G_maj.number_of_nodes(), G_min.getFeatureVec(0).size());
 
         add_graph_to_problem(G_min, 1, 0);
         add_graph_to_problem(G_maj, -1, G_min.number_of_nodes());
+}
+
+void svm_solver::allocate_prob(NodeID total_size, size_t features) {
+        this->original = true;
+        this->param.gamma = 1/(float) features;
+        this->prob.l = total_size;
+        this->prob.y = new double [this->prob.l];
+        this->prob.x = new svm_node* [this->prob.l];
+        this->prob_nodes.reserve(prob.l);
+}
+
+        }
 }
 
 void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID offset) {
@@ -79,22 +77,9 @@ void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID 
                 this->prob.y[prob_node] = label;
 
                 const FeatureVec vec = G.getFeatureVec(node);
-                int att_num = 0;
-                for (size_t i = 0; i < features; ++i) {
-                        if (std::abs(vec[i]) < EPS) {
-                                continue;
-                        }// skip zero valued features
-
-                        svm_node n;
-                        n.index = i+1;
-                        n.value = vec[i];
-                        this->prob.x[prob_node][att_num] = n;
-                        ++att_num;
-                }
-                svm_node n; // end node
-                n.index = -1;
-                n.value = 0;
-                this->prob.x[prob_node][att_num] = n;
+                svm_feature svm_nodes = svm_convert::feature_to_node(vec);
+                this->prob_nodes.push_back(std::move(svm_nodes));
+                this->prob.x[prob_node] = this->prob_nodes.back().data();
         } endfor
 }
 
@@ -107,8 +92,7 @@ void svm_solver::train() {
         this->model = svm_train(&(this->prob), &(this->param));
 }
 
-svm_result svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sample,
-                                     const std::vector<std::vector<svm_node>>& maj_sample) {
+svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample) {
         const char * error_msg = svm_check_parameter(&(this->prob), &(this->param));
         if (error_msg != NULL) {
                 std::cout << error_msg << std::endl;
@@ -150,9 +134,9 @@ svm_result svm_solver::train_initial(const std::vector<std::vector<svm_node>>& m
         return svm_solver::make_result(result);
 }
 
-svm_result svm_solver::train_range(const std::vector<std::pair<float,float>> & params,
-                                   const std::vector<std::vector<svm_node>>& min_sample,
-                                   const std::vector<std::vector<svm_node>>& maj_sample) {
+svm_result svm_solver::train_range(const std::vector<svm_para> & params,
+                                   const svm_data & min_sample,
+                                   const svm_data & maj_sample) {
         std::vector<svm_summary> summaries;
 
         for (auto&& p : params) {
@@ -207,8 +191,7 @@ int svm_solver::predict(const std::vector<svm_node> & nodes) {
         return svm_predict(this->model, nodes.data());
 }
 
-svm_summary svm_solver::predict_validation_data(const std::vector<std::vector<svm_node>> & min,
-                                                const std::vector<std::vector<svm_node>> & maj) {
+svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_data & maj) {
         size_t tp = 0, tn = 0, fp = 0, fn = 0;
 
         for (const auto& instance : min) {
