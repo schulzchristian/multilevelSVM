@@ -8,6 +8,7 @@
 #include "svm_definitions.h"
 #include "data_structure/graph_access.h"
 #include "svm_summary.h"
+#include "svm_desc.h"
 
 class svm_solver
 {
@@ -36,6 +37,7 @@ private:
         static svm_result make_result(const std::vector<svm_summary> & vec);
 
         bool original = false;
+        svm_desc desc;
         svm_data prob_nodes;
         svm_problem prob;
         svm_parameter param;

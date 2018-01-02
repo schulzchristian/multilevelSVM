@@ -8,7 +8,7 @@
 
 class svm_convert {
 public:
-        static const FeatureData EPS = 0.000001f;
+        static constexpr FeatureData EPS = 0.000001f;
 
         static svm_data gaccess_to_nodes(const graph_access & G);
 

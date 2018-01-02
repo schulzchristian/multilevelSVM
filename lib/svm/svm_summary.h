@@ -4,9 +4,22 @@
 #include <vector>
 #include <svm.h>
 #include "definitions.h"
+#include "svm_desc.h"
 
 class svm_summary {
 public:
+        svm_summary(const svm_model & model, const svm_desc & desc, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
+
+        void print();
+        void print_short();
+
+        NodeID num_SV_min();
+        NodeID num_SV_maj();
+
+        bool operator > (const svm_summary new_) const{
+                return (this->Gmean > new_.Gmean);
+        }
+
         int TP;
         int TN;
         int FP;
@@ -19,26 +32,14 @@ public:
         double PPV;
         double NPV;
 
-        int num_SV_min;
-        int num_SV_maj;
-        std::vector<NodeID> indices_SV_min;
-        std::vector<NodeID> indices_SV_maj;
+        std::vector<NodeID> SV_min;
+        std::vector<NodeID> SV_maj;
 
         double C;
         double gamma;
 
         double C_log;
         double gamma_log;
-
-        bool operator > (const svm_summary new_) const{
-                return (this->Gmean > new_.Gmean);
-        }
-
-        svm_summary(const svm_model & model, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
-
-        void print();
-
-        void print_short();
 };
 
 struct summary_cmp_better_gmean_sn
@@ -70,7 +71,7 @@ struct summary_cmp_better_gmean_sv
                                 return false;
                         else{                                                    //similar gmean
                                 // a has less nSV than b which is better
-                                return (a.num_SV_min + a.num_SV_maj >  b.num_SV_min + b.num_SV_maj);
+                                return (a.SV_min.size() + a.SV_maj.size() >  b.SV_min.size() + b.SV_maj.size());
                         }
                 }
         }

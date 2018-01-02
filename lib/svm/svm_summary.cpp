@@ -4,7 +4,7 @@
 
 #include "svm_summary.h"
 
-svm_summary::svm_summary(const svm_model & model, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
+svm_summary::svm_summary(const svm_model & model, const svm_desc & desc, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
         this->TP = tp;
         this->FP = fp;
         this->TN = tn;
@@ -30,19 +30,22 @@ svm_summary::svm_summary(const svm_model & model, NodeID tp, NodeID tn, NodeID f
         this->C_log = std::log(this->C) / std::log(2);
         this->gamma_log = std::log(this->gamma) / std::log(2);
 
-        //TODO swap?
-        this->num_SV_min = model.nSV[0];
-        this->num_SV_maj = model.nSV[1];
-
-        this->indices_SV_min.reserve(this->num_SV_min);
-        this->indices_SV_maj.reserve(this->num_SV_maj);
-
+        this->SV_min.reserve(model.nSV[0]);
         for(int i = 0; i < model.nSV[0]; i++) {
-                this->indices_SV_min.push_back(model.sv_indices[i]);
+                // libSVM uses 1 as first index while we need our NodeID
+                NodeID id = model.sv_indices[i] - 1;
+                this->SV_min.push_back(id);
+                // std::cout << id << ", ";
         }
-        for(int i = model.nSV[0]; i < model.nSV[1]; i++) {
-                this->indices_SV_maj.push_back(model.sv_indices[i]);
+
+        this->SV_maj.reserve(model.nSV[1]);
+        for(int i = 0; i < model.nSV[1]; i++) {
+                int id = model.sv_indices[model.nSV[0] + i] - 1 - desc.num_min;
+                this->SV_maj.push_back(id);
+                // std::cout << id << ", ";
         }
+        // std::cout << "\n";
+
 }
 
 void svm_summary::print() {
@@ -56,8 +59,8 @@ void svm_summary::print() {
                   << " F1:" << this->F1
                   << " GM:" << this->Gmean
                   << std::setprecision(0)
-                  << " SV_min:" << this->num_SV_min
-                  << " SV_maj:" << this->num_SV_maj
+                  << " SV_min:" << this->SV_min.size()
+                  << " SV_maj:" << this->SV_maj.size()
                   << " TP:" << this->TP
                   << " TN:" << this->TN
                   << " FP:" << this->FP
@@ -74,4 +77,12 @@ void svm_summary::print_short() {
                   << "\tACC=" << this->Acc
                   << "\tGmean=" << this->Gmean
                   << std::endl;
+}
+
+NodeID svm_summary::num_SV_min() {
+        return this->SV_min.size();
+}
+
+NodeID svm_summary::num_SV_maj() {
+        return this->SV_maj.size();
 }
