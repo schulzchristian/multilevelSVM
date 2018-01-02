@@ -20,7 +20,7 @@ public:
 
         void train();
         svm_result train_initial(const svm_data & min_sample, const svm_data & maj_sample);
-        svm_result train_range(const std::vector<svm_para> & params,
+        svm_result train_range(const std::vector<svm_param> & params,
                                const svm_data & min_sample,
                                const svm_data & maj_sample);
 

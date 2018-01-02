@@ -118,7 +118,7 @@ libmapping                = ['lib/mapping/local_search_mapping.cpp',
 libmlsvm_files            = ['lib/svm/svm_solver.cpp',
                              'lib/svm/svm_summary.cpp',
                              'lib/svm/svm_convert.cpp',
-                             'lib/svm/grid_search.cpp',
+                             'lib/svm/param_search.cpp',
                              'lib/svm/k_fold.cpp',
                              'lib/svm/svm_flann.cpp',
                              'extern/libsvm-3.22/src/svm.cpp' ]

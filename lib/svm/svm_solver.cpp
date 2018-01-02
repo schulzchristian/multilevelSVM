@@ -4,7 +4,7 @@
 
 #include "svm_solver.h"
 #include "svm_convert.h"
-#include "grid_search.h"
+#include "param_search.h"
 #include "timer.h"
 
 
@@ -98,11 +98,9 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
                 std::cout << error_msg << std::endl;
         }
 
-
         // first grid search
-        // grid_search gs(-5,15,2,3,-15,-2);
-        // auto params = gs.get_sequence();
-        auto params = grid_search::mlsvm_method(-10, 10, -10, 10, true);
+        // auto params = param_search.grid(-5,15,2,3,-15,-2);
+        auto params = param_search::mlsvm_method(-10, 10, -10, 10, true);
 
         svm_result result = train_range(params, min_sample, maj_sample);
         svm_summary good = result[0];
@@ -112,9 +110,8 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         good.print();
 
         // second (finer) grid search
-        // grid_search gs2 = grid_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
-        // params = gs2.get_sequence();
-        params = grid_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
+        // params = param_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
+        params = param_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
         // params.pop_back(); // the last parameters are equal to the input params
 
         svm_result second_res = train_range(params, min_sample, maj_sample);
@@ -134,7 +131,7 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         return svm_solver::make_result(result);
 }
 
-svm_result svm_solver::train_range(const std::vector<svm_para> & params,
+svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                                    const svm_data & min_sample,
                                    const svm_data & maj_sample) {
         std::vector<svm_summary> summaries;
