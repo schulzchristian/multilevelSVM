@@ -107,112 +107,100 @@ void svm_solver::train() {
         this->model = svm_train(&(this->prob), &(this->param));
 }
 
-void svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sample,
-                               const std::vector<std::vector<svm_node>>& maj_sample) {
+svm_result svm_solver::train_initial(const std::vector<std::vector<svm_node>>& min_sample,
+                                     const std::vector<std::vector<svm_node>>& maj_sample) {
         const char * error_msg = svm_check_parameter(&(this->prob), &(this->param));
         if (error_msg != NULL) {
                 std::cout << error_msg << std::endl;
         }
 
 
-        std::vector<std::pair<svm_solver,svm_summary>> models;
-
-        double training_time = 0;
-        double validation_time = 0;
-
-        //first grid search
+        // first grid search
         // grid_search gs(-5,15,2,3,-15,-2);
         // auto params = gs.get_sequence();
-
         auto params = grid_search::mlsvm_method(-10, 10, -10, 10, true);
 
-        // could be done in parallel
-        for (auto&& p : params) {
-                svm_solver cur_solver(*this); // (copy ctor) use this instances prob and param values
-                cur_solver.param.C = pow(2, p.first);
-                cur_solver.param.gamma = pow(2, p.second);
-
-                timer t;
-                cur_solver.train();
-                training_time += t.elapsed();
-
-                t.restart();
-                svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
-                cur_summary.C_log = p.first;
-                cur_summary.gamma_log = p.second;
-
-                validation_time += t.elapsed();
-
-                std::cout << "log C=" << cur_summary.C_log << " \tlog gamma=" << cur_summary.gamma_log
-                          << "\tACC=" << cur_summary.Acc << "\tGmean=" << cur_summary.Gmean << std::endl;
-
-                models.push_back(std::make_pair(cur_solver, cur_summary));
-        }
-
-        svm_summary good = svm_solver::select_best_model(models);
+        svm_result result = train_range(params, min_sample, maj_sample);
+        svm_summary good = result[0];
         int trained_combis = params.size();
 
-        std::cout << "GOOD log best C=" << good.C_log << " log gamma=" << good.gamma_log << std::endl;
+        std::cout << "continue with log best C=" << good.C_log << " log gamma=" << good.gamma_log << std::endl;
         good.print();
 
-        //second (finer) grid search
+        // second (finer) grid search
         // grid_search gs2 = grid_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
         // params = gs2.get_sequence();
         params = grid_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
+        // params.pop_back(); // the last parameters are equal to the input params
 
-        for (auto&& p : params) {
-                if (abs(p.first - good.C) < svm_convert::EPS && abs(p.second - good.gamma) < svm_convert::EPS)
-                        continue; // skip the already processed instance
-
-                svm_solver cur_solver(*this);
-                cur_solver.param.C = pow(2, p.first);
-                cur_solver.param.gamma = pow(2, p.second);
-
-                timer t;
-                cur_solver.train();
-                training_time += t.elapsed();
-
-                t.restart();
-                svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
-                cur_summary.C_log = p.first;
-                cur_summary.gamma_log = p.second;
-
-                validation_time += t.elapsed();
-
-                std::cout << "log C=" << cur_summary.C_log << " \tlog gamma=" << cur_summary.gamma_log
-                          << "\tACC=" << cur_summary.Acc << "\tGmean=" << cur_summary.Gmean << std::endl;
-
-                models.push_back(std::make_pair(cur_solver, cur_summary));
-        }
-
-        svm_summary best = svm_solver::select_best_model(models);
+        svm_result second_res = train_range(params, min_sample, maj_sample);
+        result.insert(result.end(), second_res.begin(), second_res.end());
+        svm_summary best = select_best_model(result);
         trained_combis += params.size();
 
         std::cout << "trained and validated " << trained_combis << " parameter combinations." << std::endl;
-        std::cout << "trainig time: " << training_time << " validation time: " << validation_time << std::endl;
         std::cout << "BEST log C=" << best.C_log << " log gamma=" << best.gamma_log << std::endl;
-
         best.print();
 
         // train this solver to the best found parameters
         this->param.C = best.C;
         this->param.gamma = best.gamma;
         this->train();
+
+        return svm_solver::make_result(result);
 }
 
-svm_summary svm_solver::select_best_model(std::vector<std::pair<svm_solver,svm_summary>> & vec) {
-        std::sort(vec.begin(), vec.end(), [](const std::pair<svm_solver,svm_summary> & a,
-                                             const std::pair<svm_solver,svm_summary> & b){
-                          return summary_cmp_better_gmean_sn::comp(a.second, b.second);
+svm_result svm_solver::train_range(const std::vector<std::pair<float,float>> & params,
+                                   const std::vector<std::vector<svm_node>>& min_sample,
+                                   const std::vector<std::vector<svm_node>>& maj_sample) {
+        std::vector<svm_summary> summaries;
+
+        for (auto&& p : params) {
+                svm_solver cur_solver(*this); // (copy ctor) use this instances prob and param values
+                cur_solver.param.C = pow(2, p.first);
+                cur_solver.param.gamma = pow(2, p.second);
+
+                cur_solver.train();
+
+                svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
+                cur_summary.C_log = p.first;
+                cur_summary.gamma_log = p.second;
+
+                cur_summary.print_short();
+
+                summaries.push_back(cur_summary);
+        }
+        svm_solver::select_best_model(summaries);
+        return svm_solver::make_result(summaries);
+}
+
+svm_summary svm_solver::select_best_model(std::vector<svm_summary> & vec) {
+        std::sort(vec.begin(), vec.end(),
+                  [](const svm_summary & a, const svm_summary & b){
+                          return summary_cmp_better_gmean_sn::comp(a, b);
                   });
 
-
-        for (size_t i = 0; i < vec.size(); ++i){
-                if(vec[i].second.Gmean > 0.05)
-                        return vec[i].second;
-
+        for (size_t i = 0; i < vec.size(); ++i) {
+                if(vec[i].Gmean > 0.05) {
+                        return vec[i];
+                }
         }
-        return vec[0].second;   // in case there is no model with gmean larger than zero, return the 1st one
+        // in case there is no model with gmean larger than zero, return the 1st one
+        return vec[0];
+}
+
+svm_result svm_solver::make_result(const std::vector<svm_summary> & vec) {
+        // assert the vector is sorted (this happened in select_best_model)
+        std::vector<svm_summary> res;
+        res.push_back(vec[0]);
+
+        for (size_t i = 1; i < vec.size(); ++i) {
+                if(vec[i].Gmean > res[0].Gmean - 0.1f) {
+                        res.push_back(vec[i]);
+                }
+        }
+
+        return res;
 }
 
 int svm_solver::predict(const std::vector<svm_node> & nodes) {

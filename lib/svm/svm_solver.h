@@ -5,6 +5,7 @@
 #include "data_structure/graph_access.h"
 #include "svm_summary.h"
 
+typedef std::vector<svm_summary> svm_result;
 
 class svm_solver
 {
@@ -16,8 +17,11 @@ public:
         void read_problem(const graph_access & G_min, const graph_access & G_maj);
 
         void train();
-        void train_initial(const std::vector<std::vector<svm_node>>& min_sample,
-                           const std::vector<std::vector<svm_node>>& maj_sample);
+        svm_result train_initial(const std::vector<std::vector<svm_node>>& min_sample,
+                                 const std::vector<std::vector<svm_node>>& maj_sample);
+        svm_result train_range(const std::vector<std::pair<float,float>> & params,
+                               const std::vector<std::vector<svm_node>>& min_sample,
+                               const std::vector<std::vector<svm_node>>& maj_sample);
 
         int predict(const std::vector<svm_node> & node);
 
@@ -26,7 +30,8 @@ public:
 
 private:
         void add_graph_to_problem(const graph_access & G, int label, NodeID offset);
-        static svm_summary select_best_model(std::vector<std::pair<svm_solver,svm_summary>> & vec);
+        static svm_summary select_best_model(std::vector<svm_summary> & vec);
+        static svm_result make_result(const std::vector<svm_summary> & vec);
 
         svm_problem prob;
         svm_parameter param;

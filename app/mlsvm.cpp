@@ -126,7 +126,7 @@ int main(int argn, char *argv[]) {
 
                 svm_solver solver;
                 solver.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
-                solver.train_initial(min_sample, maj_sample);
+                svm_result initial_result = solver.train_initial(min_sample, maj_sample);
 
                 auto init_train_time = t.elapsed();
                 std::cout << "init train time: " << init_train_time << std::endl;
@@ -134,13 +134,13 @@ int main(int argn, char *argv[]) {
 
 
                 std::cout << "validation on hole training data:" << std::endl;
-                svm_summary summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                svm_summary initial_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
 
                 std::cout << "init train result: ";
-                summary.print();
+                initial_summary.print();
 
-                kfold.setResult("INIT_ACC", summary.Acc);
-                kfold.setResult("INIT_GMEAN", summary.Gmean);
+                kfold.setResult("INIT_ACC", initial_summary.Acc);
+                kfold.setResult("INIT_GMEAN", initial_summary.Gmean);
 
                 // ------------- REFINEMENT -----------------
                 // TODO
