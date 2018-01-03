@@ -132,17 +132,19 @@ int main(int argn, char *argv[]) {
 
                 auto init_train_time = t.elapsed();
                 std::cout << "init train time: " << init_train_time << std::endl;
-                kfold.setResult("INIT_TRAIN_TIME", init_train_time);
 
+                svm_summary initial_summary = initial_result[0];
+                kfold.setResult("\tINIT_TIME", init_train_time);
+                kfold.setResult("INIT_AC  ", initial_summary.Acc);
+                kfold.setResult("INIT_GM  ", initial_summary.Gmean);
 
                 std::cout << "inital validation on hole training data:" << std::endl;
-                svm_summary initial_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                svm_summary initial_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
 
-                std::cout << "init train result: ";
-                initial_summary.print();
-
-                kfold.setResult("INIT_ACC", initial_summary.Acc);
-                kfold.setResult("INIT_GMEAN", initial_summary.Gmean);
+                std::cout << "init train result: " << std::endl;
+                initial_test_summary.print();
+                kfold.setResult("INIT_TEST_AC", initial_test_summary.Acc);
+                kfold.setResult("INIT_TEST_GMN", initial_test_summary.Gmean);
 
                 // ------------- REFINEMENT -----------------
 
@@ -155,14 +157,17 @@ int main(int argn, char *argv[]) {
 
                 auto refinement_time = t.elapsed();
                 std::cout << "refinement timed " << refinement_time << std::endl;
-                kfold.setResult("REFINE_TIME", refinement_time);
+                svm_summary final_summary = final_result[0];
+                kfold.setResult("\tFINAL_TIME", refinement_time);
+                kfold.setResult("FINAL_AC", final_summary.Acc);
+                kfold.setResult("FINAL_GM ", final_summary.Gmean);
 
                 std::cout << "final validation on hole training data:" << std::endl;
-                svm_summary final_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
-                final_summary.print();
+                svm_summary final_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                final_test_summary.print();
 
-                kfold.setResult("RESULT_ACC", final_summary.Acc);
-                kfold.setResult("RESULT_GMEAN", final_summary.Gmean);
+                kfold.setResult("FINAL_TEST_AC", final_test_summary.Acc);
+                kfold.setResult("FINAL_TEST_GM", final_test_summary.Gmean);
 
                 // ------------- END --------------
                 auto time_iteration = t_all.elapsed();

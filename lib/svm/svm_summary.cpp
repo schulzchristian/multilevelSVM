@@ -49,9 +49,12 @@ svm_summary::svm_summary(const svm_model & model, const svm_desc & desc, NodeID 
 }
 
 void svm_summary::print() {
-        std::cout << std::setprecision(3)
+        std::cout << std::setprecision(5)
+                  << "log C: " << this->C_log
+                  << " log g: " << this->gamma_log
+                  << std::setprecision(3)
                   << std::fixed
-                  << "AC:" << this->Acc
+                  << " AC:" << this->Acc
                   << " SN:" << this->Sens
                   << " SP:" << this->Spec
                   << " PPV:" << this->PPV
@@ -71,13 +74,16 @@ void svm_summary::print() {
 }
 
 void svm_summary::print_short() {
-        std::cout << std::setprecision(3)
+        std::cout << std::setprecision(2)
+                  << std::fixed
                   << "log C=" << this->C_log
-                  << " \tlog gamma=" << this->gamma_log
-                  << "\tACC=" << this->Acc
+                  << "\tlog gamma=" << this->gamma_log
+                  << std::setprecision(3)
+                  << "  \tACC=" << this->Acc
                   << "\tGmean=" << this->Gmean
-                  << " \tSVs=" << this->SV_min.size() + this->SV_maj.size()
+                  << "\tSVs=" << this->SV_min.size() + this->SV_maj.size()
                   << " (" << this->SV_min.size() << "," << this->SV_maj.size() <<")"
+                  << std::defaultfloat
                   << std::endl;
 }
 
