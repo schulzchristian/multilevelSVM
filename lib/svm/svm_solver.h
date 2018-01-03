@@ -15,8 +15,12 @@ class svm_solver
 public:
         svm_solver();
         svm_solver(const svm_solver & solver);
+        svm_solver(svm_solver && o);
         virtual ~svm_solver();
+        svm_solver& operator=(const svm_solver & o) = default;
+        // svm_solver& operator=(svm_solver && o);
 
+        void read_problem(const svm_data & min_data, const svm_data & maj_data);
         void read_problem(const graph_access & G_min, const graph_access & G_maj);
 
         void train();
@@ -29,8 +33,13 @@ public:
 
         svm_summary predict_validation_data(const svm_data & min, const svm_data & maj);
 
+        void dont_delete();
+        void set_C(float C);
+        void set_gamma(float gamma);
+
 private:
         void allocate_prob(NodeID total_size, size_t features);
+        void add_to_problem(const svm_data & data, int label, NodeID offset);
         void add_graph_to_problem(const graph_access & G, int label, NodeID offset);
 
         static svm_summary select_best_model(std::vector<svm_summary> & vec);

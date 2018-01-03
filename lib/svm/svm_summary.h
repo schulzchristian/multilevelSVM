@@ -71,7 +71,7 @@ struct summary_cmp_better_gmean_sv
                                 return false;
                         else{                                                    //similar gmean
                                 // a has less nSV than b which is better
-                                return (a.SV_min.size() + a.SV_maj.size() >  b.SV_min.size() + b.SV_maj.size());
+                                return (a.SV_min.size() + a.SV_maj.size() <  b.SV_min.size() + b.SV_maj.size());
                         }
                 }
         }

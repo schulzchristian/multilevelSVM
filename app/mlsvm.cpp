@@ -12,10 +12,12 @@
 #include "parse_parameters.h"
 #include "partition/partition_config.h"
 #include "coarsening/coarsening.h"
+#include "data_structure/graph_hierarchy.h"
 #include "timer.h"
 #include "svm/svm_solver.h"
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
+#include "svm/svm_refinement.h"
 
 int main(int argn, char *argv[]) {
 
@@ -133,7 +135,7 @@ int main(int argn, char *argv[]) {
                 kfold.setResult("INIT_TRAIN_TIME", init_train_time);
 
 
-                std::cout << "validation on hole training data:" << std::endl;
+                std::cout << "inital validation on hole training data:" << std::endl;
                 svm_summary initial_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
 
                 std::cout << "init train result: ";
@@ -143,9 +145,26 @@ int main(int argn, char *argv[]) {
                 kfold.setResult("INIT_GMEAN", initial_summary.Gmean);
 
                 // ------------- REFINEMENT -----------------
-                // TODO
 
+                t.restart();
 
+                svm_refinement refinement;
+                svm_result final_result = refinement.main(min_hierarchy, maj_hierarchy,
+                                                          solver, initial_result,
+                                                          min_sample, maj_sample);
+
+                auto refinement_time = t.elapsed();
+                std::cout << "refinement timed " << refinement_time << std::endl;
+                kfold.setResult("REFINE_TIME", refinement_time);
+
+                std::cout << "final validation on hole training data:" << std::endl;
+                svm_summary final_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                final_summary.print();
+
+                kfold.setResult("RESULT_ACC", final_summary.Acc);
+                kfold.setResult("RESULT_GMEAN", final_summary.Gmean);
+
+                // ------------- END --------------
                 auto time_iteration = t_all.elapsed();
 
                 std::cout << "iteration time: " << time_iteration << std::endl;

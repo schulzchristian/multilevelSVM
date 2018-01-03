@@ -121,6 +121,7 @@ libmlsvm_files            = ['lib/svm/svm_solver.cpp',
                              'lib/svm/param_search.cpp',
                              'lib/svm/k_fold.cpp',
                              'lib/svm/svm_flann.cpp',
+                             'lib/svm/svm_refinement.cpp',
                              'extern/libsvm-3.22/src/svm.cpp' ]
 
 libcsv_flann_files        = ['lib/svm/svm_flann.cpp']

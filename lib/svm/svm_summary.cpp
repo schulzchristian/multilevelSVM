@@ -76,6 +76,8 @@ void svm_summary::print_short() {
                   << " \tlog gamma=" << this->gamma_log
                   << "\tACC=" << this->Acc
                   << "\tGmean=" << this->Gmean
+                  << " \tSVs=" << this->SV_min.size() + this->SV_maj.size()
+                  << " (" << this->SV_min.size() << "," << this->SV_maj.size() <<")"
                   << std::endl;
 }
 

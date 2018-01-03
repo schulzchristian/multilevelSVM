@@ -32,22 +32,52 @@ svm_solver::svm_solver() {
         this->param.weight = NULL;
 }
 
-svm_solver::svm_solver(const svm_solver & solver) {
-        this->param = solver.param;
-        this->prob = solver.prob;
+svm_solver::svm_solver(const svm_solver & o)
+        : desc(o.desc),
+          prob(o.prob),
+          param(o.param)
+{
+        this->original = false;
         this->model = nullptr;
-        this->desc = solver.desc;
 }
 
+svm_solver::svm_solver(svm_solver && o)
+        : desc(std::move(o.desc)),
+          prob(std::move(o.prob)),
+          param(std::move(o.param))
+{
+        this->original = true;
+        this->model = o.model;
+        o.original = false;
+        o.model = nullptr;
+        std::cout << "!!!!!moved" << std::endl;
+}
+
+
 svm_solver::~svm_solver() {
-        svm_free_and_destroy_model(&(this->model));
-        // svm_destroy_param(&(this->param));
+        if (this->model != nullptr) {
+                svm_free_and_destroy_model(&(this->model));
+        }
         if (original) {
+                svm_destroy_param(&(this->param));
                 delete[] prob.y;
                 delete[] prob.x;
         }
 }
 
+void svm_solver::dont_delete() {
+        this->original = false;
+}
+
+void svm_solver::read_problem(const svm_data & min_data, const svm_data & maj_data) {
+        this->desc.num_min = min_data.size();
+        this->desc.num_maj = maj_data.size();
+        this->desc.features = min_data[0].size();
+
+        allocate_prob(min_data.size() + maj_data.size(), min_data[0].size());
+
+        add_to_problem(min_data, 1, 0);
+        add_to_problem(maj_data, -1, min_data.size());
 }
 
 void svm_solver::read_problem(const graph_access & G_min, const graph_access & G_maj) {
@@ -70,6 +100,11 @@ void svm_solver::allocate_prob(NodeID total_size, size_t features) {
         this->prob_nodes.reserve(prob.l);
 }
 
+void svm_solver::add_to_problem(const svm_data & data, int label, NodeID offset) {
+        for (NodeID node = 0; node < data.size(); node++) {
+                NodeID prob_node = node + offset;
+                this->prob.y[prob_node] = label;
+                this->prob.x[prob_node] = data[node].data();
         }
 }
 
@@ -159,7 +194,7 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
 svm_summary svm_solver::select_best_model(std::vector<svm_summary> & vec) {
         std::sort(vec.begin(), vec.end(),
                   [](const svm_summary & a, const svm_summary & b){
-                          return summary_cmp_better_gmean_sn::comp(a, b);
+                          return summary_cmp_better_gmean_sv::comp(a, b);
                   });
 
         for (size_t i = 0; i < vec.size(); ++i) {
@@ -211,4 +246,12 @@ svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_
         }
 
         return svm_summary(*(this->model), this->desc, tp, tn, fp, fn);
+}
+
+void svm_solver::set_C(float C) {
+        this->param.C = C;
+}
+
+void svm_solver::set_gamma(float gamma) {
+        this->param.gamma = gamma;
 }
