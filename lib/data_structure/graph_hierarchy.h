@@ -38,6 +38,7 @@ public:
         graph_access  * pop_finer_and_project();
         graph_access  * pop_finer_and_project_ns( PartialBoundary & separator );
         graph_access  * get_coarsest();
+        graph_access  * get_finest();
         CoarseMapping * get_mapping_of_current_finer();
                
         bool isEmpty();
@@ -52,6 +53,7 @@ private:
         std::vector<graph_access*>  m_to_delete_hierachies;
         graph_access  * m_current_coarser_graph;
         graph_access  * m_coarsest_graph;
+        graph_access  * m_finest_graph = nullptr;
         CoarseMapping * m_current_coarse_mapping;
 };
 

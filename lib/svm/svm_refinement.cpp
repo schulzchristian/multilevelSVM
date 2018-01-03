@@ -51,10 +51,16 @@ svm_result svm_refinement::main(graph_hierarchy & min_hierarchy, graph_hierarchy
                 svm_solver solver;
                 solver.read_problem(neighbors_min, neighbors_maj);
 
+
+                // auto min_new_sample = svm_convert::sample_from_graph(*(min_hierarchy.get_finest()), 0.1f);
+                // auto maj_new_sample = svm_convert::sample_from_graph(*(maj_hierarchy.get_finest()), 0.1f);
+
                 std::cout << "test over result range" << std::endl;
-                std::vector<svm_param> refine_range = param_search::from_result(result);
-                // result = solver.train_range(refine_range, min_sample, maj_sample);
-                result = solver.train_initial(min_sample, maj_sample);
+                // std::vector<svm_param> refine_range = param_search::from_result(result);
+                // result = solver.train_range(refine_range, min_new_sample, maj_new_sample);
+
+                auto params = param_search::mlsvm_method(-10, 10, -10, 10, false, true, result[0].C_log, result[0].gamma_log);
+                result = solver.train_range(params, min_sample, maj_sample);
 
                 if (min_delete != nullptr) {
                         delete min_delete;
@@ -72,7 +78,7 @@ svm_result svm_refinement::main(graph_hierarchy & min_hierarchy, graph_hierarchy
         }
 
 
-        std::cout << "train to (best of "<< result.size() << ")" << std::endl;
+        std::cout << "best of uncoarsening" << std::endl;
         svm_summary best = result[0];
         best.print();
         final_solver.set_C(best.C);

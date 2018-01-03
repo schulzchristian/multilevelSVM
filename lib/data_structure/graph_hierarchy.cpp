@@ -44,6 +44,9 @@ void graph_hierarchy::push_back(graph_access * G, CoarseMapping * coarse_mapping
         m_the_mappings.push(coarse_mapping);
         m_to_delete_mappings.push_back(coarse_mapping);
         m_coarsest_graph = G;
+        if (m_finest_graph == nullptr) {
+                m_finest_graph = G;
+        }
 }
 
 graph_access* graph_hierarchy::pop_finer_and_project() {
@@ -126,6 +129,10 @@ graph_access* graph_hierarchy::pop_coarsest( ) {
         graph_access* current_coarsest = m_the_graph_hierarchy.top();
         m_the_graph_hierarchy.pop();
         return current_coarsest;
+}
+
+graph_access* graph_hierarchy::get_finest() {
+        return m_finest_graph;
 }
 
 bool graph_hierarchy::isEmpty( ) {

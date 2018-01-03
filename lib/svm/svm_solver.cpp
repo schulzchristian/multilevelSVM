@@ -55,11 +55,10 @@ svm_solver::svm_solver(svm_solver && o)
 
 
 svm_solver::~svm_solver() {
-        if (this->model != nullptr) {
+        if (this->trained && this->model != nullptr) {
                 svm_free_and_destroy_model(&(this->model));
         }
-        if (original) {
-                svm_destroy_param(&(this->param));
+        if (this->original) {
                 delete[] prob.y;
                 delete[] prob.x;
         }
@@ -127,6 +126,7 @@ void svm_solver::train() {
         }
 
         this->model = svm_train(&(this->prob), &(this->param));
+        this->trained = true;
 }
 
 svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample) {
@@ -179,6 +179,14 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                 cur_solver.param.gamma = pow(2, p.second);
 
                 cur_solver.train();
+
+                // if (cur_solver.model->l > (cur_solver.desc.num_min + cur_solver.desc.num_maj) * 0.8
+                //     && !summaries.empty()) {
+                //         // don't evaluate models which are very likely prone to over fitting
+                //         // but at least evaluate once
+                //         std::cout << "not evaluated " << cur_solver.model->l << std::endl;
+                //         continue;
+                // }
 
                 svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
 

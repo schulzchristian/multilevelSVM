@@ -46,6 +46,7 @@ private:
         static svm_result make_result(const std::vector<svm_summary> & vec);
 
         bool original = false;
+        bool trained = false;
         svm_desc desc;
         svm_data prob_nodes;
         svm_problem prob;
