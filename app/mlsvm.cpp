@@ -153,7 +153,9 @@ int main(int argn, char *argv[]) {
                 svm_refinement refinement;
                 svm_result final_result = refinement.main(min_hierarchy, maj_hierarchy,
                                                           solver, initial_result,
-                                                          min_sample, maj_sample);
+                                                          min_sample, maj_sample,
+                                                          *kfold.getMinTestData(),
+                                                          *kfold.getMajTestData());
 
                 auto refinement_time = t.elapsed();
                 std::cout << "refinement timed " << refinement_time << std::endl;

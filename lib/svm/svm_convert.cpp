@@ -21,6 +21,17 @@ svm_feature svm_convert::feature_to_node(const FeatureVec & vec) {
         return nodes;
 }
 
+svm_data svm_convert::gaccess_to_nodes(const graph_access & G) {
+        std::vector<std::vector<svm_node>> nodes;
+
+        forall_nodes(G, n) {
+                std::vector<svm_node> line = svm_convert::feature_to_node(G.getFeatureVec(n));
+                nodes.push_back(line);
+        } endfor
+
+        return nodes;
+}
+
 svm_data svm_convert::sample_from_graph(const graph_access & G, float amount) {
         std::vector<std::vector<svm_node>> nodes;
 

@@ -109,9 +109,16 @@ void svm_solver::train() {
             (trained_model, [](svm_model* m) { svm_free_and_destroy_model(&m); });
 }
 
+svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample,
+                                     bool inherit, float param_c, float param_g) {
         // first grid search
         // auto params = param_search.grid(-5,15,2,3,-15,-2);
-        auto params = param_search::mlsvm_method(-10, 10, -10, 10, true);
+
+        auto params = param_search::mlsvm_method(-10, 10, -10, 10, true, inherit, param_c, param_g);
+
+        if (inherit) {
+                std::cout << "initial train around logC=" << param_c << " logGamma="<< param_g << std::endl;
+        }
 
         svm_result result = train_range(params, min_sample, maj_sample);
         svm_summary good = result[0];
