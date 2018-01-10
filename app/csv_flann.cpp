@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
         string outputfile;
 
         if (parse_args(argc, argv, nn_num, label_col, norm, libsvm, inputfile, outputfile)){
-                cout << "parse_args error. exiting..." << "\n";
+                cout << "parse_args error. exiting..." << endl;
                 return 1;
         }
 
@@ -224,7 +224,7 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & label) {
                 feature_size = std::max(data.back().size(), feature_size);
         }
 
-        cout << "resize now" << "\n";
+        cout << "resize now" << endl;
 
         for (auto&& row : data) {
                 if (row.size() < feature_size)

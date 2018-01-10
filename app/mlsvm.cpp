@@ -56,6 +56,9 @@ int main(int argn, char *argv[]) {
 
         // -------- end
 
+        partition_config.cluster_upperbound = 5; //no effect
+        partition_config.cluster_coarsening_factor = 1;
+        partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
         partition_config.stop_rule = STOP_RULE_FIXED;
         partition_config.matching_type = CLUSTER_COARSENING;
         partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
@@ -87,6 +90,13 @@ int main(int argn, char *argv[]) {
                           << " min: " << kfold.getMinTestData()->size()
                           << " maj: " << kfold.getMajTestData()->size() << std::endl;
 
+                auto min_sample = svm_convert::sample_from_graph(*(kfold.getMinGraph()), 0.1f);
+                auto maj_sample = svm_convert::sample_from_graph(*(kfold.getMajGraph()), 0.1f);
+
+                std::cout << "sample -"
+                          << " min: " << min_sample.size()
+                          << " maj: " << maj_sample.size() << std::endl;
+
 
                 // ------------- COARSENING -----------------
 
@@ -97,15 +107,9 @@ int main(int argn, char *argv[]) {
                 graph_hierarchy maj_hierarchy;
 
                 balance_configuration::configurate_balance(partition_config, *G_min);
-                partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
-                partition_config.cluster_coarsening_factor = 1;
-
                 coarsen.perform_coarsening(partition_config, *G_min, min_hierarchy);
 
                 balance_configuration::configurate_balance(partition_config, *G_maj);
-                partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
-                partition_config.cluster_coarsening_factor = 1;
-
                 coarsen.perform_coarsening(partition_config, *G_maj, maj_hierarchy);
 
                 auto coarsening_time = t.elapsed();
@@ -118,13 +122,6 @@ int main(int argn, char *argv[]) {
                 // ------------- INITIAL TRAINING -----------------
 
                 t.restart();
-
-                auto min_sample = svm_convert::sample_from_graph(*(kfold.getMinGraph()), 0.1f);
-                auto maj_sample = svm_convert::sample_from_graph(*(kfold.getMajGraph()), 0.1f);
-
-                std::cout << "sample -"
-                          << " min: " << min_sample.size()
-                          << " maj: " << maj_sample.size() << std::endl;
 
                 svm_solver solver;
                 solver.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
@@ -140,8 +137,6 @@ int main(int argn, char *argv[]) {
 
                 std::cout << "inital validation on hole training data:" << std::endl;
                 svm_summary initial_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
-
-                std::cout << "init train result: " << std::endl;
                 initial_test_summary.print();
                 kfold.setResult("INIT_TEST_AC", initial_test_summary.Acc);
                 kfold.setResult("INIT_TEST_GMN", initial_test_summary.Gmean);
@@ -160,7 +155,7 @@ int main(int argn, char *argv[]) {
                 auto refinement_time = t.elapsed();
                 std::cout << "refinement timed " << refinement_time << std::endl;
                 svm_summary final_summary = final_result[0];
-                kfold.setResult("\tFINAL_TIME", refinement_time);
+                kfold.setResult("\tREFINEMENT_TIME", refinement_time);
                 kfold.setResult("FINAL_AC", final_summary.Acc);
                 kfold.setResult("FINAL_GM ", final_summary.Gmean);
 

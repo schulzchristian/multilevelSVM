@@ -21,8 +21,6 @@ svm_result svm_refinement::main(graph_hierarchy & min_hierarchy, graph_hierarchy
         std::vector<NodeID> sv_min;
         std::vector<NodeID> sv_maj;
         svm_result result = initial_result;
-        graph_access* min_delete = nullptr;
-        graph_access* maj_delete = nullptr;
         bool training_inherit = false;
 
         svm_data min_new_sample = min_sample;

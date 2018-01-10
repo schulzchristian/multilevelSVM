@@ -36,8 +36,8 @@ public:
 
 private:
         void allocate_prob(NodeID total_size, size_t features);
-        void add_to_problem(const svm_data & data, int label, NodeID offset);
-        void add_graph_to_problem(const graph_access & G, int label, NodeID offset);
+        void add_to_problem(const svm_data & data, int label);
+        void add_to_problem(const graph_access & G, int label);
 
         static svm_summary select_best_model(std::vector<svm_summary> & vec);
         static svm_result make_result(const std::vector<svm_summary> & vec);

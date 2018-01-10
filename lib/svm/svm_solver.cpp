@@ -41,8 +41,8 @@ void svm_solver::read_problem(const svm_data & min_data, const svm_data & maj_da
 
         allocate_prob(min_data.size() + maj_data.size(), min_data[0].size());
 
-        add_to_problem(min_data, 1, 0);
-        add_to_problem(maj_data, -1, min_data.size());
+        add_to_problem(min_data, 1);
+        add_to_problem(maj_data, -1);
 }
 
 void svm_solver::read_problem(const graph_access & G_min, const graph_access & G_maj) {
@@ -52,8 +52,8 @@ void svm_solver::read_problem(const graph_access & G_min, const graph_access & G
 
         allocate_prob(G_min.number_of_nodes() + G_maj.number_of_nodes(), G_min.getFeatureVec(0).size());
 
-        add_graph_to_problem(G_min, 1, 0);
-        add_graph_to_problem(G_maj, -1, G_min.number_of_nodes());
+        add_to_problem(G_min, 1);
+        add_to_problem(G_maj, -1);
 }
 
 void svm_solver::allocate_prob(NodeID total_size, size_t features) {
@@ -68,9 +68,8 @@ void svm_solver::allocate_prob(NodeID total_size, size_t features) {
         this->param.gamma = 1/(float) features;
 }
 
-void svm_solver::add_to_problem(const svm_data & data, int label, NodeID offset) {
+void svm_solver::add_to_problem(const svm_data & data, int label) {
         for (NodeID node = 0; node < data.size(); node++) {
-                NodeID prob_node = node + offset;
                 this->prob_labels->push_back(label);
 
                 this->prob_nodes->push_back(data[node]);
@@ -78,9 +77,8 @@ void svm_solver::add_to_problem(const svm_data & data, int label, NodeID offset)
         }
 }
 
-void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID offset) {
+void svm_solver::add_to_problem(const graph_access & G, int label) {
         forall_nodes(G, node) {
-                NodeID prob_node = node + offset;
                 this->prob_labels->push_back(label);
 
                 const FeatureVec vec = G.getFeatureVec(node);
@@ -124,13 +122,12 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         svm_summary good = result[0];
         int trained_combis = params.size();
 
-        std::cout << "continue with log best C=" << good.C_log << " log gamma=" << good.gamma_log << std::endl;
+        std::cout << "continue with (" << good.C_log << "," << good.gamma_log << ")" << std::endl;
         good.print();
 
         // second (finer) grid search
         // params = param_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
         params = param_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
-        // params.pop_back(); // the last parameters are equal to the input params
 
         svm_result second_res = train_range(params, min_sample, maj_sample);
         result.insert(result.end(), second_res.begin(), second_res.end());
@@ -138,7 +135,7 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         trained_combis += params.size();
 
         std::cout << "trained " << trained_combis << " parameter combinations." << std::endl;
-        std::cout << "BEST log C=" << best.C_log << " log gamma=" << best.gamma_log << std::endl;
+        std::cout << "BEST (" << best.C_log << "," << best.gamma_log << ")"<< std::endl;
         best.print();
 
         // train this solver to the best found parameters
@@ -156,10 +153,17 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
 
         for (auto&& p : params) {
                 svm_solver cur_solver(*this); // (copy ctor) use this instances prob and param values
+
                 cur_solver.param.C = pow(2, p.first);
                 cur_solver.param.gamma = pow(2, p.second);
 
                 cur_solver.train();
+
+                std::cout << std::setprecision(2)
+                          << std::fixed
+                          << "log C=" << p.first
+                          << "\tlog gamma=" << p.second
+                          << std::flush;
 
                 // if (cur_solver.model->l > (cur_solver.desc.num_min + cur_solver.desc.num_maj) * 0.8
                 //     && !summaries.empty()) {
@@ -183,7 +187,7 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
 svm_summary svm_solver::select_best_model(std::vector<svm_summary> & vec) {
         std::sort(vec.begin(), vec.end(),
                   [](const svm_summary & a, const svm_summary & b){
-                          return summary_cmp_better_gmean_sv::comp(a, b);
+                          return summary_cmp_better_gmean_sn::comp(a, b);
                   });
 
         for (size_t i = 0; i < vec.size(); ++i) {

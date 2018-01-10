@@ -37,6 +37,7 @@ svm_summary::svm_summary(const svm_model & model, const svm_desc & desc, NodeID 
                 this->SV_min.push_back(id);
                 // std::cout << id << ", ";
         }
+        // std::cout << std::endl;
 
         this->SV_maj.reserve(model.nSV[1]);
         for(int i = 0; i < model.nSV[1]; i++) {
@@ -44,7 +45,7 @@ svm_summary::svm_summary(const svm_model & model, const svm_desc & desc, NodeID 
                 this->SV_maj.push_back(id);
                 // std::cout << id << ", ";
         }
-        // std::cout << "\n";
+        // std::cout << std::endl;
 
 }
 
@@ -74,11 +75,7 @@ void svm_summary::print() {
 }
 
 void svm_summary::print_short() {
-        std::cout << std::setprecision(2)
-                  << std::fixed
-                  << "log C=" << this->C_log
-                  << "\tlog gamma=" << this->gamma_log
-                  << std::setprecision(3)
+        std::cout << std::setprecision(3)
                   << "  \tACC=" << this->Acc
                   << "\tGmean=" << this->Gmean
                   << "\tSVs=" << this->SV_min.size() + this->SV_maj.size()
