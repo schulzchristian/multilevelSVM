@@ -1,6 +1,8 @@
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 #include "svm_solver.h"
 #include "svm_convert.h"
@@ -32,42 +34,6 @@ svm_solver::svm_solver() {
         this->param.weight = NULL;
 }
 
-svm_solver::svm_solver(const svm_solver & o)
-        : desc(o.desc),
-          prob(o.prob),
-          param(o.param)
-{
-        this->original = false;
-        this->model = nullptr;
-}
-
-svm_solver::svm_solver(svm_solver && o)
-        : desc(std::move(o.desc)),
-          prob(std::move(o.prob)),
-          param(std::move(o.param))
-{
-        this->original = true;
-        this->model = o.model;
-        o.original = false;
-        o.model = nullptr;
-        std::cout << "!!!!!moved" << std::endl;
-}
-
-
-svm_solver::~svm_solver() {
-        if (this->trained && this->model != nullptr) {
-                svm_free_and_destroy_model(&(this->model));
-        }
-        if (this->original) {
-                delete[] prob.y;
-                delete[] prob.x;
-        }
-}
-
-void svm_solver::dont_delete() {
-        this->original = false;
-}
-
 void svm_solver::read_problem(const svm_data & min_data, const svm_data & maj_data) {
         this->desc.num_min = min_data.size();
         this->desc.num_maj = maj_data.size();
@@ -91,49 +57,57 @@ void svm_solver::read_problem(const graph_access & G_min, const graph_access & G
 }
 
 void svm_solver::allocate_prob(NodeID total_size, size_t features) {
-        this->original = true; //to know we have to delete some memory later
+        this->prob_labels = std::make_shared<std::vector<double>>();
+        this->prob_nodes = std::make_shared<svm_data>();
+        this->prob_nodes_meta = std::make_shared<std::vector<svm_node*>>();
+
+        this->prob_labels->reserve(total_size);
+        this->prob_nodes->reserve(total_size);
+        this->prob_nodes_meta->reserve(total_size);
+
         this->param.gamma = 1/(float) features;
-        this->prob.l = total_size;
-        this->prob.y = new double [this->prob.l];
-        this->prob.x = new svm_node* [this->prob.l];
-        this->prob_nodes.reserve(prob.l);
 }
 
 void svm_solver::add_to_problem(const svm_data & data, int label, NodeID offset) {
         for (NodeID node = 0; node < data.size(); node++) {
                 NodeID prob_node = node + offset;
-                this->prob.y[prob_node] = label;
-                this->prob.x[prob_node] = data[node].data();
+                this->prob_labels->push_back(label);
+
+                this->prob_nodes->push_back(data[node]);
+                this->prob_nodes_meta->push_back(this->prob_nodes->back().data());
         }
 }
 
 void svm_solver::add_graph_to_problem(const graph_access & G, int label, NodeID offset) {
         forall_nodes(G, node) {
                 NodeID prob_node = node + offset;
-                this->prob.y[prob_node] = label;
+                this->prob_labels->push_back(label);
 
                 const FeatureVec vec = G.getFeatureVec(node);
                 svm_feature svm_nodes = svm_convert::feature_to_node(vec);
-                this->prob_nodes.push_back(std::move(svm_nodes));
-                this->prob.x[prob_node] = this->prob_nodes.back().data();
+                this->prob_nodes->push_back(std::move(svm_nodes));
+                this->prob_nodes_meta->push_back(this->prob_nodes->back().data());
         } endfor
 }
 
 void svm_solver::train() {
-        const char * error_msg = svm_check_parameter(&(this->prob), &(this->param));
+        svm_problem prob;
+        prob.l = this->prob_labels->size();
+        prob.y = this->prob_labels->data();
+        prob.x = this->prob_nodes_meta->data();
+
+        const char * error_msg = svm_check_parameter(&prob, &(this->param));
         if (error_msg != NULL) {
                 std::cout << error_msg << std::endl;
+                std::cout << "we are exiting due to bad parameters"  << std::endl;
+                exit(0);
         }
 
-        this->model = svm_train(&(this->prob), &(this->param));
-        this->trained = true;
+        svm_model * trained_model = svm_train(&prob, &(this->param));
+
+        this->model = std::shared_ptr<svm_model>
+            (trained_model, [](svm_model* m) { svm_free_and_destroy_model(&m); });
 }
-
-svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample) {
-        const char * error_msg = svm_check_parameter(&(this->prob), &(this->param));
-        if (error_msg != NULL) {
-                std::cout << error_msg << std::endl;
-        }
 
         // first grid search
         // auto params = param_search.grid(-5,15,2,3,-15,-2);
@@ -229,7 +203,7 @@ svm_result svm_solver::make_result(const std::vector<svm_summary> & vec) {
 }
 
 int svm_solver::predict(const std::vector<svm_node> & nodes) {
-        return svm_predict(this->model, nodes.data());
+        return svm_predict(this->model.get(), nodes.data());
 }
 
 svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_data & maj) {
@@ -253,7 +227,7 @@ svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_
                 }
         }
 
-        return svm_summary(*(this->model), this->desc, tp, tn, fp, fn);
+        return svm_summary(*this->model, this->desc, tp, tn, fp, fn);
 }
 
 void svm_solver::set_C(float C) {

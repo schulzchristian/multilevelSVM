@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <utility>
+#include <memory>
 #include <svm.h>
 
 #include "svm_definitions.h"
@@ -14,11 +15,6 @@ class svm_solver
 {
 public:
         svm_solver();
-        svm_solver(const svm_solver & solver);
-        svm_solver(svm_solver && o);
-        virtual ~svm_solver();
-        svm_solver& operator=(const svm_solver & o) = default;
-        // svm_solver& operator=(svm_solver && o);
 
         void read_problem(const svm_data & min_data, const svm_data & maj_data);
         void read_problem(const graph_access & G_min, const graph_access & G_maj);
@@ -45,15 +41,13 @@ private:
         static svm_summary select_best_model(std::vector<svm_summary> & vec);
         static svm_result make_result(const std::vector<svm_summary> & vec);
 
-        bool original = false;
-        bool trained = false;
         svm_desc desc;
-        svm_data prob_nodes;
-        svm_problem prob;
+        std::shared_ptr<std::vector<double>> prob_labels;
+        std::shared_ptr<svm_data> prob_nodes;
+        std::shared_ptr<std::vector<svm_node*>> prob_nodes_meta;
         svm_parameter param;
-        svm_model *model;
+        std::shared_ptr<svm_model> model;
 
 };
-
 
 #endif /* SVM_SOLVER_H */
