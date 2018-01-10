@@ -101,6 +101,40 @@ std::vector<std::pair<float,float>> param_search::mlsvm_method(float c_from, flo
                 double g = (((UDTable[pattern][i][1] - 1) * g_len) / (pattern_minus_one * pow_2_stage_minus_one))
                         + cen_g;
 
+                // scale params to range
+                c = pow(lg_base, c);
+                g = pow(lg_base, g);
+
+                double c_max = pow(lg_base, c_to);
+                double c_min = pow(lg_base, c_from);
+                double g_max = pow(lg_base, g_to);
+                double g_min = pow(lg_base, g_from);
+
+                if (c > c_max ){
+                        c = c_max + (rand() % 500) * (rand()%2? 1 :-1);
+                }
+                if(c < c_min ){
+                        c = c_min - (rand() % 100) * (rand()%2? 1 :-1);
+                        while(c < 0.001){
+                                c +=  (rand() % 500);
+                        }
+                }
+
+                if (g > g_max ){
+                        g = g_max + (rand() % 100 * 0.001) * (rand()%2? 1 :-1);
+                }
+                if(g < g_min ){
+                        g = g_min - (rand() % 100 * 0.00001) * (rand()%2? 1 :-1);
+                        while(g < 0.00001){
+                                g +=  (rand() % 100 * 0.00001);
+                        }
+                }
+
+                c = log(c) / log(lg_base);
+                g = log(g) / log(lg_base);
+                // end scale
+
+
                 seq.push_back(std::make_pair(c,g));
         }
 
