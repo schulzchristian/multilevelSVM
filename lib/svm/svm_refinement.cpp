@@ -113,7 +113,7 @@ svm_data svm_refinement::get_SV_neighbors(const graph_access & G,
                 NodeID coarse_node = coarse_mapping[node];
                 if (sv_set.find(coarse_node) != sv_set.end()) {
                         svm_feature feature = svm_convert::feature_to_node(G.getFeatureVec(node));
-                        neighbors.push_back(feature);
+                        neighbors.push_back(std::move(feature));
                 }
         } endfor
 

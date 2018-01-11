@@ -137,9 +137,16 @@ graph_access* graph_hierarchy::get_finest() {
 
 bool graph_hierarchy::isEmpty( ) {
         ASSERT_EQ(m_the_graph_hierarchy.size(), m_the_mappings.size());
+        if (m_the_graph_hierarchy.size() > 0 && m_the_graph_hierarchy.top() == m_finest_graph) {
+                return true;
+        }
         return m_the_graph_hierarchy.empty();
 }
 
 unsigned int graph_hierarchy::size() {
+        if(m_the_graph_hierarchy.size() > 0 &&
+           m_the_graph_hierarchy.top() == m_coarsest_graph) {
+                return m_the_graph_hierarchy.size() - 1;
+        }
         return m_the_graph_hierarchy.size();
 }
