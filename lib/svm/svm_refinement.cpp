@@ -32,8 +32,6 @@ svm_result svm_refinement::main(graph_hierarchy & min_hierarchy, graph_hierarchy
                 sv_min = result[0].SV_min;
                 sv_maj = result[0].SV_maj;
 
-                std::cout << "minority hierarchy " << min_hierarchy.size()
-                          << " majority hierarchy " << maj_hierarchy.size() << std::endl;
 
                 if (!min_hierarchy.isEmpty() && min_hierarchy.size() >= maj_hierarchy.size()) {
                         std::cout << "minority uncoarsed" << std::endl;

@@ -187,7 +187,7 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
 svm_summary svm_solver::select_best_model(std::vector<svm_summary> & vec) {
         std::sort(vec.begin(), vec.end(),
                   [](const svm_summary & a, const svm_summary & b){
-                          return summary_cmp_better_gmean_sn::comp(a, b);
+                          return summary_cmp_better_gmean_sv::comp(a, b);
                   });
 
         for (size_t i = 0; i < vec.size(); ++i) {

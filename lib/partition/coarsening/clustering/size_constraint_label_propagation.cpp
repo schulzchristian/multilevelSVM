@@ -156,11 +156,13 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
         std::vector<PartitionID> hash_map(G.number_of_nodes(),0);
         std::vector<NodeID> permutation(G.number_of_nodes());
         std::vector<NodeWeight> cluster_sizes(G.number_of_nodes());
+        std::vector<NodeWeight> cluster_local_sizes(G.number_of_nodes());
         cluster_id.resize(G.number_of_nodes());
 
         forall_nodes(G, node) {
                 cluster_sizes[node] = G.getNodeWeight(node);
                 cluster_id[node]    = node;
+                cluster_local_sizes[node] = 1;
         } endfor
         
         node_ordering n_ordering;
@@ -170,6 +172,7 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                 unsigned int change_counter = 0;
                 forall_nodes(G, i) {
                         NodeID node = permutation[i];
+                        bool dont_change = false;
                         //now move the node to the cluster that is most common in the neighborhood
 
                         forall_out_edges(G, e, node) {
@@ -189,8 +192,9 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                                 if((cur_value > max_value  || (cur_value == max_value && random_functions::nextBool())) 
                                 && (cluster_sizes[cur_block] + G.getNodeWeight(node) < block_upperbound || cur_block == my_block) 
                                 && (!partition_config.graph_allready_partitioned || G.getPartitionIndex(node) == G.getPartitionIndex(target))
-                                && (!partition_config.combine || G.getSecondPartitionIndex(node) == G.getSecondPartitionIndex(target)))
+                                   && (!partition_config.combine || G.getSecondPartitionIndex(node) == G.getSecondPartitionIndex(target)))
                                 {
+                                        dont_change = cluster_local_sizes[cur_block] >= partition_config.cluster_upperbound;
                                         max_value = cur_value;
                                         max_block = cur_block;
                                 }
@@ -198,10 +202,14 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                                 hash_map[cur_block] = 0;
                         } endfor
 
-                        cluster_sizes[cluster_id[node]]  -= G.getNodeWeight(node);
-                        cluster_sizes[max_block]         += G.getNodeWeight(node);
-                        change_counter                   += (cluster_id[node] != max_block);
-                        cluster_id[node]                  = max_block;
+                        if (!dont_change) {
+                                cluster_sizes[cluster_id[node]]  -= G.getNodeWeight(node);
+                                cluster_local_sizes[cluster_id[node]]--;
+                                cluster_sizes[max_block]         += G.getNodeWeight(node);
+                                cluster_local_sizes[max_block]++;
+                                change_counter                   += (cluster_id[node] != max_block);
+                                cluster_id[node]                  = max_block;
+                        }
                 } endfor
         }
 

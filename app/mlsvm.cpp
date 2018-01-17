@@ -56,13 +56,14 @@ int main(int argn, char *argv[]) {
 
         // -------- end
 
-        partition_config.cluster_upperbound = 5; //no effect
+        partition_config.cluster_upperbound = 10;
         partition_config.cluster_coarsening_factor = 1;
-        partition_config.upper_bound_partition = partition_config.cluster_upperbound+1;
+        partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
         partition_config.matching_type = CLUSTER_COARSENING;
         partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
         std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
+        std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
 
 
         k_fold kfold(5, filename);
@@ -106,10 +107,10 @@ int main(int argn, char *argv[]) {
                 graph_hierarchy min_hierarchy;
                 graph_hierarchy maj_hierarchy;
 
-                balance_configuration::configurate_balance(partition_config, *G_min);
+                // balance_configuration::configurate_balance(partition_config, *G_min);
                 coarsen.perform_coarsening(partition_config, *G_min, min_hierarchy);
 
-                balance_configuration::configurate_balance(partition_config, *G_maj);
+                // balance_configuration::configurate_balance(partition_config, *G_maj);
                 coarsen.perform_coarsening(partition_config, *G_maj, maj_hierarchy);
 
                 auto coarsening_time = t.elapsed();
