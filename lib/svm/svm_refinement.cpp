@@ -64,13 +64,25 @@ svm_result svm_refinement::main(graph_hierarchy & min_hierarchy, graph_hierarchy
                 // result = solver.train_range(refine_range, min_new_sample, maj_new_sample);
 
                 // auto params = param_search::mlsvm_method(-10, 10, -10, 10, false, true, result[0].C_log, result[0].gamma_log);
-                result = solver.train_initial(min_new_sample, maj_new_sample, training_inherit, result[0].C_log, result[0].gamma_log);
+                if (neighbors_min.size() + neighbors_maj.size() < 10000) {
+                        result = solver.train_initial(min_new_sample, maj_new_sample, training_inherit, result[0].C_log, result[0].gamma_log);
+                } else {
+                        std::cout << "skip training just use logC=" << result[0].C_log
+                                  << " log gamma=" << result[0].gamma_log << std::endl;
+                        solver.set_C(result[0].C);
+                        solver.set_gamma(result[0].gamma);
+                        solver.train();
+                        result.clear();
+                        svm_summary s = solver.predict_validation_data(min_new_sample, maj_new_sample);
+                        result.push_back(s);
+                }
+
+
 
                 std::cout << "final validation on hole training data:" << std::endl;
                 svm_summary test_summary = solver.predict_validation_data(min_test, maj_test);
                 test_summary.print();
 
-                // if size >= 10000 don't train just use best result
 
                 final_solver = std::move(solver);
 
