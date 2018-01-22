@@ -4,7 +4,7 @@
 
 #include "svm_summary.h"
 
-svm_summary::svm_summary(const svm_model & model, const svm_desc & desc, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
+svm_summary::svm_summary(const svm_model & model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
         this->TP = tp;
         this->FP = fp;
         this->TN = tn;
@@ -41,7 +41,7 @@ svm_summary::svm_summary(const svm_model & model, const svm_desc & desc, NodeID 
 
         this->SV_maj.reserve(model.nSV[1]);
         for(int i = 0; i < model.nSV[1]; i++) {
-                int id = model.sv_indices[model.nSV[0] + i] - 1 - desc.num_min;
+                int id = model.sv_indices[model.nSV[0] + i] - 1 - instance.num_min;
                 this->SV_maj.push_back(id);
                 // std::cout << id << ", ";
         }

@@ -140,13 +140,3 @@ std::vector<std::pair<float,float>> param_search::mlsvm_method(float c_from, flo
 
         return seq;
 }
-
-std::vector<svm_param> param_search::from_result(const svm_result & result) {
-        std::vector<svm_param> seq;
-
-        for (const svm_summary & solution : result) {
-                seq.push_back(std::make_pair(solution.C_log, solution.gamma_log));
-        }
-
-        return seq;
-}

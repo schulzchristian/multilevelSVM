@@ -4,11 +4,11 @@
 #include <vector>
 #include <svm.h>
 #include "definitions.h"
-#include "svm_desc.h"
+#include "svm_instance.h"
 
 class svm_summary {
 public:
-        svm_summary(const svm_model & model, const svm_desc & desc, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
+        svm_summary(const svm_model & model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
 
         void print();
         void print_short();

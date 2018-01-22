@@ -18,6 +18,9 @@
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
 #include "svm/svm_refinement.h"
+#include "svm/svm_result.h"
+
+void print_null(const char *s) {}
 
 int main(int argn, char *argv[]) {
 
@@ -40,6 +43,8 @@ int main(int argn, char *argv[]) {
         }
 
 
+        // turn 
+        svm_set_print_string_function(&print_null);
 
         partition_config.LogDump(stdout);
 
@@ -56,7 +61,7 @@ int main(int argn, char *argv[]) {
 
         // -------- end
 
-        partition_config.cluster_upperbound = 10;
+        partition_config.cluster_upperbound = 100;
         partition_config.cluster_coarsening_factor = 1;
         partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
@@ -119,53 +124,95 @@ int main(int argn, char *argv[]) {
                           << " maj: " << maj_hierarchy.get_coarsest()->number_of_nodes() << std::endl;
 
                 kfold.setResult("COARSE_TIME", coarsening_time);
+                kfold.setResult("COARSE_MIN", min_hierarchy.get_coarsest()->number_of_nodes());
+                kfold.setResult("COARSE_MAJ", maj_hierarchy.get_coarsest()->number_of_nodes());
+                kfold.setResult("HIERARCHY_MIN_SIZE", min_hierarchy.size());
+                kfold.setResult("HIERARCHY_MAJ_SIZE", maj_hierarchy.size());
 
                 // ------------- INITIAL TRAINING -----------------
 
                 t.restart();
 
-                svm_solver solver;
-                solver.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
-                svm_result initial_result = solver.train_initial(min_sample, maj_sample);
+                svm_instance initial_instance;
+                initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
+
+                svm_solver init_solver(initial_instance);
+                svm_result initial_result = init_solver.train_initial(min_sample, maj_sample);
 
                 auto init_train_time = t.elapsed();
                 std::cout << "init train time: " << init_train_time << std::endl;
 
-                svm_summary initial_summary = initial_result[0];
-                kfold.setResult("\tINIT_TIME", init_train_time);
+                svm_summary initial_summary = initial_result.best();
+                kfold.setResult("\tINIT_TRAIN_TIME", init_train_time);
                 kfold.setResult("INIT_AC  ", initial_summary.Acc);
                 kfold.setResult("INIT_GM  ", initial_summary.Gmean);
 
                 std::cout << "inital validation on hole training data:" << std::endl;
-                svm_summary initial_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                svm_summary initial_test_summary = init_solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
                 initial_test_summary.print();
-                kfold.setResult("INIT_TEST_AC", initial_test_summary.Acc);
-                kfold.setResult("INIT_TEST_GMN", initial_test_summary.Gmean);
+                kfold.setResult("INIT_AC_TRAIN", initial_test_summary.Acc);
+                kfold.setResult("INIT_GM_TRAIN", initial_test_summary.Gmean);
 
                 // ------------- REFINEMENT -----------------
 
                 t.restart();
 
-                svm_refinement refinement;
-                svm_result final_result = refinement.main(min_hierarchy, maj_hierarchy,
-                                                          solver, initial_result,
-                                                          min_sample, maj_sample,
-                                                          *kfold.getMinTestData(),
-                                                          *kfold.getMajTestData());
+                svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result);
+
+                // std::vector<std::pair<svm_summary, svm_solver>> best_results;
+
+                while (!refinement.is_done()) {
+                  timer t_ref;
+
+                  // min_sample = svm_convert::sample_from_graph(*(min_hierarchy.get_finest()), 0.2f);
+                  // maj_sample = svm_convert::sample_from_graph(*(maj_hierarchy.get_finest()), 0.2f);
+
+                  svm_result current_result = refinement.step(min_sample, maj_sample);
+
+                  std::cout << "refinement at level " << refinement.get_level()
+                            << " took " << t_ref.elapsed() << std::endl;
+
+                  // best_results.push_back(std::make_pair(current_result.best(), current_result.instance));
+
+                  std::ostringstream fmt_ac, fmt_gm;
+                  fmt_ac << "LEVEL" << refinement.get_level() << "_AC";
+                  fmt_gm << "LEVEL" << refinement.get_level() << "_GM";
+                  kfold.setResult(fmt_ac.str(), current_result.best().Acc);
+                  kfold.setResult(fmt_gm.str(), current_result.best().Gmean);
+
+                  std::cout << "level " << refinement.get_level()
+                            << " validation on hole training data:" << std::endl;
+
+                  svm_solver solver(current_result.instance);
+                  solver.set_C(current_result.best().C);
+                  solver.set_gamma(current_result.best().gamma);
+                  solver.train();
+                  svm_summary final_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                  final_test_summary.print();
+
+                  fmt_ac << "_TEST";
+                  fmt_gm << "_TEST";
+                  kfold.setResult(fmt_ac.str(), final_test_summary.Acc);
+                  kfold.setResult(fmt_gm.str(), final_test_summary.Gmean);
+
+                }
 
                 auto refinement_time = t.elapsed();
-                std::cout << "refinement timed " << refinement_time << std::endl;
-                svm_summary final_summary = final_result[0];
+                std::cout << "refinement time " << refinement_time << std::endl;
                 kfold.setResult("\tREFINEMENT_TIME", refinement_time);
-                kfold.setResult("FINAL_AC", final_summary.Acc);
-                kfold.setResult("FINAL_GM ", final_summary.Gmean);
 
-                std::cout << "final validation on hole training data:" << std::endl;
-                svm_summary final_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
-                final_test_summary.print();
+                /*
+                svm_summary best_summary = svm_solver::select_best_model(best_results);
+                kfold.setResult("BEST_AC", best_summary.Acc);
+                kfold.setResult("BEST_GM", best_summary.Gmean);
 
-                kfold.setResult("FINAL_TEST_AC", final_test_summary.Acc);
-                kfold.setResult("FINAL_TEST_GM", final_test_summary.Gmean);
+                std::cout << "best validation on hole training data:" << std::endl;
+                svm_summary best_summary_test = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                best_summary_test.print();
+
+                kfold.setResult("BEST_AC_TEST", best_summary_test.Acc);
+                kfold.setResult("BEST_GM_TEST", best_summary_test.Gmean);
+                */
 
                 // ------------- END --------------
                 auto time_iteration = t_all.elapsed();

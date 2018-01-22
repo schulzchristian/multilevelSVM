@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "svm_definitions.h"
+#include "svm_result.h"
 
 class param_search
 {
@@ -18,8 +19,6 @@ public:
         static std::vector<svm_param> mlsvm_method(float c_from, float c_to, float g_from, float g_to,
                                                    bool step1, bool inherit = false,
                                                    float param_c = 0, float param_g = 0);
-
-        static std::vector<svm_param> from_result(const svm_result & result);
 
 private:
         template<typename T>

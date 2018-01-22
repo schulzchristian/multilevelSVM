@@ -9,18 +9,12 @@
 #include "param_search.h"
 #include "timer.h"
 
-
-void print_null(const char *s) {}
-
-
-svm_solver::svm_solver() {
-        svm_set_print_string_function(&print_null);
-
-        // default values
+svm_solver::svm_solver(const svm_instance & instance)
+    : instance(instance) {
         this->param.svm_type = C_SVC;
         this->param.kernel_type = RBF;
         this->param.degree = 3;
-        this->param.gamma = 2;	// 1/num_features
+        this->param.gamma = 2;	// doc suggests 1/num_features
         this->param.coef0 = 0;
         this->param.nu = 0.5;
         this->param.cache_size = 100;
@@ -34,65 +28,14 @@ svm_solver::svm_solver() {
         this->param.weight = NULL;
 }
 
-void svm_solver::read_problem(const svm_data & min_data, const svm_data & maj_data) {
-        this->desc.num_min = min_data.size();
-        this->desc.num_maj = maj_data.size();
-        this->desc.features = min_data[0].size();
-
-        allocate_prob(min_data.size() + maj_data.size(), min_data[0].size());
-
-        add_to_problem(min_data, 1);
-        add_to_problem(maj_data, -1);
-}
-
-void svm_solver::read_problem(const graph_access & G_min, const graph_access & G_maj) {
-        this->desc.num_min = G_min.number_of_nodes();
-        this->desc.num_maj = G_maj.number_of_nodes();
-        this->desc.features = G_min.getFeatureVec(0).size();
-
-        allocate_prob(G_min.number_of_nodes() + G_maj.number_of_nodes(), G_min.getFeatureVec(0).size());
-
-        add_to_problem(G_min, 1);
-        add_to_problem(G_maj, -1);
-}
-
-void svm_solver::allocate_prob(NodeID total_size, size_t features) {
-        this->prob_labels = std::make_shared<std::vector<double>>();
-        this->prob_nodes = std::make_shared<svm_data>();
-        this->prob_nodes_meta = std::make_shared<std::vector<svm_node*>>();
-
-        this->prob_labels->reserve(total_size);
-        this->prob_nodes->reserve(total_size);
-        this->prob_nodes_meta->reserve(total_size);
-
-        this->param.gamma = 1/(float) features;
-}
-
-void svm_solver::add_to_problem(const svm_data & data, int label) {
-        for (NodeID node = 0; node < data.size(); node++) {
-                this->prob_labels->push_back(label);
-
-                this->prob_nodes->push_back(data[node]);
-                this->prob_nodes_meta->push_back(this->prob_nodes->back().data());
-        }
-}
-
-void svm_solver::add_to_problem(const graph_access & G, int label) {
-        forall_nodes(G, node) {
-                this->prob_labels->push_back(label);
-
-                const FeatureVec vec = G.getFeatureVec(node);
-                svm_feature svm_nodes = svm_convert::feature_to_node(vec);
-                this->prob_nodes->push_back(std::move(svm_nodes));
-                this->prob_nodes_meta->push_back(this->prob_nodes->back().data());
-        } endfor
+svm_solver::svm_solver() {
 }
 
 void svm_solver::train() {
         svm_problem prob;
-        prob.l = this->prob_labels->size();
-        prob.y = this->prob_labels->data();
-        prob.x = this->prob_nodes_meta->data();
+        prob.l = this->instance.size();
+        prob.y = this->instance.label_data();
+        prob.x = this->instance.node_data();
 
         const char * error_msg = svm_check_parameter(&prob, &(this->param));
         if (error_msg != NULL) {
@@ -109,9 +52,7 @@ void svm_solver::train() {
 
 svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample,
                                      bool inherit, float param_c, float param_g) {
-        // first grid search
-        // auto params = param_search.grid(-5,15,2,3,-15,-2);
-
+        // first search
         auto params = param_search::mlsvm_method(-10, 10, -10, 10, true, inherit, param_c, param_g);
 
         if (inherit) {
@@ -119,22 +60,18 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         }
 
         svm_result result = train_range(params, min_sample, maj_sample);
-        svm_summary good = result[0];
-        int trained_combis = params.size();
+        svm_summary good = result.best();
 
         std::cout << "continue with (" << good.C_log << "," << good.gamma_log << ")" << std::endl;
         good.print();
 
-        // second (finer) grid search
-        // params = param_search::around(good.C_log, 2, 0.25, good.gamma_log, 2, 0.25);
+        // second search
         params = param_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
 
         svm_result second_res = train_range(params, min_sample, maj_sample);
-        result.insert(result.end(), second_res.begin(), second_res.end());
-        svm_summary best = select_best_model(result);
-        trained_combis += params.size();
+        result.add(second_res);
+        svm_summary best = result.best();
 
-        std::cout << "trained " << trained_combis << " parameter combinations." << std::endl;
         std::cout << "BEST (" << best.C_log << "," << best.gamma_log << ")"<< std::endl;
         best.print();
 
@@ -143,7 +80,7 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         this->param.gamma = best.gamma;
         this->train();
 
-        return svm_solver::make_result(result);
+        return result;
 }
 
 svm_result svm_solver::train_range(const std::vector<svm_param> & params,
@@ -165,7 +102,7 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                           << "\tlog gamma=" << p.second
                           << std::flush;
 
-                // if (cur_solver.model->l > (cur_solver.desc.num_min + cur_solver.desc.num_maj) * 0.8
+                // if (cur_solver.model->l > (cur_solver.instance.num_min + cur_solver.instance.num_maj) * 0.8
                 //     && !summaries.empty()) {
                 //         // don't evaluate models which are very likely prone to over fitting
                 //         // but at least evaluate once
@@ -180,37 +117,20 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                 summaries.push_back(cur_summary);
         }
 
-        svm_solver::select_best_model(summaries);
         return svm_solver::make_result(summaries);
 }
 
-svm_summary svm_solver::select_best_model(std::vector<svm_summary> & vec) {
-        std::sort(vec.begin(), vec.end(),
-                  [](const svm_summary & a, const svm_summary & b){
-                          return summary_cmp_better_gmean_sv::comp(a, b);
-                  });
-
-        for (size_t i = 0; i < vec.size(); ++i) {
-                if(vec[i].Gmean > 0.05) {
-                        return vec[i];
-                }
-        }
-        // in case there is no model with gmean larger than zero, return the 1st one
-        return vec[0];
-}
-
 svm_result svm_solver::make_result(const std::vector<svm_summary> & vec) {
-        // assert the vector is sorted (this happened in select_best_model)
-        std::vector<svm_summary> res;
-        res.push_back(vec[0]);
+        std::vector<svm_summary> summaries;
+        summaries.push_back(vec[0]);
 
         for (size_t i = 1; i < vec.size(); ++i) {
-                if(vec[i].Gmean > res[0].Gmean - 0.1f) {
-                        res.push_back(std::move(vec[i]));
+                if(vec[i].Gmean > summaries[0].Gmean - 0.1f) {
+                        summaries.push_back(std::move(vec[i]));
                 }
         }
 
-        return res;
+        return svm_result(summaries, this->instance);
 }
 
 int svm_solver::predict(const std::vector<svm_node> & nodes) {
@@ -238,7 +158,7 @@ svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_
                 }
         }
 
-        return svm_summary(*this->model, this->desc, tp, tn, fp, fn);
+        return svm_summary(*this->model, this->instance, tp, tn, fp, fn);
 }
 
 void svm_solver::set_C(float C) {
