@@ -111,13 +111,13 @@ int uncoarsening::perform_uncoarsening_cut(const PartitionConfig & config, graph
                 coarser_boundary = finer_boundary;
                 coarser_no_nodes = G->number_of_nodes();
 
-		//clean up 
-		if(to_delete != NULL) {
-			delete to_delete;
-		}
-		if(!hierarchy.isEmpty()) {
-			to_delete = G;
-		}
+                //clean up 
+                if(to_delete != NULL) {
+                        delete to_delete;
+                }
+                if(!hierarchy.isEmpty()) {
+                        to_delete = G;
+                }
 
                 finest = G;
         }
@@ -217,13 +217,13 @@ int uncoarsening::perform_uncoarsening_nodeseparator(const PartitionConfig & con
                         }
                 }
                 if(to_delete != NULL) {
-			delete to_delete;
-		}
-		if(!hierarchy.isEmpty()) {
-			to_delete = G;
-		}
+                        delete to_delete;
+                }
+                if(!hierarchy.isEmpty()) {
+                        to_delete = G;
+                }
         }
-	delete coarsest;
+        delete coarsest;
 
         return 0;
 }
@@ -308,13 +308,13 @@ int uncoarsening::perform_uncoarsening_nodeseparator_fast(const PartitionConfig 
                         }
                 }
                 if(to_delete != NULL) {
-			delete to_delete;
-		}
-		if(!hierarchy.isEmpty()) {
-			to_delete = G;
-		}
+                        delete to_delete;
+                }
+                if(!hierarchy.isEmpty()) {
+                        to_delete = G;
+                }
         }
-	delete coarsest;
+        delete coarsest;
 
         return 0;
 }
