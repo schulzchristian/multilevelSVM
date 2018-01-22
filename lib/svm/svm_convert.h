@@ -5,12 +5,15 @@
 #include <svm.h>
 #include "data_structure/graph_access.h"
 #include "svm_definitions.h"
+#include "tools/random_functions.h"
 
 class svm_convert {
 public:
         static constexpr FeatureData EPS = 0.000001f;
 
-        static svm_data gaccess_to_nodes(const graph_access & G);
+        static svm_data graph_to_nodes(const graph_access & G);
+
+        static svm_data graph_part_to_nodes(const graph_access & G, const std::vector<NodeID> & sv);
 
         static svm_feature feature_to_node(const FeatureVec & vec);
 
@@ -25,10 +28,8 @@ std::vector<T> svm_convert::take_sample(const std::vector<T> & data, float perce
         std::vector<T> sample;
         sample.reserve(data.size() * percentage);
 
-        for (auto&& entry : data) {
-                float r = static_cast <float> (std::rand()) / static_cast <float> (RAND_MAX);
-
-                if (r > percentage) {
+        for (const auto&& entry : data) {
+                if (random_functions::next() > percentage) {
                         continue;
                 }
 

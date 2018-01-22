@@ -176,6 +176,10 @@ class random_functions {
                         return A(m_mt); 
                 }
 
+                static double next() {
+                        return (double) rand() / (double) RAND_MAX; // rnd in 0,1
+                }
+
                 static double nextDouble(double lb, double rb) {
                         double rnbr   = (double) rand() / (double) RAND_MAX; // rnd in 0,1
                         double length = rb - lb;

@@ -1,4 +1,5 @@
 #include "svm_convert.h"
+#include <unordered_set>
 
 svm_feature svm_convert::feature_to_node(const FeatureVec & vec) {
         std::vector<svm_node> nodes;
@@ -21,12 +22,11 @@ svm_feature svm_convert::feature_to_node(const FeatureVec & vec) {
         return nodes;
 }
 
-svm_data svm_convert::gaccess_to_nodes(const graph_access & G) {
+svm_data svm_convert::graph_to_nodes(const graph_access & G) {
         std::vector<std::vector<svm_node>> nodes;
 
         forall_nodes(G, n) {
-                std::vector<svm_node> line = svm_convert::feature_to_node(G.getFeatureVec(n));
-                nodes.push_back(line);
+                nodes.push_back(svm_convert::feature_to_node(G.getFeatureVec(n)));
         } endfor
 
         return nodes;
@@ -36,15 +36,26 @@ svm_data svm_convert::sample_from_graph(const graph_access & G, float amount) {
         std::vector<std::vector<svm_node>> nodes;
 
         forall_nodes(G, n) {
-                float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-                if (r > amount) {
+                if (random_functions::next() > amount) {
                         continue;
                 }
 
-                std::vector<svm_node> line = svm_convert::feature_to_node(G.getFeatureVec(n));
-                nodes.push_back(line);
+                nodes.push_back(svm_convert::feature_to_node(G.getFeatureVec(n)));
         } endfor
 
-                  return nodes;
+        return nodes;
+}
+
+svm_data svm_convert::graph_part_to_nodes(const graph_access & G, const std::vector<NodeID> & sv) {
+        svm_data nodes;
+
+        std::unordered_set<NodeID> sv_set{sv.begin(), sv.end()};
+
+        forall_nodes(G, node) {
+                if (sv_set.find(node) != sv_set.end()) {
+                        nodes.push_back(svm_convert::feature_to_node(G.getFeatureVec(node)));
+                }
+        } endfor
+
+        return nodes;
 }
