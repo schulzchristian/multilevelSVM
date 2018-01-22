@@ -44,7 +44,7 @@ bool k_fold::next() {
                 return false;
         }
 
-        std::cout << "------------- K-FOLD ITERATION " << this->cur_iteration + 1
+        std::cout << "------------- K-FOLD ITERATION " << this->cur_iteration
                   << " -------------" << std::endl;
 
         this->cur_min_test.clear();
@@ -111,19 +111,37 @@ void k_fold::setResult(const std::string &tag, float result) {
         this->results[tag][this->cur_iteration] = result;
 }
 
-void k_fold::printAverages() {
-        for (const auto& tag : this->tag_order) {
-                std::vector<float> & results = this->results[tag];
-                float average = 0;
-                for (const float res : results){
-                        average += res;
-                }
-                if (this->cur_iteration >= this->iterations) {
-                        average /= this->iterations;
-                } else {
-                        average /= this->cur_iteration + 1;
-                }
+void k_fold::setString(const std::string & tag, const std::string & result) {
+        if (this->strings.count(tag) <= 0) {
+                this->strings[tag] = std::vector<std::string>(this->iterations);
+                this->tag_order.push_back(tag);
+        }
+        this->strings[tag][this->cur_iteration] = result;
+}
 
-                std::cout << tag << "\t" << average << std::endl;
+void k_fold::print() {
+        for (const auto& tag : this->tag_order) {
+                if (this->results.find(tag) != this->results.end()) {
+                        std::vector<float> & ress = this->results[tag];
+                        float average = 0;
+                        for (const float res : ress) {
+                                average += res;
+                        }
+                        if (this->cur_iteration >= this->iterations) {
+                                average /= this->iterations;
+                        } else {
+                                average /= this->cur_iteration + 1;
+                        }
+
+                        std::cout << tag << "\t" << average << std::endl;
+                }
+                else {
+                        std::vector<std::string> & strs = this->strings[tag];
+                        std::cout << "[" << tag << "]" << std::endl;
+                        for (size_t i = 0; i < strs.size(); i++) {
+                                std::cout << "fold " << i << ": "
+                                          << strs[i] << std::endl;
+                        }
+                }
         }
 }

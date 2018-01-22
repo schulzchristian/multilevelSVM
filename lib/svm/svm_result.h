@@ -23,6 +23,9 @@ public:
 
         std::vector<svm_summary> summaries;
         svm_instance instance;
+
+
+        static size_t get_best_index(const std::vector<std::pair<svm_summary,svm_instance>> vec);
 };
 
 

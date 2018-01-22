@@ -42,10 +42,16 @@ public:
         double gamma_log;
 };
 
+struct summary_cmp_better_gmean
+{
+  static bool comp(const svm_summary& a, const svm_summary& b) {
+    return a.Gmean > b.Gmean;
+  }
+};
+
 struct summary_cmp_better_gmean_sn
 {
-        static bool comp (const svm_summary& a, const svm_summary& b)
-        {
+        static bool comp(const svm_summary& a, const svm_summary& b) {
                 float filter_range = 0.02;
                 if( (a.Gmean - b.Gmean) > filter_range )         //a has completely better gmean than b
                         return true;
@@ -61,8 +67,7 @@ struct summary_cmp_better_gmean_sn
 
 struct summary_cmp_better_gmean_sv
 {
-        static bool comp (const svm_summary& a, const svm_summary& b)
-        {
+        static bool comp(const svm_summary& a, const svm_summary& b) {
                 float filter_range = 0.02;
                 if( (a.Gmean - b.Gmean) > filter_range )         //a has completely better gmean than b
                         return true;

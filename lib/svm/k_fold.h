@@ -24,8 +24,8 @@ public:
         std::vector<std::vector<svm_node>>* getMajTestData();
 
         void setResult(const std::string & tag, float result);
-        void printAverages();
-
+        void setString(const std::string & tag, const std::string & result);
+        void print();
 
 private:
         void readData(const std::string & filename);
@@ -36,6 +36,7 @@ private:
         int iterations;
         int cur_iteration;
         std::unordered_map<std::string, std::vector<float>> results;
+        std::unordered_map<std::string, std::vector<std::string>> strings;
         std::vector<std::string> tag_order;
 
 

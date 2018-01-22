@@ -159,7 +159,8 @@ int main(int argn, char *argv[]) {
 
                 svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result);
 
-                // std::vector<std::pair<svm_summary, svm_solver>> best_results;
+                std::vector<std::pair<svm_summary, svm_instance>> best_results;
+                best_results.push_back(std::make_pair(initial_summary, initial_instance));
 
                 while (!refinement.is_done()) {
                   timer t_ref;
@@ -172,7 +173,7 @@ int main(int argn, char *argv[]) {
                   std::cout << "refinement at level " << refinement.get_level()
                             << " took " << t_ref.elapsed() << std::endl;
 
-                  // best_results.push_back(std::make_pair(current_result.best(), current_result.instance));
+                  best_results.push_back(std::make_pair(current_result.best(), current_result.instance));
 
                   std::ostringstream fmt_ac, fmt_gm;
                   fmt_ac << "LEVEL" << refinement.get_level() << "_AC";
@@ -201,18 +202,23 @@ int main(int argn, char *argv[]) {
                 std::cout << "refinement time " << refinement_time << std::endl;
                 kfold.setResult("\tREFINEMENT_TIME", refinement_time);
 
-                /*
-                svm_summary best_summary = svm_solver::select_best_model(best_results);
+                int best_index = svm_result::get_best_index(best_results);
+                kfold.setString("BEST_INDEX", std::to_string(best_index));
+
+                svm_summary best_summary = best_results[best_index].first;
                 kfold.setResult("BEST_AC", best_summary.Acc);
                 kfold.setResult("BEST_GM", best_summary.Gmean);
 
                 std::cout << "best validation on hole training data:" << std::endl;
-                svm_summary best_summary_test = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                svm_solver best_solver(best_results[best_index].second);
+                best_solver.set_C(best_summary.C);
+                best_solver.set_gamma(best_summary.gamma);
+                best_solver.train();
+                svm_summary best_summary_test = best_solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
                 best_summary_test.print();
 
                 kfold.setResult("BEST_AC_TEST", best_summary_test.Acc);
                 kfold.setResult("BEST_GM_TEST", best_summary_test.Gmean);
-                */
 
                 // ------------- END --------------
                 auto time_iteration = t_all.elapsed();
@@ -225,7 +231,7 @@ int main(int argn, char *argv[]) {
                 t_all.restart();
         }
 
-        kfold.printAverages();
+        kfold.print();
 
 
         return 0;

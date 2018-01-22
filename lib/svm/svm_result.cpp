@@ -42,3 +42,13 @@ void svm_result::sort_summaries() {
   std::sort(this->summaries.begin(), this->summaries.end(), summary_cmp_better_gmean_sv::comp);
 }
 
+static size_t svm_result::get_best_index(const std::vector<std::pair<svm_summary,svm_instance>> vec) {
+  size_t best_index = 0;
+
+  for (size_t i = 1; i < vec.size(); i++) {
+    if (summary_cmp_better_gmean::comp(vec[i].first, vec[best_index].first)) {
+      best_index = i;
+    }
+  }
+  return best_index;
+}
