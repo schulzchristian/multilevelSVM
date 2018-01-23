@@ -70,8 +70,9 @@ void svm_summary::print() {
                   << " FP:" << this->FP
                   << " FN:" << this->FN
                   << std::setprecision(3)
-                  << std::defaultfloat
                   << std::endl;
+
+        std::cout.unsetf(std::ios_base::floatfield);
 }
 
 void svm_summary::print_short() {
@@ -80,8 +81,9 @@ void svm_summary::print_short() {
                   << "\tGmean=" << this->Gmean
                   << "\tSVs=" << this->SV_min.size() + this->SV_maj.size()
                   << " (" << this->SV_min.size() << "," << this->SV_maj.size() <<")"
-                  << std::defaultfloat
                   << std::endl;
+
+        std::cout.unsetf(std::ios_base::floatfield);
 }
 
 NodeID svm_summary::num_SV_min() {

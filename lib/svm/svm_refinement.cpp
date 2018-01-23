@@ -32,10 +32,6 @@ void svm_refinement::uncoarse() {
         std::vector<NodeID> sv_min = result.best().SV_min;
         std::vector<NodeID> sv_maj = result.best().SV_maj;
 
-        std::cout << "isempty min " << min_hierarchy->isEmpty()
-                  << " maj " << maj_hierarchy->isEmpty()
-                  << std::endl;
-
         if (!min_hierarchy->isEmpty() && min_hierarchy->size() >= maj_hierarchy->size()) {
                 std::cout << "minority uncoarsed" << std::endl;
                 graph_access* G_min = min_hierarchy->pop_finer_and_project();
@@ -52,9 +48,6 @@ void svm_refinement::uncoarse() {
 }
 
 svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & maj_sample) {
-  std::cout << "min hierarchy " << min_hierarchy->size()
-            << " -- maj hierarchy " << maj_hierarchy->size() << std::endl;
-
         uncoarse();
 
         std::cout << "min hierarchy " << min_hierarchy->size()
@@ -72,18 +65,20 @@ svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & ma
         if (neighbors_min.size() + neighbors_maj.size() < 10000) {
                 result = solver.train_initial(min_sample, maj_sample, training_inherit, result.best().C_log, result.best().gamma_log);
         } else {
-                std::cout << "test over result range" << std::endl;
-                std::vector<svm_param> refine_range = result.all_params();
-                result = solver.train_range(refine_range, min_sample, maj_sample);
+                // std::cout << "test over result range" << std::endl;
+                // std::vector<svm_param> refine_range = result.all_params();
+                // result = solver.train_range(refine_range, min_sample, maj_sample);
 
-                // std::cout << "skip training just use log C=" << result.best().C_log
-                //           << " log gamma=" << result.best().gamma_log << std::endl;
-                // solver.set_C(result.best().C);
-                // solver.set_gamma(result.best().gamma);
-                // solver.train();
-                // result.clear();
-                // svm_summary s = solver.predict_validation_data(min_sample, maj_sample);
-                // result.push_back(s);
+                std::cout << "skip training just use log C=" << result.best().C_log
+                          << " log gamma=" << result.best().gamma_log << std::endl;
+                solver.set_C(result.best().C);
+                solver.set_gamma(result.best().gamma);
+                solver.train();
+                svm_summary s = solver.predict_validation_data(min_sample, maj_sample);
+                s.print();
+                std::vector<svm_summary> vec;
+                vec.push_back(s);
+                result = svm_result(vec, instance);
         }
 
         return result;

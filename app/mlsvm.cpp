@@ -61,7 +61,7 @@ int main(int argn, char *argv[]) {
 
         // -------- end
 
-        partition_config.cluster_upperbound = 100;
+        partition_config.cluster_upperbound = std::numeric_limits<NodeID>::max()/2;
         partition_config.cluster_coarsening_factor = 1;
         partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
@@ -181,6 +181,7 @@ int main(int argn, char *argv[]) {
                   kfold.setResult(fmt_ac.str(), current_result.best().Acc);
                   kfold.setResult(fmt_gm.str(), current_result.best().Gmean);
 
+                  /*
                   std::cout << "level " << refinement.get_level()
                             << " validation on hole training data:" << std::endl;
 
@@ -195,7 +196,7 @@ int main(int argn, char *argv[]) {
                   fmt_gm << "_TEST";
                   kfold.setResult(fmt_ac.str(), final_test_summary.Acc);
                   kfold.setResult(fmt_gm.str(), final_test_summary.Gmean);
-
+                  */
                 }
 
                 auto refinement_time = t.elapsed();
