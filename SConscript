@@ -122,6 +122,7 @@ libmlsvm_files            = ['lib/svm/svm_solver.cpp',
                              'lib/svm/svm_convert.cpp',
                              'lib/svm/param_search.cpp',
                              'lib/svm/k_fold.cpp',
+                             'lib/svm/results.cpp',
                              'lib/svm/svm_flann.cpp',
                              'lib/svm/svm_refinement.cpp',
                              'extern/libsvm-3.22/src/svm.cpp' ]
@@ -192,4 +193,4 @@ if env['program'] == 'mlsvm':
 if env['program'] == 'csv_flann':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')
         env.Append(CCFLAGS  = '-DMODE_MLSVM')
-        env.Program('csv_flann', ['app/csv_flann.cpp']+libcsv_flann_files, LIBS=['flann','libargtable2','gomp'])
+        env.Program('csv_flann', ['app/csv_flann.cpp']+libcsv_flann_files, LIBS=['libargtable2','gomp'])

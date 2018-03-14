@@ -23,10 +23,6 @@ public:
         std::vector<std::vector<svm_node>>* getMinTestData();
         std::vector<std::vector<svm_node>>* getMajTestData();
 
-        void setResult(const std::string & tag, float result);
-        void setString(const std::string & tag, const std::string & result);
-        void print();
-
 private:
         void readData(const std::string & filename);
         void calculate_kfold_class(const std::vector<FeatureVec> & features_full,
@@ -35,10 +31,6 @@ private:
 
         int iterations;
         int cur_iteration;
-        std::unordered_map<std::string, std::vector<float>> results;
-        std::unordered_map<std::string, std::vector<std::string>> strings;
-        std::vector<std::string> tag_order;
-
 
         std::vector<FeatureVec> min_features;
         std::vector<FeatureVec> maj_features;

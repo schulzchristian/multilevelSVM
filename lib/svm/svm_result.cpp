@@ -9,12 +9,6 @@ svm_result::svm_result(const std::vector<svm_summary> & summaries, const svm_ins
 }
 
 svm_summary svm_result::best() {
-        for (size_t i = 0; i < summaries.size(); ++i) {
-                if(summaries[i].Gmean > 0.05) {
-                        return summaries[i];
-                }
-        }
-        // in case there is no model with gmean larger than zero, return the 1st one
         return summaries[0];
 }
 

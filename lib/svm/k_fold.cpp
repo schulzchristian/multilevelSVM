@@ -3,10 +3,7 @@
 #include "timer.h"
 #include "svm_flann.h"
 #include "svm_convert.h"
-
-#include <algorithm>    // std::shuffle
-#include <random>       // std::default_random_engine
-#include <chrono>       // std::chrono::system_clockinclude <algorithm>
+#include "random_functions.h"
 
 k_fold::k_fold(int num_iter, const std::string & filename) {
         readData(filename);
@@ -24,17 +21,15 @@ void k_fold::readData(const std::string & filename) {
         graph_io::readFeaturesLines(filename + "_min_data", this->min_features);
         graph_io::readFeaturesLines(filename + "_maj_data", this->maj_features);
 
-        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-        std::shuffle(this->min_features.begin(), this->min_features.end(), std::default_random_engine(seed));
-        std::shuffle(this->maj_features.begin(), this->maj_features.end(), std::default_random_engine(seed));
+        random_functions::permutate_vector_good(this->min_features, false);
+        random_functions::permutate_vector_good(this->maj_features, false);
 
         std::cout << "io time: " << t.elapsed() << std::endl;
 
         std::cout << "full graph -"
                   << " min: " << this->min_features.size()
                   << " maj: " << this->maj_features.size()
-                  << " features: " << min_features[0].size() << std::endl;
+                  << " features: " << this->min_features[0].size() << std::endl;
 }
 
 bool k_fold::next() {
@@ -101,47 +96,4 @@ std::vector<std::vector<svm_node>>* k_fold::getMinTestData() {
 
 std::vector<std::vector<svm_node>>* k_fold::getMajTestData() {
         return &this->cur_maj_test;
-}
-
-void k_fold::setResult(const std::string &tag, float result) {
-        if (this->results.count(tag) <= 0) {
-                this->results[tag] = std::vector<float>(this->iterations, 0);
-                this->tag_order.push_back(tag);
-        }
-        this->results[tag][this->cur_iteration] = result;
-}
-
-void k_fold::setString(const std::string & tag, const std::string & result) {
-        if (this->strings.count(tag) <= 0) {
-                this->strings[tag] = std::vector<std::string>(this->iterations);
-                this->tag_order.push_back(tag);
-        }
-        this->strings[tag][this->cur_iteration] = result;
-}
-
-void k_fold::print() {
-        for (const auto& tag : this->tag_order) {
-                if (this->results.find(tag) != this->results.end()) {
-                        std::vector<float> & ress = this->results[tag];
-                        float average = 0;
-                        for (const float res : ress) {
-                                average += res;
-                        }
-                        if (this->cur_iteration >= this->iterations) {
-                                average /= this->iterations;
-                        } else {
-                                average /= this->cur_iteration + 1;
-                        }
-
-                        std::cout << tag << "\t" << average << std::endl;
-                }
-                else {
-                        std::vector<std::string> & strs = this->strings[tag];
-                        std::cout << "[" << tag << "]" << std::endl;
-                        for (size_t i = 0; i < strs.size(); i++) {
-                                std::cout << "fold " << i << ": "
-                                          << strs[i] << std::endl;
-                        }
-                }
-        }
 }
