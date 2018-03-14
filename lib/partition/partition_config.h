@@ -404,6 +404,14 @@ struct PartitionConfig
         bool enable_mapping;
 
         //=======================================
+        //===============MLSVM===================
+        //=======================================
+
+        int num_experiments;
+        int kfold_iterations;
+        float sample_percent;
+
+        //=======================================
         //===============Shared Mem OMP==========
         //=======================================
         bool enable_omp;

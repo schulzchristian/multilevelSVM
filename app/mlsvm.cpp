@@ -31,43 +31,29 @@ int main(int argn, char *argv[]) {
         bool suppress_output   = false;
         bool recursive         = false;
 
-        int ret_code = parse_parameters(argn, argv,
-                                        partition_config,
-                                        filename,
-                                        is_graph_weighted,
-                                        suppress_output,
-                                        recursive);
+        int ret_code = parse_parameters(argn, argv, partition_config, filename, is_graph_weighted, suppress_output, recursive);
 
         if(ret_code) {
                 return -1;
         }
 
 
-        // turn 
+        // disable libsvm output
         svm_set_print_string_function(&print_null);
 
         partition_config.LogDump(stdout);
-
         partition_config.k = 1;
-
-        // -------- copied from label_propagation
-
-        // if( partition_config.cluster_upperbound == std::numeric_limits< NodeWeight >::max()/2 ) {
-        //         std::cout <<  "no size-constrained specified" << std::endl;
-        // } else {
-        //         std::cout <<  "size-constrained set to " <<  partition_config.cluster_upperbound << std::endl;
-        // }
-
-
-        // -------- end
-
-        partition_config.cluster_upperbound = std::numeric_limits<NodeID>::max()/2;
+        // partition_config.cluster_upperbound = std::numeric_limits<NodeID>::max()/2;
         partition_config.cluster_coarsening_factor = 1;
         partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
         partition_config.matching_type = CLUSTER_COARSENING;
         partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
+        std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
+        std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
         std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
+        std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
+        std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
         std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
 
 

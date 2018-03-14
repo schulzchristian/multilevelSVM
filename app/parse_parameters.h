@@ -1,5 +1,5 @@
 /******************************************************************************
- * parse_parameters.h 
+ * parse_parameters.h
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -28,11 +28,11 @@
 #include <sstream>
 #include "configuration.h"
 
-int parse_parameters(int argn, char **argv, 
-                     PartitionConfig & partition_config, 
-                     std::string & graph_filename, 
-                     bool & is_graph_weighted, 
-                     bool & suppress_program_output, 
+int parse_parameters(int argn, char **argv,
+                     PartitionConfig & partition_config,
+                     std::string & graph_filename,
+                     bool & is_graph_weighted,
+                     bool & suppress_program_output,
                      bool & recursive) {
 
         const char *progname = argv[0];
@@ -143,7 +143,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_lit *mh_enable_kabapE                     = arg_lit0(NULL, "mh_enable_kabapE", "Enable combine operator KaBaPE");
         struct arg_int *maxT                                 = arg_int0(NULL, "maxT", NULL, "maxT parameter for Tabu Search");
         struct arg_int *maxIter                              = arg_int0(NULL, "maxIter", NULL, "maxIter parameter for Tabu Search");
-        struct arg_lit *balance_edges 		             = arg_lit0(NULL, "balance_edges", "Turn on balancing of edges among blocks.");
+        struct arg_lit *balance_edges                  = arg_lit0(NULL, "balance_edges", "Turn on balancing of edges among blocks.");
 
         struct arg_int *cluster_upperbound                   = arg_int0(NULL, "cluster_upperbound", NULL, "Set a size-constraint on the size of a cluster. Default: none");
         struct arg_int *label_propagation_iterations         = arg_int0(NULL, "label_propagation_iterations", NULL, "Set the number of label propgation iterations. Default: 10.");
@@ -152,15 +152,15 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *max_flow_improv_steps                = arg_int0(NULL, "max_flow_improv_steps", NULL, "Maximum number of tries to improve a node separator using flows.");
         struct arg_lit *most_balanced_flows_node_sep         = arg_lit0(NULL, "most_balanced_flows_node_sep", "(Default: disabled)");
         struct arg_dbl *region_factor_node_separators        = arg_dbl0(NULL, "region_factor_node_separators", NULL, "Region factor for flow problems to obtain node separators.");
-        struct arg_lit *sep_flows_disabled		     = arg_lit0(NULL, "sep_flows_disabled", "(Default: disabled)");
-        struct arg_lit *sep_fm_disabled		     	     = arg_lit0(NULL, "sep_fm_disabled", "(Default: disabled)");
-        struct arg_lit *sep_loc_fm_disabled		     = arg_lit0(NULL, "sep_loc_fm_disabled", "(Default: disabled)");
-        struct arg_lit *sep_greedy_disabled		     = arg_lit0(NULL, "sep_greedy_disabled", "(Default: disabled)");
+        struct arg_lit *sep_flows_disabled         = arg_lit0(NULL, "sep_flows_disabled", "(Default: disabled)");
+        struct arg_lit *sep_fm_disabled              = arg_lit0(NULL, "sep_fm_disabled", "(Default: disabled)");
+        struct arg_lit *sep_loc_fm_disabled        = arg_lit0(NULL, "sep_loc_fm_disabled", "(Default: disabled)");
+        struct arg_lit *sep_greedy_disabled        = arg_lit0(NULL, "sep_greedy_disabled", "(Default: disabled)");
         struct arg_lit *sep_full_boundary_ip                 = arg_lit0(NULL, "sep_full_boundary_ip", "(Default: disabled)");
         struct arg_lit *sep_faster_ns                        = arg_lit0(NULL, "sep_faster_ns", "(Default: disabled)");
-        struct arg_int *sep_fm_unsucc_steps		     = arg_int0(NULL, "sep_fm_unsucc_steps", NULL, "Maximum number of steps till last improvement in FM algorithm.");
+        struct arg_int *sep_fm_unsucc_steps        = arg_int0(NULL, "sep_fm_unsucc_steps", NULL, "Maximum number of steps till last improvement in FM algorithm.");
         struct arg_int *sep_num_fm_reps                      = arg_int0(NULL, "sep_num_fm_reps", NULL, "Number of FM repetitions during uncoarsening on each level.");
-        struct arg_int *sep_loc_fm_unsucc_steps		     = arg_int0(NULL, "sep_loc_fm_unsucc_steps", NULL, "Maximum number of steps till last improvement in FM algorithm.");
+        struct arg_int *sep_loc_fm_unsucc_steps        = arg_int0(NULL, "sep_loc_fm_unsucc_steps", NULL, "Maximum number of steps till last improvement in FM algorithm.");
         struct arg_int *sep_num_loc_fm_reps                  = arg_int0(NULL, "sep_num_loc_fm_reps", NULL, "Number of FM repetitions during uncoarsening on each level.");
         struct arg_int *sep_loc_fm_no_snodes                 = arg_int0(NULL, "sep_loc_fm_no_snodes", NULL, "Number of FM repetitions during uncoarsening on each level.");
         struct arg_int *sep_num_vert_stop                    = arg_int0(NULL, "sep_num_vert_stop", NULL, "Number of vertices to stop coarsening at.");
@@ -175,103 +175,114 @@ int parse_parameters(int argn, char **argv,
         struct arg_str *distance_parameter_string            = arg_str0(NULL, "distance_parameter_string", NULL, "Specify as 1:10:100 if cores on the same chip have distance 1, PEs in the same rack have distance 10, ... and so forth.");
         struct arg_lit *online_distances                     = arg_lit0(NULL, "online_distances", "Do not store processor distances in a matrix, but do recomputation. (Default: disabled)");
 
+
+        // MLSVM stuff
+        struct arg_int *num_experiments                      = arg_int0("e", "num_experiments", NULL, "Number of experiments i.e. full kfold runs (default 1)");
+        struct arg_int *kfold_iterations                     = arg_int0("f", "kfold_iterations", NULL, "Number of kfold iterations (Default: 5)");
+        struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
+
         struct arg_end *end                                  = arg_end(100);
 
         // Define argtable.
         void* argtable[] = {
                 help, filename, user_seed,
 #ifdef MODE_DEVEL
-                k, graph_weighted, imbalance, edge_rating_tiebreaking, 
-                matching_type, edge_rating, rate_first_level_inner_outer, first_level_random_matching, 
+                k, graph_weighted, imbalance, edge_rating_tiebreaking,
+                matching_type, edge_rating, rate_first_level_inner_outer, first_level_random_matching,
                 aggressive_random_levels, gpa_grow_internal, match_islands, stop_rule, num_vert_stop_factor,
-                initial_partition, initial_partitioning_repetitions, disable_refined_bubbling, 
+                initial_partition, initial_partitioning_repetitions, disable_refined_bubbling,
                 bubbling_iterations, initial_partition_optimize, bipartition_post_fm_limit, bipartition_post_ml_limit, bipartition_tries,
                 bipartition_algorithm,
                 permutation_quality, permutation_during_refinement, enforce_balance,
-                refinement_scheduling_algorithm, bank_account_factor, refinement_type, 
-                fm_search_limit, flow_region_factor, most_balanced_flows,toposort_iterations, 
-                kway_rounds, kway_search_stop_rule, kway_fm_limits, kway_adaptive_limits_alpha, 
+                refinement_scheduling_algorithm, bank_account_factor, refinement_type,
+                fm_search_limit, flow_region_factor, most_balanced_flows,toposort_iterations,
+                kway_rounds, kway_search_stop_rule, kway_fm_limits, kway_adaptive_limits_alpha,
                 enable_corner_refinement, disable_qgraph_refinement,local_multitry_fm_alpha, local_multitry_rounds,
-                global_cycle_iterations, use_wcycles, wcycle_no_new_initial_partitioning, use_fullmultigrid, use_vcycle,level_split, 
-                enable_convergence, compute_vertex_separator, suppress_output, 
-                input_partition, preconfiguration, only_first_level, disable_max_vertex_weight_constraint, 
-                recursive_bipartitioning, use_bucket_queues, time_limit, unsuccessful_reps, local_partitioning_repetitions, 
-                mh_pool_size, mh_plain_repetitions, mh_disable_nc_combine, mh_disable_cross_combine, mh_enable_tournament_selection,       
-                mh_disable_combine, mh_enable_quickstart, mh_disable_diversify_islands, mh_flip_coin, mh_initial_population_fraction, 
-		mh_print_log,mh_sequential_mode, mh_optimize_communication_volume, mh_enable_tabu_search,
+                global_cycle_iterations, use_wcycles, wcycle_no_new_initial_partitioning, use_fullmultigrid, use_vcycle,level_split,
+                enable_convergence, compute_vertex_separator, suppress_output,
+                input_partition, preconfiguration, only_first_level, disable_max_vertex_weight_constraint,
+                recursive_bipartitioning, use_bucket_queues, time_limit, unsuccessful_reps, local_partitioning_repetitions,
+                mh_pool_size, mh_plain_repetitions, mh_disable_nc_combine, mh_disable_cross_combine, mh_enable_tournament_selection,
+                mh_disable_combine, mh_enable_quickstart, mh_disable_diversify_islands, mh_flip_coin, mh_initial_population_fraction,
+                mh_print_log,mh_sequential_mode, mh_optimize_communication_volume, mh_enable_tabu_search,
                 mh_disable_diversify, mh_diversify_best, mh_cross_combine_original_k, disable_balance_singletons, initial_partition_optimize_fm_limits,
                 initial_partition_optimize_multitry_fm_alpha, initial_partition_optimize_multitry_rounds,
-                enable_omp, 
+                enable_omp,
                 amg_iterations,
-                kaba_neg_cycle_algorithm, kabaE_internal_bal, kaba_internal_no_aug_steps_aug, 
-                kaba_packing_iterations, kaba_flip_packings, kaba_lsearch_p, kaffpa_perfectly_balanced_refinement, 
+                kaba_neg_cycle_algorithm, kabaE_internal_bal, kaba_internal_no_aug_steps_aug,
+                kaba_packing_iterations, kaba_flip_packings, kaba_lsearch_p, kaffpa_perfectly_balanced_refinement,
                 kaba_unsucc_iterations, kaba_disable_zero_weight_cycles,
                 maxT, maxIter, minipreps, mh_penalty_for_unconnected, mh_enable_kabapE,
 #elif defined MODE_KAFFPA
-                k, imbalance,  
-                preconfiguration, 
-                time_limit, 
-                enforce_balance, 
-		balance_edges,
+                k, imbalance,
+                preconfiguration,
+                time_limit,
+                enforce_balance,
+    balance_edges,
                 enable_mapping,
-                hierarchy_parameter_string, 
+                hierarchy_parameter_string,
                 distance_parameter_string,
                 online_distances,
-                filename_output, 
+                filename_output,
 #elif defined MODE_EVALUATOR
-                k,   
-                preconfiguration, 
+                k,
+                preconfiguration,
                 input_partition,
 #elif defined MODE_NODESEP
                 //k,
-                imbalance,  
-                preconfiguration, 
-                filename_output, 
-                //time_limit, 
+                imbalance,
+                preconfiguration,
+                filename_output,
+                //time_limit,
                 //edge_rating,
                 //max_flow_improv_steps,
                 //max_initial_ns_tries,
                 //region_factor_node_separators,
                 //global_cycle_iterations,
                 //most_balanced_flows_node_sep,
-		//sep_flows_disabled,
-		//sep_fm_disabled,
-		//sep_loc_fm_disabled,
-		//sep_greedy_disabled,
-		//sep_fm_unsucc_steps,
-		//sep_num_fm_reps,
-		//sep_loc_fm_unsucc_steps,
-		//sep_num_loc_fm_reps,
+                //sep_flows_disabled,
+                //sep_fm_disabled,
+                //sep_loc_fm_disabled,
+                //sep_greedy_disabled,
+                //sep_fm_unsucc_steps,
+                //sep_num_fm_reps,
+                //sep_loc_fm_unsucc_steps,
+                //sep_num_loc_fm_reps,
                 //sep_loc_fm_no_snodes,
                 //sep_num_vert_stop,
                 //sep_full_boundary_ip,
                 //sep_edge_rating_during_ip,
                 //sep_faster_ns,
 #elif defined MODE_PARTITIONTOVERTEXSEPARATOR
-                k, input_partition, 
-                filename_output, 
+                k, input_partition,
+                filename_output,
 #elif defined MODE_IMPROVEVERTEXSEPARATOR
-                input_partition, 
-                filename_output, 
-#elif defined MODE_KAFFPAE
-                k, imbalance, 
-                preconfiguration,  
-                time_limit,  
-                mh_enable_quickstart, 
-		mh_print_log, mh_optimize_communication_volume, 
-                mh_enable_tabu_search,
-                maxT, maxIter,  
-                mh_enable_kabapE,
-                kabaE_internal_bal,  
-		balance_edges,
                 input_partition,
-                filename_output, 
+                filename_output,
+#elif defined MODE_KAFFPAE
+                k, imbalance,
+                preconfiguration,
+                time_limit,
+                mh_enable_quickstart,
+    mh_print_log, mh_optimize_communication_volume,
+                mh_enable_tabu_search,
+                maxT, maxIter,
+                mh_enable_kabapE,
+                kabaE_internal_bal,
+    balance_edges,
+                input_partition,
+                filename_output,
 #elif defined MODE_LABELPROPAGATION
                 cluster_upperbound,
                 label_propagation_iterations,
-                filename_output, 
+                filename_output,
 #elif defined MODE_MLSVM
+                num_experiments,
+                kfold_iterations,
+                sample_percent,
                 fix_num_vert_stop,
+                cluster_upperbound,
+                label_propagation_iterations,
                 filename_output,
 #endif
                 end
@@ -293,7 +304,7 @@ int parse_parameters(int argn, char **argv,
                 arg_print_errors(stderr, end, progname);
                 printf("Try '%s --help' for more information.\n",progname);
                 arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
-                return 1; 
+                return 1;
         }
 
         if (k->count > 0) {
@@ -376,14 +387,14 @@ int parse_parameters(int argn, char **argv,
 
         if(hierarchy_parameter_string->count) {
                 std::istringstream f(hierarchy_parameter_string->sval[0]);
-                std::string s;    
+                std::string s;
                 partition_config.group_sizes.clear();
                 while (getline(f, s, ':')) {
                         partition_config.group_sizes.push_back(stoi(s));
-                }       
+                }
 
                 PartitionID old_k = partition_config.k;
-                partition_config.k = 1; // recompute k 
+                partition_config.k = 1; // recompute k
                 for( unsigned int i = 0; i < partition_config.group_sizes.size(); i++) {
                         partition_config.k *= partition_config.group_sizes[i];
                 }
@@ -396,11 +407,11 @@ int parse_parameters(int argn, char **argv,
 
         if(distance_parameter_string->count) {
                 std::istringstream f(distance_parameter_string->sval[0]);
-                std::string s;    
+                std::string s;
                 partition_config.distances.clear();
                 while (getline(f, s, ':')) {
                         partition_config.distances.push_back(stoi(s));
-                }       
+                }
         }
 
         if(online_distances->count > 0) {
@@ -435,10 +446,10 @@ int parse_parameters(int argn, char **argv,
                 partition_config.mh_disable_combine = true;
         }
 
-	if(balance_edges->count > 0) {
-		partition_config.balance_edges = true;
-	}
-        
+        if(balance_edges->count > 0) {
+                partition_config.balance_edges = true;
+        }
+
         if(mh_optimize_communication_volume->count > 0) {
                 partition_config.mh_optimize_communication_volume = true;
         }
@@ -487,60 +498,60 @@ int parse_parameters(int argn, char **argv,
                 partition_config.kaba_flip_packings = true;
         }
 
-	if(sep_flows_disabled->count > 0) {
-		partition_config.sep_flows_disabled = true;
-	}
+        if(sep_flows_disabled->count > 0) {
+                partition_config.sep_flows_disabled = true;
+        }
 
         if(sep_faster_ns->count > 0) {
                 partition_config.faster_ns = true;
         }
 
-	if(sep_loc_fm_no_snodes->count > 0) {
-		partition_config.sep_loc_fm_no_snodes = sep_loc_fm_no_snodes->ival[0];
-	}
+        if(sep_loc_fm_no_snodes->count > 0) {
+                partition_config.sep_loc_fm_no_snodes = sep_loc_fm_no_snodes->ival[0];
+        }
 
-	if(sep_num_vert_stop->count > 0) {
-		partition_config.sep_num_vert_stop = sep_num_vert_stop->ival[0];
-	}
+        if(sep_num_vert_stop->count > 0) {
+                partition_config.sep_num_vert_stop = sep_num_vert_stop->ival[0];
+        }
 
-	if(fix_num_vert_stop->count > 0) {
-          partition_config.fix_num_vert_stop = fix_num_vert_stop->ival[0];
-	}
+        if(fix_num_vert_stop->count > 0) {
+                partition_config.fix_num_vert_stop = fix_num_vert_stop->ival[0];
+        }
 
-	if(sep_fm_unsucc_steps->count > 0) {
-		partition_config.sep_fm_unsucc_steps = sep_fm_unsucc_steps->ival[0];
-	}
-	if(sep_fm_unsucc_steps->count > 0) {
-		partition_config.sep_fm_unsucc_steps = sep_fm_unsucc_steps->ival[0];
-	}
+        if(sep_fm_unsucc_steps->count > 0) {
+                partition_config.sep_fm_unsucc_steps = sep_fm_unsucc_steps->ival[0];
+        }
+        if(sep_fm_unsucc_steps->count > 0) {
+                partition_config.sep_fm_unsucc_steps = sep_fm_unsucc_steps->ival[0];
+        }
 
-	if(sep_num_fm_reps->count > 0) {
-		partition_config.sep_num_fm_reps = sep_num_fm_reps->ival[0];
-	}
+        if(sep_num_fm_reps->count > 0) {
+                partition_config.sep_num_fm_reps = sep_num_fm_reps->ival[0];
+        }
 
-	if(sep_loc_fm_unsucc_steps->count > 0) {
-		partition_config.sep_loc_fm_unsucc_steps = sep_loc_fm_unsucc_steps->ival[0];
-	}
+        if(sep_loc_fm_unsucc_steps->count > 0) {
+                partition_config.sep_loc_fm_unsucc_steps = sep_loc_fm_unsucc_steps->ival[0];
+        }
 
-	if(sep_num_loc_fm_reps->count > 0) {
-		partition_config.sep_num_loc_fm_reps = sep_num_loc_fm_reps->ival[0];
-	}
+        if(sep_num_loc_fm_reps->count > 0) {
+                partition_config.sep_num_loc_fm_reps = sep_num_loc_fm_reps->ival[0];
+        }
 
-	if(sep_fm_disabled->count > 0) {
-		partition_config.sep_fm_disabled = true;
-	}
+        if(sep_fm_disabled->count > 0) {
+                partition_config.sep_fm_disabled = true;
+        }
 
-	if(sep_loc_fm_disabled->count > 0) {
-		partition_config.sep_loc_fm_disabled = true;
-	}
+        if(sep_loc_fm_disabled->count > 0) {
+                partition_config.sep_loc_fm_disabled = true;
+        }
 
-	if(sep_greedy_disabled->count > 0) {
-		partition_config.sep_greedy_disabled = true;
-	}
+        if(sep_greedy_disabled->count > 0) {
+                partition_config.sep_greedy_disabled = true;
+        }
 
-	if(sep_full_boundary_ip->count > 0) {
-		partition_config.sep_full_boundary_ip = true;
-	}
+        if(sep_full_boundary_ip->count > 0) {
+                partition_config.sep_full_boundary_ip = true;
+        }
 
         if (kaba_lsearch_p->count) {
                 if(strcmp("coindiff", kaba_lsearch_p->sval[0]) == 0) {
@@ -566,9 +577,9 @@ int parse_parameters(int argn, char **argv,
         }
 
 
-	if(mh_enable_tabu_search->count > 0) {
-		partition_config.mh_enable_gal_combine = true;
-	}
+        if(mh_enable_tabu_search->count > 0) {
+                partition_config.mh_enable_gal_combine = true;
+        }
 
         if(kaba_packing_iterations->count > 0) {
                 partition_config.kaba_packing_iterations = kaba_packing_iterations->ival[0];
@@ -696,37 +707,37 @@ int parse_parameters(int argn, char **argv,
         }
 
         if(use_wcycles->count > 0) {
-                partition_config.use_wcycles = true; 
+                partition_config.use_wcycles = true;
         }
 
         if(enable_convergence->count > 0) {
-                partition_config.no_change_convergence = true; 
+                partition_config.no_change_convergence = true;
         }
 
         if(use_fullmultigrid->count > 0) {
-                partition_config.use_fullmultigrid = true; 
+                partition_config.use_fullmultigrid = true;
         }
 
         if(use_vcycle->count > 0) {
-                partition_config.use_fullmultigrid = false; 
-                partition_config.use_wcycles       = false; 
+                partition_config.use_fullmultigrid = false;
+                partition_config.use_wcycles       = false;
         }
 
 
         if(toposort_iterations->count > 0) {
-                partition_config.toposort_iterations = toposort_iterations->ival[0]; 
+                partition_config.toposort_iterations = toposort_iterations->ival[0];
         }
 
         if(bipartition_tries->count > 0) {
-                partition_config.bipartition_tries = bipartition_tries->ival[0]; 
+                partition_config.bipartition_tries = bipartition_tries->ival[0];
         }
 
         if(bipartition_post_fm_limit->count > 0) {
-                partition_config.bipartition_post_fm_limits = bipartition_post_fm_limit->ival[0]; 
+                partition_config.bipartition_post_fm_limits = bipartition_post_fm_limit->ival[0];
         }
 
         if(bipartition_post_ml_limit->count > 0) {
-                partition_config.bipartition_post_ml_limits = bipartition_post_ml_limit->ival[0]; 
+                partition_config.bipartition_post_ml_limits = bipartition_post_ml_limit->ival[0];
         }
 
         if(disable_max_vertex_weight_constraint->count > 0) {
@@ -734,23 +745,23 @@ int parse_parameters(int argn, char **argv,
         }
 
         if(num_vert_stop_factor->count > 0) {
-                partition_config.num_vert_stop_factor = num_vert_stop_factor->ival[0]; 
+                partition_config.num_vert_stop_factor = num_vert_stop_factor->ival[0];
         }
 
         if(local_multitry_rounds->count > 0) {
-                partition_config.local_multitry_rounds = local_multitry_rounds->ival[0]; 
+                partition_config.local_multitry_rounds = local_multitry_rounds->ival[0];
         }
 
         if(local_multitry_fm_alpha->count > 0) {
-                partition_config.local_multitry_fm_alpha = local_multitry_fm_alpha->ival[0]; 
+                partition_config.local_multitry_fm_alpha = local_multitry_fm_alpha->ival[0];
         }
 
         if(wcycle_no_new_initial_partitioning->count > 0) {
-                partition_config.no_new_initial_partitioning = true; 
+                partition_config.no_new_initial_partitioning = true;
         }
 
         if(graph_weighted->count > 0) {
-                is_graph_weighted = true;                
+                is_graph_weighted = true;
         }
 
         if(disable_refined_bubbling->count > 0) {
@@ -1035,7 +1046,7 @@ int parse_parameters(int argn, char **argv,
                 }
         }
 
-        if (initial_partition->count > 0) { 
+        if (initial_partition->count > 0) {
                 if (strcmp("recursive", initial_partition->sval[0]) == 0) {
                         partition_config.initial_partitioning_type = INITIAL_PARTITIONING_RECPARTITION;
                 } else {
@@ -1054,6 +1065,25 @@ int parse_parameters(int argn, char **argv,
                 partition_config.cluster_upperbound = std::numeric_limits< NodeWeight >::max()/2;
         }
 
+        if (num_experiments->count > 0) {
+                partition_config.num_experiments = num_experiments->ival[0];
+        } else {
+                partition_config.num_experiments = 1;
+        }
+
+        if (kfold_iterations->count > 0) {
+                partition_config.kfold_iterations = kfold_iterations->ival[0];
+        } else {
+                partition_config.kfold_iterations = 5;
+        }
+
+        if(sample_percent->count > 0) {
+                partition_config.sample_percent = sample_percent->dval[0];
+        } else {
+                partition_config.sample_percent = 0.1;
+        }
+
+        arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
         return 0;
 }
 
