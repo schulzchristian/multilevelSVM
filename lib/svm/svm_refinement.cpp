@@ -15,8 +15,6 @@ svm_refinement::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy 
         this->neighbors_min = svm_convert::graph_to_nodes(* this->min_hierarchy->get_coarsest());
         this->neighbors_maj = svm_convert::graph_to_nodes(* this->maj_hierarchy->get_coarsest());
         this->training_inherit = false;
-        this->min_to_delete = NULL;
-        this->maj_to_delete = NULL;
 }
 
 svm_refinement::~svm_refinement() {
@@ -34,30 +32,19 @@ void svm_refinement::uncoarse() {
         std::vector<NodeID> sv_min = result.best().SV_min;
         std::vector<NodeID> sv_maj = result.best().SV_maj;
 
+        // if maj_hierarchy is larger then start by only uncoarse the maj graph
         if (!min_hierarchy->isEmpty() && min_hierarchy->size() >= maj_hierarchy->size()) {
                 std::cout << "minority uncoarsed" << std::endl;
                 graph_access* G_min = min_hierarchy->pop_finer_and_project();
                 CoarseMapping* mapping_min = min_hierarchy->get_mapping_of_current_finer();
                 this->neighbors_min = get_SV_neighbors(*G_min, *mapping_min, sv_min);
                 this->training_inherit = true; // after the first uncoarsening of the min data inherit params
-                if (this->min_to_delete != NULL) {
-                        delete this->min_to_delete;
-                }
-                if (!min_hierarchy->isEmpty()) {
-                        this->min_to_delete = G_min;
-                }
         }
         if (!maj_hierarchy->isEmpty()) {
                 std::cout << "majority uncoarsed" << std::endl;
                 graph_access* G_maj = maj_hierarchy->pop_finer_and_project();
                 CoarseMapping* mapping_maj = maj_hierarchy->get_mapping_of_current_finer();
                 this->neighbors_maj = get_SV_neighbors(*G_maj, *mapping_maj, sv_maj);
-                if (this->maj_to_delete != NULL) {
-                        delete this->maj_to_delete;
-                }
-                if (!maj_hierarchy->isEmpty()) {
-                        this->maj_to_delete = G_maj;
-                }
         }
 }
 

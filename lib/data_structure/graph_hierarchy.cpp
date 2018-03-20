@@ -33,7 +33,7 @@ graph_hierarchy::~graph_hierarchy() {
                         delete m_to_delete_mappings[i];
         }
 
-        for( unsigned i = 0; i+1 < m_to_delete_hierachies.size(); i++) {
+        for( unsigned i = 1; i < m_to_delete_hierachies.size(); i++) {
                 if(m_to_delete_hierachies[i] != NULL)
                 delete m_to_delete_hierachies[i];
         }
@@ -43,6 +43,7 @@ void graph_hierarchy::push_back(graph_access * G, CoarseMapping * coarse_mapping
         m_the_graph_hierarchy.push(G);
         m_the_mappings.push(coarse_mapping);
         m_to_delete_mappings.push_back(coarse_mapping);
+        m_to_delete_hierachies.push_back(G);
         m_coarsest_graph = G;
         if (m_finest_graph == nullptr) {
                 m_finest_graph = G;

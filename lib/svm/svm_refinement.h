@@ -34,8 +34,6 @@ private:
         svm_data neighbors_maj;
         svm_result result;
         bool training_inherit;
-        graph_access *min_to_delete;
-        graph_access *maj_to_delete;
 };
 
 #endif /* REFINEMENT_H */

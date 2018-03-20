@@ -130,7 +130,7 @@ int uncoarsening::perform_uncoarsening_cut(const PartitionConfig & config, graph
 
         delete refine;
         if(finer_boundary != NULL) delete finer_boundary;
-	delete coarsest;
+        delete coarsest;
 
         return improvement;
 }
