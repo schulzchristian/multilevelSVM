@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <functional>
+#include <cctype>
+#include <locale>
 #include <argtable2.h>
 #include "svm/svm_flann.h"
 #include "timer.h"
@@ -13,11 +16,53 @@ using namespace std;
 
 typedef vector<FeatureVec> MyMat;
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, bool & libsvm, string & inputfile, string & outputfile);
+
+// trim from start (in place)
+static inline void ltrim(std::string &s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+                                return !std::isspace(ch);
+                        }));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+                                return !std::isspace(ch);
+                        }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string &s) {
+        ltrim(s);
+        rtrim(s);
+}
+
+// trim from start (copying)
+static inline std::string ltrim_copy(std::string s) {
+        ltrim(s);
+        return s;
+}
+
+// trim from end (copying)
+static inline std::string rtrim_copy(std::string s) {
+        rtrim(s);
+        return s;
+}
+
+// trim from both ends (copying)
+static inline std::string trim_copy(std::string s) {
+        trim(s);
+        return s;
+}
+
+
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile);
 
 void read_csv(const string & filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
 
 void read_libsvm(const string & filename, MyMat & data, vector<int> & label);
+
+void write_csv(const string & filename, const MyMat & data, const vector<int> & label);
 
 void normalize(MyMat & data);
 
@@ -35,10 +80,11 @@ int main(int argc, char *argv[]) {
         bool norm = true; //indicates whether to normalize or scale to [0,1]
                           //the later will preserve null entries
         bool libsvm = false; // read libsvm data instead of csv
+        bool processed_csv = false;
         string inputfile;
         string outputfile;
 
-        if (parse_args(argc, argv, nn_num, label_col, norm, libsvm, inputfile, outputfile)){
+        if (parse_args(argc, argv, nn_num, label_col, norm, libsvm, processed_csv, inputfile, outputfile)){
                 cout << "parse_args error. exiting..." << endl;
                 return 1;
         }
@@ -56,6 +102,9 @@ int main(int argc, char *argv[]) {
                 cout << "read csv time " << t.elapsed() << endl;
         }
 
+        if (processed_csv || label_col != 0) {
+                write_csv(outputfile + "_processed.csv", data, label);
+        }
 
         size_t rows = data.size();
         size_t cols = data[0].size();
@@ -109,17 +158,18 @@ int main(int argc, char *argv[]) {
         return 0;
 }
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, bool & libsvm, string & inputfile, string & outputfile) {
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile) {
         // Setup argtable parameters.
         struct arg_end *end                 = arg_end(100);
         struct arg_lit *help                = arg_lit0("h", "help","Print help.");
-        struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute.");
+        struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute. (default 10)");
         struct arg_int *label_column        = arg_int0(NULL, "label_col", NULL, "column in which the labels are written (starting at 0)");
+        struct arg_lit *p_csv       = arg_lit0("c", NULL, "");
         struct arg_lit *scale               = arg_lit0(NULL, "scale", "don't normalize just scale to [0,1]");
         struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to csv file to process.");
         struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
 
-        void* argtable[] = {help, nearest_neighbors, label_column, scale, filename, filename_output
+        void* argtable[] = {help, nearest_neighbors, label_column, scale, p_csv, filename, filename_output
                             ,end};
 
         // Parse arguments.
@@ -148,6 +198,10 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & nor
                 normalize = false;
         }
 
+        if (p_csv->count > 0) {
+                processed_csv = true;
+        }
+
         if (filename->count > 0) {
                 inputfile = filename->sval[0];
                 auto last_dot = inputfile.find_last_of('.');
@@ -169,6 +223,8 @@ void read_csv(const string & filename, MyMat & data, vector<int> & label, int la
         ifstream file;
         file.open(filename);
 
+        std::vector<std::vector<std::string>> values;
+
         for (string line; getline(file, line); ) {
                 stringstream sep(line);
 
@@ -178,14 +234,41 @@ void read_csv(const string & filename, MyMat & data, vector<int> & label, int la
 
                 data.push_back(FeatureVec());
 
-                int col=0;
+                size_t col=0;
                 for (string item; getline(sep, item, ','); ) {
+                        if (values.size() < col + 1) {
+                                values.resize(col+1);
+                        }
                         if (col == label_col) {
                                 int val = stoi(item);
                                 label.push_back(val);
                         } else{
-                                FeatureData val = stod(item);
-                                data.back().push_back(val);
+                                try {
+                                        FeatureData val = stod(item);
+                                        data.back().push_back(val);
+                                }
+                                catch (...) {
+                                        // if non numerical value convert
+                                        trim(item);
+                                        if (item == "?") {
+                                                data.back().push_back(-1);
+                                        }
+                                        else {
+                                                int val = -1;
+                                                for (size_t i = 0; i < values[col].size(); i++) {
+                                                        if (values[col][i] == item) {
+                                                                val = i;
+                                                                break;
+                                                        }
+                                                }
+                                                if (val == -1) {
+                                                        values[col].push_back(item);
+                                                        val = values[col].size() - 1;
+                                                }
+                                                data.back().push_back(val);
+                                        }
+                                }
+
                         }
                         col++;
                 }
@@ -231,6 +314,26 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & label) {
                         row.resize(feature_size);
         }
         cout << "done" << endl;
+}
+
+void write_csv(const string & filename, const MyMat& data, const vector<int> & label) {
+        size_t rows = data.size();
+        size_t cols = data[0].size();
+
+        ofstream file;
+        file.open(filename);
+
+        timer t;
+
+        for (size_t i = 0; i < rows; ++i) {
+                file << label[i] << ",";
+                for (size_t j = 0; j < cols; ++j) {
+                        file << data[i][j] << ",";
+                }
+                file << endl;
+        }
+
+        cout << "finished writing processed csv to " << filename << " in " << t.elapsed() << endl;
 }
 
 void normalize(MyMat & data) {
