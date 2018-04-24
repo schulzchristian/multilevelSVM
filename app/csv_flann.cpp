@@ -60,15 +60,15 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & nor
 
 void read_csv(const string & filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
 
-void read_libsvm(const string & filename, MyMat & data, vector<int> & label);
+void read_libsvm(const string & filename, MyMat & data, vector<int> & labels);
 
-void write_csv(const string & filename, const MyMat & data, const vector<int> & label);
+void write_csv(const string & filename, const MyMat & data, const vector<int> & labels);
 
 void normalize(MyMat & data);
 
 void scale(MyMat & data, FeatureData from = 0, FeatureData to = 1);
 
-void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj);
+void split(const MyMat & data, const vector<int> labels, MyMat & min, MyMat & maj);
 
 void write_metis(const vector<vector<Edge>> & edges, const string output);
 
@@ -90,20 +90,20 @@ int main(int argc, char *argv[]) {
         }
 
         MyMat data;
-        vector<int> label;
+        vector<int> labels;
 
         timer t;
 
         if (libsvm) {
-                read_libsvm(inputfile, data, label);
+                read_libsvm(inputfile, data, labels);
                 cout << "read libsvm time " << t.elapsed() << endl;
         } else {
-                read_csv(inputfile, data, label, label_col);
+                read_csv(inputfile, data, labels, label_col);
                 cout << "read csv time " << t.elapsed() << endl;
         }
 
         if (processed_csv || label_col != 0) {
-                write_csv(outputfile + "_processed.csv", data, label);
+                write_csv(outputfile + "_processed.csv", data, labels);
         }
 
         size_t rows = data.size();
@@ -126,18 +126,21 @@ int main(int argc, char *argv[]) {
 
         t.restart();
 
-        split(data, label, min_data, maj_data);
+        split(data, labels, min_data, maj_data);
 
         cout << "splitting time " << t.elapsed() << endl;
 
         std::cout << "nodes - min " << min_data.size()
                   << " maj " << maj_data.size() << std::endl;
 
-        vector<vector<Edge>> min_edges;
-        vector<vector<Edge>> maj_edges;
+        write_features(min_data, outputfile + "_min_data");
+        write_features(maj_data, outputfile + "_maj_data");
 
+        /*
         t.restart();
 
+        vector<vector<Edge>> min_edges;
+        vector<vector<Edge>> maj_edges;
         svm_flann::run_flann(min_data, min_edges, nn_num);
 
         std::cout << "flann time min " << t.elapsed() << std::endl;
@@ -150,10 +153,9 @@ int main(int argc, char *argv[]) {
 
         write_metis(min_edges, outputfile + "_min_graph");
         write_metis(maj_edges, outputfile + "_maj_graph");
-        write_features(min_data, outputfile + "_min_data");
-        write_features(maj_data, outputfile + "_maj_data");
 
-        cout << "export time " << t.elapsed() << endl;
+        cout << "flann + export time " << t.elapsed() << endl;
+        */
 
         return 0;
 }
@@ -164,7 +166,7 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & nor
         struct arg_lit *help                = arg_lit0("h", "help","Print help.");
         struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute. (default 10)");
         struct arg_int *label_column        = arg_int0(NULL, "label_col", NULL, "column in which the labels are written (starting at 0)");
-        struct arg_lit *p_csv       = arg_lit0("c", NULL, "");
+        struct arg_lit *p_csv       = arg_lit0("c", NULL, "export the csv where the categorical attributes where converted to binary");
         struct arg_lit *scale               = arg_lit0(NULL, "scale", "don't normalize just scale to [0,1]");
         struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to csv file to process.");
         struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
@@ -219,12 +221,20 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & nor
         return 0;
 }
 
-void read_csv(const string & filename, MyMat & data, vector<int> & label, int label_col) {
+void read_csv(const string & filename, MyMat & data, vector<int> & labels, int label_col) {
+        enum COL_TYP {
+                LABEL,
+                NUMERICAL,
+                CATEGORICAL
+        };
+
+        std::vector<std::vector<std::string>> col_categorical_value;
+        std::vector<COL_TYP> col_typs;
+
+        bool first = true;
+
         ifstream file;
         file.open(filename);
-
-        std::vector<std::vector<std::string>> values;
-
         for (string line; getline(file, line); ) {
                 stringstream sep(line);
 
@@ -232,50 +242,95 @@ void read_csv(const string & filename, MyMat & data, vector<int> & label, int la
                 if (line[0] == '#')
                         continue;
 
-                data.push_back(FeatureVec());
 
-                size_t col=0;
-                for (string item; getline(sep, item, ','); ) {
-                        if (values.size() < col + 1) {
-                                values.resize(col+1);
-                        }
-                        if (col == label_col) {
-                                int val = stoi(item);
-                                label.push_back(val);
-                        } else{
+                if (first == true) {
+                        // scan over the first entry to get column information
+                        size_t col = 0;
+                        for (string item; getline(sep, item, ','); ) {
                                 try {
-                                        FeatureData val = stod(item);
-                                        data.back().push_back(val);
+                                        stod(item);
+                                        col_typs.push_back(NUMERICAL);
                                 }
                                 catch (...) {
-                                        // if non numerical value convert
-                                        trim(item);
-                                        if (item == "?") {
-                                                data.back().push_back(-1);
-                                        }
-                                        else {
-                                                int val = -1;
-                                                for (size_t i = 0; i < values[col].size(); i++) {
-                                                        if (values[col][i] == item) {
-                                                                val = i;
-                                                                break;
-                                                        }
-                                                }
-                                                if (val == -1) {
-                                                        values[col].push_back(item);
-                                                        val = values[col].size() - 1;
-                                                }
-                                                data.back().push_back(val);
-                                        }
+                                        col_typs.push_back(CATEGORICAL);
+                                }
+                                col++;
+                        }
+                        col_typs[label_col] = LABEL;
+                        col_categorical_value.resize(col);
+
+                        sep.clear();
+                        sep.seekg(0);
+                        first = false;
+                }
+
+                data.push_back(FeatureVec());
+                size_t col=0;
+                for (string item; getline(sep, item, ','); ) {
+                        switch (col_typs[col]) {
+                        case LABEL:
+                                {
+                                        int label = stoi(item);
+                                        labels.push_back(label);
+                                        break;
                                 }
 
+                        case NUMERICAL:
+                                {
+                                        trim(item);
+                                        if (item == "?" || item == "na") {
+                                                data.back().push_back(-1);
+                                        }
+                                        FeatureData val = stod(item);
+                                        data.back().push_back(val);
+                                        break;
+                                }
+
+                        case CATEGORICAL:
+                                {
+                                        // convert categorical attributes to integers
+                                        int cat = -1;
+                                        for (size_t i = 0; i < col_categorical_value[col].size(); i++) {
+                                                if (col_categorical_value[col][i] == item) {
+                                                        cat = i;
+                                                        break;
+                                                }
+                                        }
+                                        if (cat == -1) {
+                                                cat = col_categorical_value[col].size();
+                                                col_categorical_value[col].push_back(item);
+                                        }
+                                        data.back().push_back(cat);
+                                        break;
+                                }
                         }
                         col++;
                 }
         }
+
+        for (size_t col = 0; col < col_categorical_value.size(); col++) {
+                if (col_typs[col] != CATEGORICAL)
+                        continue;
+                cout << "Categorical values for col " << col << endl;
+                for (const string & v : col_categorical_value[col]) {
+                        cout << v << ",";
+                }
+                cout << endl;
+        }
+
+
+        // convert categorical attributes to binary
+        for (size_t row = 0; row < data.size(); row++) {
+                for (size_t col = 0; col < col_typs.size()-1; ++col) {
+                        if(col_typs[col] != CATEGORICAL)
+                                continue;
+
+                        // for (size_t cate_index)
+                }
+        }
 }
 
-void read_libsvm(const string & filename, MyMat & data, vector<int> & label) {
+void read_libsvm(const string & filename, MyMat & data, vector<int> & labels) {
         cout << "begin " << filename << endl;
 
         ifstream file;
@@ -290,7 +345,7 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & label) {
                 data.back().reserve(feature_size);
 
                 getline(sep, item, ' ');
-                label.push_back(stoi(item));
+                labels.push_back(stoi(item));
 
                 for (; getline(sep, item, ' '); ) {
                         auto colon_pos = item.find(':');
@@ -316,7 +371,7 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & label) {
         cout << "done" << endl;
 }
 
-void write_csv(const string & filename, const MyMat& data, const vector<int> & label) {
+void write_csv(const string & filename, const MyMat& data, const vector<int> & labels) {
         size_t rows = data.size();
         size_t cols = data[0].size();
 
@@ -325,11 +380,16 @@ void write_csv(const string & filename, const MyMat& data, const vector<int> & l
 
         timer t;
 
+        cout << "lets write" << "\n";
+        cout << "data " << rows << " " << cols << "\n";
+        cout << "labels " << labels.size() << "\n";
+
         for (size_t i = 0; i < rows; ++i) {
-                file << label[i] << ",";
-                for (size_t j = 0; j < cols; ++j) {
+                file << labels[i] << ",";
+                for (size_t j = 0; j < cols - 1; ++j) {
                         file << data[i][j] << ",";
                 }
+                file << data[i][cols-1];
                 file << endl;
         }
 
@@ -394,13 +454,13 @@ void scale(MyMat & data, FeatureData from, FeatureData to) {
         }
 }
 
-void split(const MyMat & data, const vector<int> label, MyMat & min, MyMat & maj) {
+void split(const MyMat & data, const vector<int> labels, MyMat & min, MyMat & maj) {
         size_t rows = data.size();
         MyMat data_cpy(data);
 
         for (int i = rows - 1; i >= 0; --i) {
                 MyMat * target = nullptr;
-                if (label[i] == 1) {
+                if (labels[i] == 1) {
                         target = &min;
                 } else {
                         target = &maj;
