@@ -140,11 +140,11 @@ int main(int argn, char *argv[]) {
         results.setFloat("INIT_AC  ", initial_summary.Acc);
         results.setFloat("INIT_GM  ", initial_summary.Gmean);
 
-        std::cout << "inital validation on hole training data:" << std::endl;
+        std::cout << "inital validation on testing:" << std::endl;
         svm_summary initial_test_summary = init_solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
         initial_test_summary.print();
-        results.setFloat("INIT_AC_TRAIN", initial_test_summary.Acc);
-        results.setFloat("INIT_GM_TRAIN", initial_test_summary.Gmean);
+        results.setFloat("INIT_AC_TEST", initial_test_summary.Acc);
+        results.setFloat("INIT_GM_TEST", initial_test_summary.Gmean);
 
         // ------------- REFINEMENT -----------------
 
@@ -203,7 +203,7 @@ int main(int argn, char *argv[]) {
         results.setFloat("BEST_AC", best_summary.Acc);
         results.setFloat("BEST_GM", best_summary.Gmean);
 
-        std::cout << "best validation on hole training data:" << std::endl;
+        std::cout << "best validation on testing data:" << std::endl;
         svm_solver best_solver(best_results[best_index].second);
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
