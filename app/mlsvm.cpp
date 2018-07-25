@@ -217,7 +217,10 @@ int main(int argn, char *argv[]) {
 
         svm_summary best_summary = best_results[best_index].first;
         results.setFloat("BEST_AC", best_summary.Acc);
+        results.setFloat("BEST_SN", best_summary.Sens);
+        results.setFloat("BEST_SP", best_summary.Spec);
         results.setFloat("BEST_GM", best_summary.Gmean);
+        results.setFloat("BEST_F1", best_summary.F1);
 
         std::cout << "best validation on testing data:" << std::endl;
         svm_solver best_solver(best_results[best_index].second);
@@ -228,7 +231,10 @@ int main(int argn, char *argv[]) {
         best_summary_test.print();
 
         results.setFloat("BEST_AC_TEST", best_summary_test.Acc);
+        results.setFloat("BEST_SN_TEST", best_summary_test.Sens);
+        results.setFloat("BEST_SP_TEST", best_summary_test.Spec);
         results.setFloat("BEST_GM_TEST", best_summary_test.Gmean);
+        results.setFloat("BEST_F1_TEST", best_summary_test.F1);
 
         // ------------- END --------------
         auto time_iteration = t_all.elapsed();

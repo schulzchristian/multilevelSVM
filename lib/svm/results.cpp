@@ -1,5 +1,6 @@
 #include "results.h"
 #include <iostream>
+#include <iomanip>
 
 results::results() {
         this->cur_iteration = -1;
@@ -28,6 +29,7 @@ void results::setString(const std::string & tag, const std::string & result) {
 }
 
 void results::print() {
+        std::cout << std::setprecision(3) << std::defaultfloat;
         for (const auto& tag : this->tag_order) {
                 if (this->floats.find(tag) != this->floats.end()) {
                         std::vector<float> & ress = this->floats[tag];
