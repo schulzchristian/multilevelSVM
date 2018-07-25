@@ -10,7 +10,7 @@ public:
         virtual ~k_fold_build();
 
 protected:
-        virtual void next_intern() override;
+        virtual void next_intern(double & io_time) override;
 
         void readData(const std::string & filename);
         void calculate_kfold_class(const std::vector<FeatureVec> & features_full,

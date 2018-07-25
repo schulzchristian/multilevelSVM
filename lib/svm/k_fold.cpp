@@ -14,7 +14,7 @@ k_fold::~k_fold() {
 }
 
 
-bool k_fold::next() {
+bool k_fold::next(double & io_time) {
         this->cur_iteration += 1;
         if (cur_iteration >= this->iterations) {
                 std::cout << "-------------- K-FOLD DONE -------------- " << std::endl;
@@ -24,7 +24,7 @@ bool k_fold::next() {
         std::cout << "------------- K-FOLD ITERATION " << this->cur_iteration
                   << " -------------" << std::endl;
 
-        this->next_intern();
+        this->next_intern(io_time);
 
         return true;
 }

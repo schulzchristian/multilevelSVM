@@ -16,7 +16,7 @@ public:
         k_fold(int num_iter);
         virtual ~k_fold();
 
-        bool next();
+        bool next(double & io_time);
 
         graph_access* getMinGraph();
         graph_access* getMajGraph();
@@ -24,7 +24,7 @@ public:
         std::vector<std::vector<svm_node>>* getMajTestData();
 protected:
         /// do kfold stuff in here
-        virtual void next_intern() = 0;
+        virtual void next_intern(double & io_time) = 0;
 
         int iterations;
         int cur_iteration;

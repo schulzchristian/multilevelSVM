@@ -41,7 +41,6 @@ int main(int argn, char *argv[]) {
                 return -1;
         }
 
-
         // disable libsvm output
         svm_set_print_string_function(&print_null);
 
@@ -83,16 +82,17 @@ int main(int argn, char *argv[]) {
 
         timer t_all;
         timer t;
+        double kfold_io_time = 0;
 
-        while (kfold->next()) {
+        while (kfold->next(kfold_io_time)) {
         results.next();
         graph_access *G_min = kfold->getMinGraph();
         graph_access *G_maj = kfold->getMajGraph();
 
-        auto kfold_time = t.elapsed();
-
+        auto kfold_time = t.elapsed() - kfold_io_time;
         std::cout << "fold time: " << kfold_time << std::endl;
         results.setFloat("KFOLD_TIME", kfold_time);
+        kfold_io_time = 0;
 
         G_min->set_partition_count(partition_config.k);
         G_maj->set_partition_count(partition_config.k);
@@ -156,11 +156,16 @@ int main(int argn, char *argv[]) {
         results.setFloat("INIT_AC  ", initial_summary.Acc);
         results.setFloat("INIT_GM  ", initial_summary.Gmean);
 
+        t.restart();
+
         std::cout << "inital validation on testing:" << std::endl;
         svm_summary initial_test_summary = init_solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
         initial_test_summary.print();
         results.setFloat("INIT_AC_TEST", initial_test_summary.Acc);
         results.setFloat("INIT_GM_TEST", initial_test_summary.Gmean);
+
+        auto init_test_time = t.elapsed();
+        std::cout << "init test time: " << init_test_time << std::endl;
 
         // ------------- REFINEMENT -----------------
 
@@ -237,7 +242,9 @@ int main(int argn, char *argv[]) {
         results.setFloat("BEST_F1_TEST", best_summary_test.F1);
 
         // ------------- END --------------
-        auto time_iteration = t_all.elapsed();
+        auto time_all = t_all.elapsed();
+
+        auto time_iteration = time_all - kfold_io_time - init_test_time;
 
         std::cout << "iteration time: " << time_iteration << std::endl;
 

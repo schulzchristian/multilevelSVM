@@ -10,7 +10,7 @@ public:
         virtual ~k_fold_import();
 
 protected:
-        virtual void next_intern() override;
+        virtual void next_intern(double & io_time) override;
 
         std::string basename;
         int num_exp;

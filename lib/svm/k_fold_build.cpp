@@ -34,7 +34,7 @@ void k_fold_build::readData(const std::string & filename) {
 }
 
 
-void k_fold_build::next_intern() {
+void k_fold_build::next_intern(double & io_time) {
         this->cur_min_test.clear();
         this->cur_maj_test.clear();
 
