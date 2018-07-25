@@ -10,7 +10,7 @@ class svm_refinement
 {
 public:
         svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy & maj_hierarchy,
-                       const svm_result & initial_result);
+                       const svm_result & initial_result, int num_inherit_refinement);
 
         virtual ~svm_refinement();
 
@@ -34,6 +34,7 @@ private:
         svm_data neighbors_maj;
         svm_result result;
         bool training_inherit;
+        int num_inherit_refinement;
 };
 
 #endif /* REFINEMENT_H */

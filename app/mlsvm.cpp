@@ -76,7 +76,7 @@ int main(int argn, char *argv[]) {
         if(partition_config.import_kfold) {
                 kfold.reset(new k_fold_import(r, partition_config.kfold_iterations, filename));
         } else {
-                kfold.reset(new k_fold_build(partition_config.kfold_iterations, filename));
+                kfold.reset(new k_fold_build(partition_config.num_nn, partition_config.kfold_iterations, filename));
         }
 
         timer t_all;
@@ -164,7 +164,7 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result);
+        svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_inherit_refinement);
 
         std::vector<std::pair<svm_summary, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));

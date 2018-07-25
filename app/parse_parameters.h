@@ -180,8 +180,9 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *num_experiments                      = arg_int0("e", "num_experiments", NULL, "Number of experiments i.e. full kfold runs (default 1)");
         struct arg_int *kfold_iterations                     = arg_int0("f", "kfold_iterations", NULL, "Number of kfold iterations (Default: 5)");
         struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
-        struct arg_lit *import_kfold                       = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
-
+        struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
+        struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
+        struct arg_int *num_inherit_refinement               = arg_int0(NULL, "num_inherit_refinement", NULL, "Size of the problem on which no model selection is conducted and only the best parameter is inherited (Default: 10000)");
 
 
         struct arg_end *end                                  = arg_end(100);
@@ -288,6 +289,8 @@ int parse_parameters(int argn, char **argv,
                 label_propagation_iterations,
                 filename_output,
                 import_kfold,
+                num_nn,
+                num_inherit_refinement,
 #endif
                 end
         };
@@ -1091,6 +1094,18 @@ int parse_parameters(int argn, char **argv,
                 partition_config.import_kfold = true;
         } else {
                 partition_config.import_kfold = false;
+        }
+
+        if(num_nn->count > 0) {
+                partition_config.num_nn = num_nn->ival[0];
+        } else {
+                partition_config.num_nn = 10;
+        }
+
+        if(num_inherit_refinement->count > 0) {
+                partition_config.num_inherit_refinement = num_inherit_refinement->ival[0];
+        } else {
+                partition_config.num_inherit_refinement = 10;
         }
 
         arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

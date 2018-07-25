@@ -6,7 +6,7 @@
 class k_fold_build: public k_fold
 {
 public:
-        k_fold_build(int num_iter, const std::string & basename);
+        k_fold_build(int num_nn, int num_iter, const std::string & basename);
         virtual ~k_fold_build();
 
 protected:
@@ -19,6 +19,7 @@ protected:
 
         std::vector<FeatureVec> min_features;
         std::vector<FeatureVec> maj_features;
+        int num_nn;
 };
 
 #endif /* KFOLD_BUILD_H */

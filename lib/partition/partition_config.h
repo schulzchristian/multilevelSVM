@@ -411,6 +411,8 @@ struct PartitionConfig
         int kfold_iterations;
         float sample_percent;
         bool import_kfold;
+        int num_nn;
+        int num_inherit_refinement;
 
         //=======================================
         //===============Shared Mem OMP==========

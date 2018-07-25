@@ -7,8 +7,9 @@
 #include "random_functions.h"
 
 
-k_fold_build::k_fold_build(int num_iter, const std::string & filename)
+k_fold_build::k_fold_build(int num_nn, int num_iter, const std::string & filename)
         : k_fold(num_iter) {
+        this->num_nn = num_nn;
         readData(filename);
 }
 
@@ -44,7 +45,6 @@ void k_fold_build::next_intern() {
 void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & features_full,
                                    graph_access & target_graph,
                                    std::vector<std::vector<svm_node>> & target_test) {
-        int nn = 10;
         NodeID nodes          = features_full.size();
         NodeID remaining_part = nodes % this->iterations;
         NodeID test_size      = floor(nodes / this->iterations);
@@ -61,9 +61,9 @@ void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & feature
         test_subset.insert(test_subset.end(), features_full.begin() + test_start, features_full.begin() + test_end);
 
         std::vector<std::vector<Edge>> edges_subset;
-        svm_flann::run_flann(feature_subset, edges_subset);
+        svm_flann::run_flann(feature_subset, edges_subset, this->num_nn);
 
-        graph_io::readGraphFromVec(target_graph, edges_subset, nodes * nn * 2);
+        graph_io::readGraphFromVec(target_graph, edges_subset, nodes * this->num_nn * 2);
         graph_io::readFeatures(target_graph, feature_subset);
 
         target_test.reserve(test_size);
