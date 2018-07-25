@@ -410,6 +410,7 @@ struct PartitionConfig
         int num_experiments;
         int kfold_iterations;
         float sample_percent;
+        bool import_kfold;
 
         //=======================================
         //===============Shared Mem OMP==========

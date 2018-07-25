@@ -13,7 +13,7 @@
 class k_fold
 {
 public:
-        k_fold(int num_iter, const std::string & filename);
+        k_fold(int num_iter);
         virtual ~k_fold();
 
         bool next();
@@ -22,18 +22,13 @@ public:
         graph_access* getMajGraph();
         std::vector<std::vector<svm_node>>* getMinTestData();
         std::vector<std::vector<svm_node>>* getMajTestData();
-
-private:
-        void readData(const std::string & filename);
-        void calculate_kfold_class(const std::vector<FeatureVec> & features_full,
-                                   graph_access & target_graph,
-                                   std::vector<std::vector<svm_node>> & target_test);
+protected:
+        /// do kfold stuff in here
+        virtual void next_intern() = 0;
 
         int iterations;
         int cur_iteration;
 
-        std::vector<FeatureVec> min_features;
-        std::vector<FeatureVec> maj_features;
         graph_access cur_min_graph;
         graph_access cur_maj_graph;
         std::vector<std::vector<svm_node>> cur_min_test;

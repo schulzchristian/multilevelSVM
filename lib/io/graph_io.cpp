@@ -258,39 +258,6 @@ int graph_io::readFeatures(graph_access & G, const std::vector<FeatureVec> & dat
         return 0;
 }
 
-void graph_io::readFeaturesLines(const std::string & filename, std::vector<FeatureVec> & data) {
-        std::string line;
-
-        // open file for reading
-        std::ifstream in(filename);
-        if (!in) {
-                std::cerr << "Error opening file" << filename << std::endl;
-                exit(1);
-        }
-
-        std::getline(in, line);
-        std::stringstream s(line);
-        int nodes = 0;
-        int features = 0;
-        s >> nodes;
-        s >> features;
-
-        data.reserve(nodes);
-
-        while(std::getline(in, line)) {
-                std::stringstream ss(line);
-
-                FeatureVec vec(features);
-                for (int i = 0; i < features; i++) {
-                        ss >> vec[i];
-                }
-
-                data.push_back(vec);
-        }
-
-        return data;
-}
-
 int graph_io::readGraphFromVec(graph_access & G, const std::vector<std::vector<Edge>> & data, EdgeID num_edges) {
         G.start_construction(data.size(), num_edges);
 

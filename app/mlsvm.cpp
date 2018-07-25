@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <memory>
 
 #include "balance_configuration.h"
 #include "data_structure/graph_access.h"
@@ -17,6 +18,8 @@
 #include "svm/svm_solver.h"
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
+#include "svm/k_fold_build.h"
+#include "svm/k_fold_import.h"
 #include "svm/svm_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
@@ -56,22 +59,33 @@ int main(int argn, char *argv[]) {
         std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
         std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
         std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
+        std::cout << "node_ordering: " << partition_config.node_ordering << std::endl;
+        std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
+        std::cout << "seed: " << partition_config.seed << std::endl;
 
+
+        random_functions::setSeed(partition_config.seed);
 
         results results;
 
         for (int r = 0; r < partition_config.num_experiments; r++) {
-                std::cout << " \\/\\/\\/\\/\\/\\/\\/\\/\\/ EXPERIMENT " << r << " \\/\\/\\/\\/\\/\\/\\/" << std::endl;
+        std::cout << " \\/\\/\\/\\/\\/\\/\\/\\/\\/ EXPERIMENT " << r << " \\/\\/\\/\\/\\/\\/\\/" << std::endl;
 
-        k_fold kfold(partition_config.kfold_iterations, filename);
+        std::unique_ptr<k_fold> kfold;
+
+        if(partition_config.import_kfold) {
+                kfold.reset(new k_fold_import(r, partition_config.kfold_iterations, filename));
+        } else {
+                kfold.reset(new k_fold_build(partition_config.kfold_iterations, filename));
+        }
 
         timer t_all;
         timer t;
 
-        while (kfold.next()) {
+        while (kfold->next()) {
         results.next();
-        graph_access *G_min = kfold.getMinGraph();
-        graph_access *G_maj = kfold.getMajGraph();
+        graph_access *G_min = kfold->getMinGraph();
+        graph_access *G_maj = kfold->getMajGraph();
 
         auto kfold_time = t.elapsed();
 
@@ -86,11 +100,11 @@ int main(int argn, char *argv[]) {
                         << " maj: " << G_maj->number_of_nodes() << std::endl;
 
         std::cout << "test -"
-                        << " min: " << kfold.getMinTestData()->size()
-                        << " maj: " << kfold.getMajTestData()->size() << std::endl;
+                        << " min: " << kfold->getMinTestData()->size()
+                        << " maj: " << kfold->getMajTestData()->size() << std::endl;
 
-        auto min_sample = svm_convert::sample_from_graph(*(kfold.getMinGraph()), partition_config.sample_percent);
-        auto maj_sample = svm_convert::sample_from_graph(*(kfold.getMajGraph()), partition_config.sample_percent);
+        auto min_sample = svm_convert::sample_from_graph(*(kfold->getMinGraph()), partition_config.sample_percent);
+        auto maj_sample = svm_convert::sample_from_graph(*(kfold->getMajGraph()), partition_config.sample_percent);
 
         std::cout << "sample -"
                         << " min: " << min_sample.size()
@@ -141,7 +155,7 @@ int main(int argn, char *argv[]) {
         results.setFloat("INIT_GM  ", initial_summary.Gmean);
 
         std::cout << "inital validation on testing:" << std::endl;
-        svm_summary initial_test_summary = init_solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+        svm_summary initial_test_summary = init_solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
         initial_test_summary.print();
         results.setFloat("INIT_AC_TEST", initial_test_summary.Acc);
         results.setFloat("INIT_GM_TEST", initial_test_summary.Gmean);
@@ -182,7 +196,7 @@ int main(int argn, char *argv[]) {
                 solver.set_C(current_result.best().C);
                 solver.set_gamma(current_result.best().gamma);
                 solver.train();
-                svm_summary final_test_summary = solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+                svm_summary final_test_summary = solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
                 final_test_summary.print();
 
                 fmt_ac << "_TEST";
@@ -208,7 +222,7 @@ int main(int argn, char *argv[]) {
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
         best_solver.train();
-        svm_summary best_summary_test = best_solver.predict_validation_data(*kfold.getMinTestData(), *kfold.getMajTestData());
+        svm_summary best_summary_test = best_solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
         best_summary_test.print();
 
         results.setFloat("BEST_AC_TEST", best_summary_test.Acc);

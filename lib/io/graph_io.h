@@ -60,8 +60,6 @@ class graph_io {
                 static
                 int readFeatures(graph_access & G, const std::vector<FeatureVec> & data);
 
-                static void readFeaturesLines(const std::string & filename, std::vector<FeatureVec> & data);
-
                 static int readGraphFromVec(graph_access & G,
                                         const std::vector<std::vector<Edge>> & data,
                                         EdgeID num_edges);
