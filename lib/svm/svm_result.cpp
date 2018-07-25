@@ -36,7 +36,19 @@ std::vector<svm_param> svm_result::all_params() {
 }
 
 void svm_result::sort_summaries() {
-        std::sort(this->summaries.begin(), this->summaries.end(), summary_cmp_better_gmean_sv::comp);
+        // insertion_sort
+        int j;
+
+        for (int i = 0; i < this->summaries.size(); i++){
+                j = i;
+
+                while (j > 0 && summary_cmp_better_gmean_sv::comp(this->summaries[j], this->summaries[j-1])) {
+                        svm_summary temp = std::move(this->summaries[j]);
+                        this->summaries[j] = std::move(this->summaries[j-1]);
+                        this->summaries[j-1] = std::move(temp);
+                        j--;
+                }
+        }
 }
 
 static size_t svm_result::get_best_index(const std::vector<std::pair<svm_summary,svm_instance>> vec) {
