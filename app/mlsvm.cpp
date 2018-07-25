@@ -55,12 +55,14 @@ int main(int argn, char *argv[]) {
         partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
         std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
         std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
+        std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
         std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
         std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
         std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
         std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
         std::cout << "node_ordering: " << partition_config.node_ordering << std::endl;
-        std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
+        std::cout << "num_skip_ms: " << partition_config.num_skip_ms << std::endl;
+        std::cout << "inherit_ud: " << partition_config.inherit_ud << std::endl;
         std::cout << "seed: " << partition_config.seed << std::endl;
 
 
@@ -164,7 +166,7 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_inherit_refinement);
+        svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
 
         std::vector<std::pair<svm_summary, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));

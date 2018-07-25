@@ -50,27 +50,27 @@ void svm_solver::train() {
             (trained_model, [](svm_model* m) { svm_free_and_destroy_model(&m); });
 }
 
-svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample,
-                                     bool inherit, float param_c, float param_g) {
+svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data & maj_sample) {
+        svm_result result;
+        std::vector<svm_param> params;
+
         // first search
-        auto params = param_search::mlsvm_method(-10, 10, -10, 10, true, inherit, param_c, param_g);
+        std::cout << "1st sweep with initial logC=0 logGamma=0" << std::endl;
+        params = param_search::ud(-5, 15, -10, 10, true);
 
-        if (inherit) {
-                std::cout << "initial train around logC=" << param_c << " logGamma="<< param_g << std::endl;
-        }
-
-        svm_result result = train_range(params, min_sample, maj_sample);
+        result = train_range(params, min_sample, maj_sample);
         svm_summary good = result.best();
 
-        std::cout << "continue with (" << good.C_log << "," << good.gamma_log << ")" << std::endl;
+        std::cout << "2nd sweep with logC=" << good.C_log << " logGamma=" << good.gamma_log << std::endl;
         good.print();
 
         // second search
-        params = param_search::mlsvm_method(-10, 10, -10, 10, false, true, good.C_log, good.gamma_log);
+        params = param_search::ud(-5, 15, -10, 10, false, true, good.C_log, good.gamma_log);
+        params.pop_back();
 
         svm_result second_res = train_range(params, min_sample, maj_sample);
-        result.add(second_res);
-        svm_summary best = result.best();
+        second_res.add(result);
+        svm_summary best = second_res.best();
 
         std::cout << "BEST (" << best.C_log << "," << best.gamma_log << ")"<< std::endl;
         best.print();
@@ -80,8 +80,49 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         this->param.gamma = best.gamma;
         this->train();
 
-        return result;
+        return second_res;
 }
+
+svm_result svm_solver::train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
+                                        bool inherit_ud, float param_c, float param_g) {
+        svm_result result;
+        std::vector<svm_param> params;
+        if (!inherit_ud) {
+                // first search
+                std::cout << "1st sweep with logC=" << param_c << " logGamma="<< param_g << std::endl;
+                params = param_search::ud(-5, 15, -10, 10, true, true, param_c, param_g);
+
+                result = train_range(params, min_sample, maj_sample);
+                svm_summary good = result.best();
+
+                std::cout << "2nd sweep with logC=" << good.C_log << " logGamma=" << good.gamma_log << std::endl;
+                good.print();
+
+                // second search
+                params = param_search::ud(-5, 15, -10, 10, false, true, good.C_log, good.gamma_log);
+                params.pop_back();
+        } else {
+                std::cout << "2nd sweep with logC=" << param_c << " logGamma="<< param_g << std::endl;
+                params = param_search::ud(-5, 15, -10, 10, false, true, param_c, param_g);
+                params.push_back(std::make_pair(param_c, param_g));
+        }
+
+
+        svm_result second_res = train_range(params, min_sample, maj_sample);
+        second_res.add(result);
+        svm_summary best = second_res.best();
+
+        std::cout << "BEST (" << best.C_log << "," << best.gamma_log << ")"<< std::endl;
+        best.print();
+
+        // train this solver to the best found parameters
+        this->param.C = best.C;
+        this->param.gamma = best.gamma;
+        this->train();
+
+        return second_res;
+}
+
 
 svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                                    const svm_data & min_sample,
@@ -102,7 +143,7 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                           << "\tlog gamma=" << p.second
                           << std::flush;
 
-                // if (cur_solver.model->l > (cur_solver.instance.num_min + cur_solver.instance.num_maj) * 0.8
+                // if (cur_solver.model->l > (cur_solver.instance.num_min + cur_solver.instance.num_maj) * 0.9
                 //     && !summaries.empty()) {
                 //         // don't evaluate models which are very likely prone to over fitting
                 //         // but at least evaluate once
@@ -115,19 +156,6 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                 cur_summary.print_short();
 
                 summaries.push_back(cur_summary);
-        }
-
-        return svm_solver::make_result(summaries);
-}
-
-svm_result svm_solver::make_result(const std::vector<svm_summary> & vec) {
-        std::vector<svm_summary> summaries;
-        summaries.push_back(vec[0]);
-
-        for (size_t i = 1; i < vec.size(); ++i) {
-                if(vec[i].Gmean > summaries[0].Gmean - 0.1f) {
-                        summaries.push_back(std::move(vec[i]));
-                }
         }
 
         return svm_result(summaries, this->instance);

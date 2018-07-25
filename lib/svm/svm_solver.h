@@ -18,8 +18,9 @@ public:
         svm_solver(const svm_instance & instance);
 
         void train();
-        svm_result train_initial(const svm_data & min_sample, const svm_data & maj_sample,
-                                 bool inherit = false, float param_c = 0, float param_g = 0);
+        svm_result train_initial(const svm_data & min_sample, const svm_data & maj_sample);
+        svm_result train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
+                                    bool inherit_ud, float param_c, float param_g);
         svm_result train_range(const std::vector<svm_param> & params,
                                const svm_data & min_sample,
                                const svm_data & maj_sample);

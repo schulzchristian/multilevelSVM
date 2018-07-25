@@ -182,7 +182,8 @@ int parse_parameters(int argn, char **argv,
         struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
         struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
-        struct arg_int *num_inherit_refinement               = arg_int0(NULL, "num_inherit_refinement", NULL, "Size of the problem on which no model selection is conducted and only the best parameter is inherited (Default: 10000)");
+        struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
+        struct arg_lit *inherit_ud                           = arg_lit0(NULL, "inherit_ud", "Inherit the first UD sweep and only to the second UD sweep in the refinement. (Default: false)");
 
 
         struct arg_end *end                                  = arg_end(100);
@@ -290,7 +291,8 @@ int parse_parameters(int argn, char **argv,
                 filename_output,
                 import_kfold,
                 num_nn,
-                num_inherit_refinement,
+                num_skip_ms,
+                inherit_ud,
 #endif
                 end
         };
@@ -1102,10 +1104,16 @@ int parse_parameters(int argn, char **argv,
                 partition_config.num_nn = 10;
         }
 
-        if(num_inherit_refinement->count > 0) {
-                partition_config.num_inherit_refinement = num_inherit_refinement->ival[0];
+        if(num_skip_ms->count > 0) {
+                partition_config.num_skip_ms = num_skip_ms->ival[0];
         } else {
-                partition_config.num_inherit_refinement = 10;
+                partition_config.num_skip_ms = 10000;
+        }
+
+        if(inherit_ud->count > 0) {
+                partition_config.inherit_ud = true;
+        } else {
+                partition_config.inherit_ud = false;
         }
 
         arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

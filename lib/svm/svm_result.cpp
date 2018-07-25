@@ -2,6 +2,9 @@
 
 #include "svm_result.h"
 
+svm_result::svm_result() {
+}
+
 svm_result::svm_result(const std::vector<svm_summary> & summaries, const svm_instance & instance)
         : summaries(summaries), instance(instance) {
 

@@ -412,7 +412,8 @@ struct PartitionConfig
         float sample_percent;
         bool import_kfold;
         int num_nn;
-        int num_inherit_refinement;
+        int num_skip_ms;
+        bool inherit_ud;
 
         //=======================================
         //===============Shared Mem OMP==========

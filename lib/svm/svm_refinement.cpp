@@ -8,14 +8,15 @@
 #include "timer.h"
 
 svm_refinement::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy & maj_hierarchy,
-                               const svm_result & initial_result, int num_inherit_refinement)
+                               const svm_result & initial_result, int num_skip_ms, int inherit_ud)
     : result(initial_result) {
         this->min_hierarchy = &min_hierarchy;
         this->maj_hierarchy = &maj_hierarchy;
         this->neighbors_min = svm_convert::graph_to_nodes(* this->min_hierarchy->get_coarsest());
         this->neighbors_maj = svm_convert::graph_to_nodes(* this->maj_hierarchy->get_coarsest());
         this->training_inherit = false;
-        this->num_inherit_refinement = num_inherit_refinement;
+        this->num_skip_ms = num_skip_ms;
+        this->inherit_ud = inherit_ud;
 }
 
 svm_refinement::~svm_refinement() {
@@ -67,8 +68,12 @@ svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & ma
         instance.read_problem(neighbors_min, neighbors_maj);
         svm_solver solver(instance);
 
-        if (neighbors_min.size() + neighbors_maj.size() < this->num_inherit_refinement) {
-                result = solver.train_initial(min_sample, maj_sample, training_inherit, result.best().C_log, result.best().gamma_log);
+        if (neighbors_min.size() + neighbors_maj.size() < this->num_skip_ms) {
+                if (training_inherit) {
+                        result = solver.train_refinement(min_sample, maj_sample, inherit_ud, result.best().C_log, result.best().gamma_log);
+                } else {
+                        result = solver.train_initial(min_sample, maj_sample);
+                }
         } else {
                 // std::cout << "test over result range" << std::endl;
                 // std::vector<svm_param> refine_range = result.all_params();

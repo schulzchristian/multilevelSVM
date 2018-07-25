@@ -10,6 +10,7 @@
 class svm_result
 {
 public:
+        svm_result();
         svm_result(const std::vector<svm_summary> & summaries, const svm_instance & instance);
 
         svm_summary best();
