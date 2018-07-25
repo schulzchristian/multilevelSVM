@@ -183,7 +183,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
-        struct arg_lit *inherit_ud                           = arg_lit0(NULL, "inherit_ud", "Inherit the first UD sweep and only to the second UD sweep in the refinement. (Default: false)");
+        struct arg_lit *no_inherit_ud                           = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
 
 
         struct arg_end *end                                  = arg_end(100);
@@ -292,7 +292,7 @@ int parse_parameters(int argn, char **argv,
                 import_kfold,
                 num_nn,
                 num_skip_ms,
-                inherit_ud,
+                no_inherit_ud,
 #endif
                 end
         };
@@ -1110,10 +1110,10 @@ int parse_parameters(int argn, char **argv,
                 partition_config.num_skip_ms = 10000;
         }
 
-        if(inherit_ud->count > 0) {
-                partition_config.inherit_ud = true;
-        } else {
+        if(no_inherit_ud->count > 0) {
                 partition_config.inherit_ud = false;
+        } else {
+                partition_config.inherit_ud = true;
         }
 
         arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
