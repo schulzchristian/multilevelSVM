@@ -3,14 +3,9 @@
 start_dir=$(pwd)
 basefile=$(basename $1 .csv)
 
-cd $(dirname $1)
-path=$(pwd) # get absolute path
-cd $start_dir
-
 echo "--------------- mulitlevelSVM -------------"
 
-cd multilevelSVM/
-
-optimized_output/mlsvm $path/$basefile 2>&1
+#~/multilevelSVM/optimized_output/mlsvm $path/$basefile -e 5 -f 5 --import_kfold 2>&1
+~/multilevelSVM/optimized_output/mlsvm -e 5 -f 5 --import_kfold $1 2>&1
 
 cd $start_dir
