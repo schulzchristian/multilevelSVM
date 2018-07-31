@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-csv_to_libsvm=$HOME/bachelor/multilevelSVM/tools/csv_to_libsvm.py
+csv_to_libsvm=$(dirname $0)/csv_to_libsvm.py
 start_dir=$(pwd)
 echo start_dir \"$start_dir\"
 
