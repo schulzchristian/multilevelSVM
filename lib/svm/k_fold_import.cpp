@@ -35,7 +35,7 @@ void k_fold_import::next_intern(double & io_time) {
         io_time += t.elapsed();
         svm_flann::run_flann(min_features, min_edges);
         std::cout << "ran flann " << min_edges.size() << " edges" << std::endl;
-        graph_io::readGraphFromVec(this->cur_min_graph, min_edges, min_features.size() * nn * 2);
+        graph_io::readGraphFromVec(this->cur_min_graph, min_edges, min_features.size() * nn * 4);
         std::cout << "read graph from vec " << this->cur_min_graph.number_of_nodes() << " nodes " << this->cur_min_graph.number_of_edges() << " edges " << std::endl;
         graph_io::readFeatures(this->cur_min_graph, min_features);
         std::cout << "read features" << std::endl;
@@ -50,7 +50,7 @@ void k_fold_import::next_intern(double & io_time) {
         io_time += t.elapsed();
         svm_flann::run_flann(maj_features, maj_edges);
         std::cout << "ran flann " << maj_edges.size() << " edges" << std::endl;
-        graph_io::readGraphFromVec(this->cur_maj_graph, maj_edges, maj_features.size() * nn * 2);
+        graph_io::readGraphFromVec(this->cur_maj_graph, maj_edges, maj_features.size() * nn * 4);
         std::cout << "read graph from vec " << this->cur_maj_graph.number_of_nodes() << " nodes " << this->cur_maj_graph.number_of_edges() << " edges " << std::endl;
         graph_io::readFeatures(this->cur_maj_graph, maj_features);
         std::cout << "read features" << std::endl;
