@@ -193,6 +193,11 @@ if env['program'] == 'mlsvm':
         env.Append(CCFLAGS  = '-DMODE_MLSVM')
         env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','gomp'])
 
+if env['program'] == 'single_level':
+        env.Append(CXXFLAGS = '-DMODE_MLSVM')
+        env.Append(CCFLAGS  = '-DMODE_MLSVM')
+        env.Program('single_level_svm', ['app/single_level_svm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','gomp'])
+
 if env['program'] == 'csv_flann':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')
         env.Append(CCFLAGS  = '-DMODE_MLSVM')
