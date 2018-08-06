@@ -2,13 +2,14 @@
 #define SVM_SUMMARY_H
 
 #include <vector>
+#include <memory>
 #include <svm.h>
 #include "definitions.h"
 #include "svm_instance.h"
 
 class svm_summary {
 public:
-        svm_summary(const svm_model & model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
+        svm_summary(std::shared_ptr<svm_model> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
 
         void print();
         void print_short();
@@ -19,6 +20,8 @@ public:
         bool operator > (const svm_summary new_) const{
                 return (this->Gmean > new_.Gmean);
         }
+
+        std::shared_ptr<svm_model> model;
 
         int TP;
         int TN;

@@ -160,7 +160,7 @@ int main(int argn, char *argv[]) {
         t.restart();
 
         std::cout << "inital validation on testing:" << std::endl;
-        svm_summary initial_test_summary = init_solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
+        svm_summary initial_test_summary = init_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
         initial_test_summary.print();
         results.setFloat("INIT_AC_TEST", initial_test_summary.Acc);
         results.setFloat("INIT_GM_TEST", initial_test_summary.Gmean);
@@ -204,7 +204,7 @@ int main(int argn, char *argv[]) {
                 solver.set_C(current_result.best().C);
                 solver.set_gamma(current_result.best().gamma);
                 solver.train();
-                svm_summary final_test_summary = solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
+                svm_summary final_test_summary = solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
                 final_test_summary.print();
 
                 fmt_ac << "_TEST";
@@ -233,7 +233,7 @@ int main(int argn, char *argv[]) {
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
         best_solver.train();
-        svm_summary best_summary_test = best_solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
+        svm_summary best_summary_test = best_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
         best_summary_test.print();
 
         results.setFloat("BEST_AC_TEST", best_summary_test.Acc);

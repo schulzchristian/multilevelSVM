@@ -127,7 +127,7 @@ int main(int argn, char *argv[]) {
         results.setFloat("F1", summary.F1);
 
         std::cout << "validation on test data:" << std::endl;
-        svm_summary summary_test = solver.predict_validation_data(*kfold->getMinTestData(), *kfold->getMajTestData());
+        svm_summary summary_test = solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
         summary_test.print();
 
         results.setFloat("AC_TEST", summary_test.Acc);

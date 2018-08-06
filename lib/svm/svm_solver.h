@@ -27,7 +27,7 @@ public:
 
         int predict(const std::vector<svm_node> & node);
 
-        svm_summary predict_validation_data(const svm_data & min, const svm_data & maj);
+        svm_summary build_summary(const svm_data & min, const svm_data & maj);
 
         void set_C(float C);
         void set_gamma(float gamma);

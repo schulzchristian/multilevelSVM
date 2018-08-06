@@ -118,7 +118,7 @@ svm_result svm_solver::train_refinement(const svm_data & min_sample, const svm_d
         // train this solver to the best found parameters
         this->param.C = best.C;
         this->param.gamma = best.gamma;
-        this->train();
+        this->model = best.model;
 
         return second_res;
 }
@@ -151,7 +151,7 @@ svm_result svm_solver::train_range(const std::vector<svm_param> & params,
                 //         continue;
                 // }
 
-                svm_summary cur_summary = cur_solver.predict_validation_data(min_sample, maj_sample);
+                svm_summary cur_summary = cur_solver.build_summary(min_sample, maj_sample);
 
                 cur_summary.print_short();
 
@@ -165,7 +165,7 @@ int svm_solver::predict(const std::vector<svm_node> & nodes) {
         return svm_predict(this->model.get(), nodes.data());
 }
 
-svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_data & maj) {
+svm_summary svm_solver::build_summary(const svm_data & min, const svm_data & maj) {
         size_t tp = 0, tn = 0, fp = 0, fn = 0;
 
         for (const auto& instance : min) {
@@ -186,7 +186,7 @@ svm_summary svm_solver::predict_validation_data(const svm_data & min, const svm_
                 }
         }
 
-        return svm_summary(*this->model, this->instance, tp, tn, fp, fn);
+        return svm_summary(this->model, this->instance, tp, tn, fp, fn);
 }
 
 void svm_solver::set_C(float C) {

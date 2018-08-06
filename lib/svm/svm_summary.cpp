@@ -4,7 +4,8 @@
 
 #include "svm_summary.h"
 
-svm_summary::svm_summary(const svm_model & model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
+svm_summary::svm_summary(std::shared_ptr<svm_model> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
+        this->model = model;
         this->TP = tp;
         this->FP = fp;
         this->TN = tn;
@@ -25,23 +26,23 @@ svm_summary::svm_summary(const svm_model & model, const svm_instance & instance,
 
         this->F1 = 2.0*tp / (2*tp+fp+fn);
 
-        this->C = model.param.C;
-        this->gamma = model.param.gamma;
+        this->C = model->param.C;
+        this->gamma = model->param.gamma;
         this->C_log = std::log(this->C) / std::log(2);
         this->gamma_log = std::log(this->gamma) / std::log(2);
 
-        this->SV_min.reserve(model.nSV[0]);
-        for(int i = 0; i < model.nSV[0]; i++) {
+        this->SV_min.reserve(model->nSV[0]);
+        for(int i = 0; i < model->nSV[0]; i++) {
                 // libSVM uses 1 as first index while we need our NodeID
-                NodeID id = model.sv_indices[i] - 1;
+                NodeID id = model->sv_indices[i] - 1;
                 this->SV_min.push_back(id);
                 // std::cout << id << ", ";
         }
         // std::cout << std::endl;
 
-        this->SV_maj.reserve(model.nSV[1]);
-        for(int i = 0; i < model.nSV[1]; i++) {
-                int id = model.sv_indices[model.nSV[0] + i] - 1 - instance.num_min;
+        this->SV_maj.reserve(model->nSV[1]);
+        for(int i = 0; i < model->nSV[1]; i++) {
+                int id = model->sv_indices[model->nSV[0] + i] - 1 - instance.num_min;
                 this->SV_maj.push_back(id);
                 // std::cout << id << ", ";
         }

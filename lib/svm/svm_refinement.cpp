@@ -84,7 +84,7 @@ svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & ma
                 solver.set_C(result.best().C);
                 solver.set_gamma(result.best().gamma);
                 solver.train();
-                svm_summary s = solver.predict_validation_data(min_sample, maj_sample);
+                svm_summary s = solver.build_summary(min_sample, maj_sample);
                 s.print();
                 std::vector<svm_summary> vec;
                 vec.push_back(s);
