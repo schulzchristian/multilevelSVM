@@ -414,6 +414,7 @@ struct PartitionConfig
         int num_nn;
         int num_skip_ms;
         bool inherit_ud;
+        int timeout;
 
         //=======================================
         //===============Shared Mem OMP==========

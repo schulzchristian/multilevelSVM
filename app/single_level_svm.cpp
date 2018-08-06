@@ -53,9 +53,8 @@ int main(int argn, char *argv[]) {
         partition_config.matching_type = CLUSTER_COARSENING;
         partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
         std::cout << "seed: " << partition_config.seed << std::endl;
-        std::cout << "using grid_search: " << partition_config.seed << std::endl;
-        std::cout << "timeout: " << partition_config.seed << std::endl;
-
+        // std::cout << "using grid_search: " << partition_config.seed << std::endl;
+        std::cout << "timeout: " << partition_config.timeout << std::endl;
 
 
         random_functions::setSeed(partition_config.seed);
@@ -145,6 +144,11 @@ int main(int argn, char *argv[]) {
         std::cout << "iteration time: " << time_iteration << std::endl;
 
         results.setFloat("TIME", time_iteration);
+
+        if(partition_config.timeout != 0 && time_iteration > partition_config.timeout) {
+                std::cout << "timeout reached exiting..." << std::endl;
+                exit(123);
+        }
 
         t_all.restart();
         t.restart();

@@ -185,6 +185,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
         struct arg_lit *no_inherit_ud                           = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
 
+        struct arg_int *timeout                          = arg_int0(NULL, "timeout", NULL, "Timeout in s after the timeoute s readched for a single kfold run the whole program is aborted (Default: 0 aka no timeout)");
 
         struct arg_end *end                                  = arg_end(100);
 
@@ -293,6 +294,7 @@ int parse_parameters(int argn, char **argv,
                 num_nn,
                 num_skip_ms,
                 no_inherit_ud,
+                timeout,
 #endif
                 end
         };
@@ -1114,6 +1116,12 @@ int parse_parameters(int argn, char **argv,
                 partition_config.inherit_ud = false;
         } else {
                 partition_config.inherit_ud = true;
+        }
+
+        if(timeout->count > 0) {
+                partition_config.timeout = timeout->ival[0];
+        } else {
+                partition_config.timeout = 0;
         }
 
         arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
