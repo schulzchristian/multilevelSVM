@@ -83,6 +83,25 @@ svm_result svm_solver::train_initial(const svm_data & min_sample, const svm_data
         return second_res;
 }
 
+svm_result svm_solver::train_grid(const svm_data & min_sample, const svm_data & maj_sample) {
+        svm_result result;
+        std::vector<svm_param> params;
+
+        // first search
+        std::cout << "Grid search C:-5:15:2 gamaa:3:-15:-2" << std::endl;
+        params = param_search::grid(-5, 15, 2, 3, -15, -2);
+
+        result = train_range(params, min_sample, maj_sample);
+        svm_summary good = result.best();
+
+        // train this solver to the best found parameters
+        this->param.C = good.C;
+        this->param.gamma = good.gamma;
+        this->model = good.model;
+
+        return result;
+}
+
 svm_result svm_solver::train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
                                         bool inherit_ud, float param_c, float param_g) {
         svm_result result;

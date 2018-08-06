@@ -113,7 +113,7 @@ int main(int argn, char *argv[]) {
         instance.read_problem(*(kfold->getMinGraph()), *(kfold->getMajGraph()));
 
         svm_solver solver(instance);
-        svm_result result = solver.train_initial(min_sample, maj_sample);
+        svm_result result = solver.train_grid(min_sample, maj_sample);
 
         auto train_time = t.elapsed();
         std::cout << "train time: " << train_time << std::endl;

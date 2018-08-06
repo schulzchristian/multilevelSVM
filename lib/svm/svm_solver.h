@@ -19,6 +19,7 @@ public:
 
         void train();
         svm_result train_initial(const svm_data & min_sample, const svm_data & maj_sample);
+        svm_result train_grid(const svm_data & min_sample, const svm_data & maj_sample);
         svm_result train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
                                     bool inherit_ud, float param_c, float param_g);
         svm_result train_range(const std::vector<svm_param> & params,
