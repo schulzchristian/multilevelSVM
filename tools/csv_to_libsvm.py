@@ -20,13 +20,15 @@ for line in sys.stdin:
         processedlabel = True
 
     idx = 1
-    for word in line.split():
+    for word in line.split(","):
         if not processedlabel:
             print word,
             processedlabel = True
             continue
 
+        if word[-1] == '\n':
+            word = word[:-1]
+
         print "{}:{}".format(idx, word),
         idx += 1
-
     print
