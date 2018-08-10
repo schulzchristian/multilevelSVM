@@ -228,14 +228,19 @@ int main(int argn, char *argv[]) {
         results.setFloat("BEST_GM", best_summary.Gmean);
         results.setFloat("BEST_F1", best_summary.F1);
 
+        t.restart();
+
         std::cout << "best validation on testing data:" << std::endl;
         svm_solver best_solver(best_results[best_index].second);
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
         best_solver.train();
         svm_summary best_summary_test = best_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
-        best_summary_test.print();
+        auto test_time = t.elapsed();
+        std::cout << "test time " << test_time << std::endl;
+        results.setFloat("\tTEST_TIME", test_time);
 
+        best_summary_test.print();
         results.setFloat("BEST_AC_TEST", best_summary_test.Acc);
         results.setFloat("BEST_SN_TEST", best_summary_test.Sens);
         results.setFloat("BEST_SP_TEST", best_summary_test.Spec);

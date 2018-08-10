@@ -126,10 +126,15 @@ int main(int argn, char *argv[]) {
         results.setFloat("GM", summary.Gmean);
         results.setFloat("F1", summary.F1);
 
+        t.restart();
+
         std::cout << "validation on test data:" << std::endl;
         svm_summary summary_test = solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
-        summary_test.print();
+        auto test_time = t.elapsed();
+        std::cout << "test time " << test_time << std::endl;
+        results.setFloat("\tTEST_TIME", test_time);
 
+        summary_test.print();
         results.setFloat("AC_TEST", summary_test.Acc);
         results.setFloat("SN_TEST", summary_test.Sens);
         results.setFloat("SP_TEST", summary_test.Spec);
