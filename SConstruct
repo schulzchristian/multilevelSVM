@@ -21,15 +21,16 @@
 # *****************************************************************************/
 
 
-
-# scons build file for the KaHIP.
+# scons build file for the KaSVM.
 #
 # You can build it in the following variants:
 #
 #   optimized            no debug symbols, no assertions, optimization.
 #   optimized_output     no debug symbols, no assertions, optimization -- more output on console.
+#   debug                debug symbols, assertions, no optimization -- more output on console.
 #
 #   scons variant=${variant} program=${program}
+
 import os
 import platform
 import sys
@@ -51,14 +52,14 @@ def GetEnvironment():
   """
   opts = Variables()
   opts.Add('variant', 'the variant to build, optimized or optimized with output', 'optimized')
-  opts.Add('program', 'program or interface to compile', 'kaffpa')
+  opts.Add('program', 'program or interface to compile', 'mlsvm')
 
   env = Environment(options=opts, ENV=os.environ)
   if not env['variant'] in ['optimized','optimized_output','debug']:
     print('Illegal value for variant: %s' % env['variant'])
     sys.exit(1)
 
-  if not env['program'] in ['kaffpa', 'kaffpaE', 'partition_to_vertex_separator','improve_vertex_separator','library','graphchecker','label_propagation','evaluator','node_separator', 'mlsvm', 'single_level', 'csv_flann' ]:
+  if not env['program'] in ['mlsvm', 'single_level', 'prepare']:
     print('Illegal value for program: %s' % env['program'])
     sys.exit(1)
 
@@ -71,12 +72,9 @@ def GetEnvironment():
 # Get the common environment.
 env = GetEnvironment()
 
-env.Append(CPPPATH=['../extern/argtable-2.10/include'])
 env.Append(CPPPATH=['./extern/argtable-2.10/include'])
-env.Append(CPPPATH=['../extern/flann-1.8.4/include'])
 env.Append(CPPPATH=['./extern/flann-1.8.4/include'])
 env.Append(CPPPATH=['./extern/libsvm-3.22/include'])
-env.Append(CPPPATH=['../extern/libsvm-3.22/include'])
 env.Append(CPPPATH=['./lib'])
 env.Append(CPPPATH=['./app'])
 env.Append(CPPPATH=['./lib/tools'])
@@ -99,25 +97,19 @@ if SYSTEM == 'Darwin':
         # homebrew related paths
         env.Append(LIBPATH=['/usr/local/lib/'])
         env.Append(LIBPATH=['/usr/local/lib/openmpi/'])
-        env.Append(LIBPATH=['../extern/argtable-2.10/maclib'])
         env.Append(LIBPATH=['./extern/argtable-2.10/maclib'])
 else:
         env.Append(LIBPATH=['./extern/argtable-2.10/lib'])
-        env.Append(LIBPATH=['../extern/argtable-2.10/lib'])
-        env.Append(LIBPATH=['../../extern/argtable-2.10/lib'])
-        env.Append(LIBPATH=['./extern/flann-1.8.4/lib'])
-        env.Append(LIBPATH=['../extern/flann-1.8.4/lib'])
-        env.Append(LIBPATH=['../../extern/flann-1.8.4/lib'])
 
 #by D. Luxen
-#if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
-        #print "argtable library not found. Exiting"
-        #Exit(-1)
+if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
+        print "argtable library not found. Exiting"
+        Exit(-1)
 #if not conf.CheckCXXHeader('mpi.h'):
         #print "openmpi header not found. Exiting"
         #Exit(-1)
 #
-#
+
 env.Append(CXXFLAGS = '-fopenmp')
 if "clang" in env['CC'] or "clang" in env['CXX']:
         if env['variant'] == 'optimized':
@@ -127,7 +119,7 @@ if "clang" in env['CC'] or "clang" in env['CXX']:
           # A little bit more output on the console
           env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -O3 -std=c++11')
           env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++11')
-        else:
+        elif env['variant'] == 'debug':
           env.Append(CXXFLAGS = '-O0 -g3 -std=c++11')
           env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++11')
           # env.Append(LDFLAGS  = '-pg')
@@ -143,7 +135,7 @@ else:
           # A little bit more output on the console
           env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -fno-stack-limit -O3 -std=c++11 -fpermissive')
           env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++11 -fpermissive')
-        else:
+        elif env['variant'] == 'debug':
           env.Append(CXXFLAGS = '-O0 -g3 -std=c++11 -fpermissive')
           env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++11')
           env.Append(LDFLAGS  = '-pg')
@@ -151,6 +143,10 @@ else:
           if SYSTEM != 'Darwin':
                 env.Append(CXXFLAGS = '-march=native')
                 env.Append(CCFLAGS  = '-march=native')
+
+Progress('$TARGET\r',
+         file=open('/dev/tty', 'w'),
+         overwrite=True)
 
 # Execute the SConscript.
 SConscript('SConscript', exports=['env'],variant_dir=env['variant'], duplicate=False)

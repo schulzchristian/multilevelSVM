@@ -23,6 +23,6 @@ echo "--------------- mlsvm-KaHIP -------------"
 
 cd multilevelSVM/
 
-time optimized_output/csv_flann $path/${basefile}.csv
+time optimized_output/prepare $path/${basefile}.csv
 
 cd $start_dir
