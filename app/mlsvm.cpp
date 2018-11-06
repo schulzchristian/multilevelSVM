@@ -7,7 +7,6 @@
 #include <string.h>
 #include <memory>
 
-#include "balance_configuration.h"
 #include "data_structure/graph_access.h"
 #include "graph_io.h"
 #include "parse_parameters.h"
@@ -122,10 +121,7 @@ int main(int argn, char *argv[]) {
         graph_hierarchy min_hierarchy;
         graph_hierarchy maj_hierarchy;
 
-        // balance_configuration::configurate_balance(partition_config, *G_min);
         coarsen.perform_coarsening(partition_config, *G_min, min_hierarchy);
-
-        // balance_configuration::configurate_balance(partition_config, *G_maj);
         coarsen.perform_coarsening(partition_config, *G_maj, maj_hierarchy);
 
         auto coarsening_time = t.elapsed();
