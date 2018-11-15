@@ -18,13 +18,13 @@ void svm_flann::run_flann(const std::vector<FeatureVec> & data, std::vector<std:
         }
 
         flann::Matrix<FeatureData> mat(tmp.data(), rows, cols);
-        flann::Index<flann::L2<float>> index(mat, flann::KDTreeIndexParams(1));
+        flann::Index<flann::L2<FeatureData>> index(mat, flann::KDTreeIndexParams(1));
         index.buildIndex();
         flann::SearchParams params(64);
         params.cores = 1;
 
         std::vector<std::vector<int>> indices;
-        std::vector<std::vector<float>> distances;
+        std::vector<std::vector<FeatureData>> distances;
 
         // (num_nn + 1) because we don't count the vertex it self as neighbor but flann does
         index.knnSearch(mat, indices, distances, num_nn + 1, params);
