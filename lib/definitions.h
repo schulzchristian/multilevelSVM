@@ -148,10 +148,11 @@ typedef enum {
 } RefinementType;
 
 typedef enum {
+        STOP_RULE_FIXED,
         STOP_RULE_SIMPLE,
+        STOP_RULE_SIMPLE_FIXED,
         STOP_RULE_MULTIPLE_K,
-        STOP_RULE_STRONG,
-        STOP_RULE_FIXED
+        STOP_RULE_STRONG
 } StopRule;
 
 typedef enum {
