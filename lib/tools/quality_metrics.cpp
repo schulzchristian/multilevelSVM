@@ -328,13 +328,13 @@ double quality_metrics::balance_edges(graph_access& G) {
 }
 
 EdgeWeight quality_metrics::objective(const PartitionConfig & config, graph_access & G, int* partition_map) {
-        if(config.mh_optimize_communication_volume) {
-                return max_communication_volume(G, partition_map);
-        } else if(config.mh_penalty_for_unconnected) {
-                return edge_cut_connected(G, partition_map);
-        } else {
+        // if(config.mh_optimize_communication_volume) {
+        //         return max_communication_volume(G, partition_map);
+        // } else if(config.mh_penalty_for_unconnected) {
+        //         return edge_cut_connected(G, partition_map);
+        // } else {
                 return edge_cut(G, partition_map);
-        }
+        // }
 }
 
 NodeWeight quality_metrics::total_qap(graph_access & C, matrix & D, std::vector< NodeID > & rank_assign) {

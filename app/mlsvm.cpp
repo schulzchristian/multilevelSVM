@@ -30,11 +30,9 @@ int main(int argn, char *argv[]) {
         PartitionConfig partition_config;
         std::string filename;
 
-        bool is_graph_weighted = false;
         bool suppress_output   = false;
-        bool recursive         = false;
 
-        int ret_code = parse_parameters(argn, argv, partition_config, filename, is_graph_weighted, suppress_output, recursive);
+        int ret_code = parse_parameters(argn, argv, partition_config, filename, suppress_output);
 
         if(ret_code) {
                 return -1;
@@ -45,12 +43,10 @@ int main(int argn, char *argv[]) {
 
         partition_config.LogDump(stdout);
         partition_config.k = 1;
-        // partition_config.cluster_upperbound = std::numeric_limits<NodeID>::max()/2;
         partition_config.cluster_coarsening_factor = 1;
         partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
         partition_config.matching_type = CLUSTER_COARSENING;
-        partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
         std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
         std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
         std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
@@ -86,6 +82,7 @@ int main(int argn, char *argv[]) {
 
         while (kfold->next(kfold_io_time)) {
         results.next();
+
         graph_access *G_min = kfold->getMinGraph();
         graph_access *G_maj = kfold->getMajGraph();
 

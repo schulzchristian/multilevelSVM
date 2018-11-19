@@ -95,13 +95,8 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
 
                 delete edge_matcher;
 
-                if(partition_config.graph_allready_partitioned) {
-                        contracter->contract_partitioned(copy_of_partition_config, *finer, *coarser, edge_matching,
-                                                         *coarse_mapping, no_of_coarser_vertices, permutation);
-                } else {
-                        contracter->contract(copy_of_partition_config, *finer, *coarser, edge_matching,
-                                             *coarse_mapping, no_of_coarser_vertices, permutation);
-                }
+                contracter->contract(copy_of_partition_config, *finer, *coarser, edge_matching,
+                                     *coarse_mapping, no_of_coarser_vertices, permutation);
 
                 hierarchy.push_back(finer, coarse_mapping);
 

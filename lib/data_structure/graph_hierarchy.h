@@ -1,5 +1,5 @@
 /******************************************************************************
- * graph_hierarchy.h 
+ * graph_hierarchy.h
  *
  * Source of KaHIP -- Karlsruhe High Quality Partitioning.
  *
@@ -26,7 +26,6 @@
 #include <stack>
 
 #include "graph_access.h"
-#include "uncoarsening/refinement/quotient_graph_refinement/partial_boundary.h"
 
 class graph_hierarchy {
 public:
@@ -34,13 +33,12 @@ public:
         virtual ~graph_hierarchy();
 
         void push_back(graph_access * G, CoarseMapping * coarse_mapping);
-        
+
         graph_access  * pop_finer_and_project();
-        graph_access  * pop_finer_and_project_ns( PartialBoundary & separator );
         graph_access  * get_coarsest();
         graph_access  * get_finest();
         CoarseMapping * get_mapping_of_current_finer();
-               
+
         bool isEmpty();
         unsigned int size();
 private:

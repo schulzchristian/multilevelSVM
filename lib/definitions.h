@@ -184,34 +184,4 @@ typedef enum {
         DEGREE_NODEORDERING
 } NodeOrderingType;
 
-typedef enum {
-        NSQUARE,
-        NSQUAREPRUNED,
-        COMMUNICATIONGRAPH
-} LsNeighborhoodType;
-
-typedef enum {
-        MAP_CONST_RANDOM,
-        MAP_CONST_IDENTITY,
-        MAP_CONST_OLDGROWING,
-        MAP_CONST_OLDGROWING_FASTER,
-        MAP_CONST_OLDGROWING_MATRIX,
-        MAP_CONST_FASTHIERARCHY_BOTTOMUP,
-        MAP_CONST_FASTHIERARCHY_TOPDOWN
-} ConstructionAlgorithm;
-
-typedef enum {
-        DIST_CONST_RANDOM,
-        DIST_CONST_IDENTITY,
-        DIST_CONST_HIERARCHY,
-        DIST_CONST_HIERARCHY_ONLINE
-} DistanceConstructionAlgorithm;
-
-typedef enum {
-        PRE_CONFIG_MAPPING_FAST,
-        PRE_CONFIG_MAPPING_ECO,
-        PRE_CONFIG_MAPPING_STRONG
-} PreConfigMapping;
-
-
 #endif
