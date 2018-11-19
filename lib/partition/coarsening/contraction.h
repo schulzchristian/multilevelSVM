@@ -44,12 +44,12 @@ class contraction {
                               const NodePermutationMap & permutation) const;
 
                 void contract_clustering(const PartitionConfig & partition_config,
-                              graph_access & finer,
-                              graph_access & coarser,
-                              const Matching & edge_matching,
-                              const CoarseMapping & coarse_mapping,
-                              const NodeID & no_of_coarse_vertices,
-                              const NodePermutationMap & permutation) const;
+                                         graph_access & finer,
+                                         graph_access & coarser,
+                                         const Matching & edge_matching,
+                                         const CoarseMapping & coarse_mapping,
+                                         const NodeID & no_of_coarse_vertices,
+                                         const NodePermutationMap & permutation) const;
 
 
                  void contract_partitioned(const PartitionConfig & partition_config,
