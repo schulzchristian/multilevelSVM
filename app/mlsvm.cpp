@@ -7,13 +7,11 @@
 #include <string.h>
 #include <memory>
 
-#include "data_structure/graph_access.h"
-#include "graph_io.h"
-#include "parse_parameters.h"
-#include "partition/partition_config.h"
 #include "coarsening/coarsening.h"
+#include "data_structure/graph_access.h"
 #include "data_structure/graph_hierarchy.h"
-#include "timer.h"
+#include "io/graph_io.h"
+#include "partition/partition_config.h"
 #include "svm/svm_solver.h"
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
@@ -22,6 +20,8 @@
 #include "svm/svm_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
+#include "tools/timer.h"
+#include "parse_parameters.h"
 
 void print_null(const char *s) {}
 

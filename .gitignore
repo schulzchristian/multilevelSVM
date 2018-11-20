@@ -10,3 +10,4 @@ optimized_output
 debug
 parallel/parallel_src/extern/kaHIP_lib/libkahip.a
 parallel/parallel_src/optimized_nooutput
+.sconf_temp

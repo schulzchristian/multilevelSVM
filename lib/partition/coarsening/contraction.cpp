@@ -265,7 +265,7 @@ FeatureVec contraction::combineFeatureVec(const FeatureVec & vec1, NodeWeight we
 }
 
 void contraction::divideVec(FeatureVec & vec, NodeWeight weights) const {
-        //use map??
+        // TODO use map aka. std::for_each
         size_t features = vec.size();
 
         for (size_t i = 0; i < features; ++i) {
