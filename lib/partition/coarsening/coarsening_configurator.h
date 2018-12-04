@@ -60,6 +60,9 @@ inline void coarsening_configurator::configure_coarsening( const PartitionConfig
                case CLUSTER_COARSENING:
                         *edge_matcher = new size_constraint_label_propagation();
                         break;
+                case SIMPLE_CLUSTERING:
+                        *edge_matcher = new simple_clustering();
+                        break;
 
         }
 

@@ -40,7 +40,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_str *filename_output                      = arg_str0(NULL, "output_filename", NULL, "Specify the name of the output file (that contains the partition).");
         struct arg_int *user_seed                            = arg_int0(NULL, "seed", NULL, "Seed to use for the PRNG.");
         struct arg_rex *edge_rating                          = arg_rex0(NULL, "edge_rating", "^(weight|realweight|expansionstar|expansionstar2|expansionstar2deg|punch|expansionstar2algdist|expansionstar2algdist2|algdist|algdist2|sepmultx|sepaddx|sepmax|seplog|r1|r2|r3|r4|r5|r6|r7|r8)$", "RATING", REG_EXTENDED, "Edge rating to use. One of {weight, expansionstar, expansionstar2, punch, sepmultx, sepaddx, sepmax, seplog, " " expansionstar2deg}. Default: weight"  );
-        struct arg_rex *matching_type                        = arg_rex0(NULL, "matching", "^(random|hem|shem|regions|gpa|randomgpa|localmax)$", "TYPE", REG_EXTENDED, "Type of matchings to use during coarsening. One of {random, hem," " shem, regions, gpa, randomgpa, localmax}."  );
+        struct arg_rex *matching_type                        = arg_rex0(NULL, "matching", "^(random|gpa|randomgpa|lp_clustering|simple_clustering)$", "TYPE", REG_EXTENDED, "Type of matchings to use during coarsening. One of {random, gpa, randomgpa, lp_clustering, simple_clustering}."  );
         struct arg_lit *gpa_grow_internal                    = arg_lit0(NULL, "gpa_grow_internal", "If the graph is allready partitions the paths are grown only block internally.");
         struct arg_rex *permutation_quality                  = arg_rex0(NULL, "permutation_quality", "^(none|fast|good|cacheefficient)$", "QUALITY", REG_EXTENDED, "The quality of permutations to use. One of {none, fast," " good, cacheefficient}."  );
         struct arg_rex *stop_rule                            = arg_rex0(NULL, "stop_rule", "^(fix|simple|simple-fix|multiplek|strong)$", "VARIANT", REG_EXTENDED, "Stop rule to use. One of {simple, multiplek, strong}. Default: simple" );
@@ -79,6 +79,7 @@ int parse_parameters(int argn, char **argv,
                             sample_percent,
                             stop_rule,
                             fix_num_vert_stop,
+                            matching_type,
                             cluster_upperbound,
                             label_propagation_iterations,
                             filename_output,
@@ -225,6 +226,10 @@ int parse_parameters(int argn, char **argv,
                         partition_config.matching_type = MATCHING_GPA;
                 } else if (strcmp("randomgpa", matching_type->sval[0]) == 0) {
                         partition_config.matching_type = MATCHING_RANDOM_GPA;
+                } else if (strcmp("lp_clustering", matching_type->sval[0]) == 0) {
+                        partition_config.matching_type = CLUSTER_COARSENING;
+                } else if (strcmp("simple_clustering", matching_type->sval[0]) == 0) {
+                        partition_config.matching_type = SIMPLE_CLUSTERING;
                 } else {
                         fprintf(stderr, "Invalid matching variant: \"%s\"\n", matching_type->sval[0]);
                         exit(0);

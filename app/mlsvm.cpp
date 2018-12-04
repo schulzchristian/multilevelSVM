@@ -44,9 +44,8 @@ int main(int argn, char *argv[]) {
         partition_config.LogDump(stdout);
         partition_config.k = 1;
         partition_config.cluster_coarsening_factor = 1;
-        partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
-        partition_config.matching_type = CLUSTER_COARSENING;
+
         std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
         std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
         std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
