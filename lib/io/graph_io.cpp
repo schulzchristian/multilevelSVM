@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <sstream>
+#include <unordered_set>
 #include "graph_io.h"
 
 graph_io::graph_io() {
@@ -282,29 +283,26 @@ EdgeID graph_io::makeEdgesBidirectional(std::vector<std::vector<Edge>> & data) {
         size_t pre = 0;
         size_t post = 0;
 
-        for (auto& nodeData : data) {
-                for (auto & edge : nodeData) {
+        std::vector<std::unordered_set<NodeID>> neighbors(data.size());
+
+        for (NodeID from = 0; from < data.size(); ++from) {
+                for (EdgeID edge = 0; edge < data[from].size(); ++edge) {
+                        NodeID target = data[from][edge].target;
+                        neighbors[from].insert(target);
                         pre++;
                 }
         }
 
+
         for (NodeID from = 0; from < data.size(); ++from) {
                 for (EdgeID edge = 0; edge < data[from].size(); ++edge) {
                         Edge e = data[from][edge];
-                        bool revese_egde_exists = false;
-
-                        for (NodeID back = 0; back < data[e.target].size(); ++back) {
-                                if (data[e.target][back].target == from) {
-                                        revese_egde_exists = true;
-                                        break;
-                                }
-                        }
-
-                        if (!revese_egde_exists) {
-                                Edge back_e;
-                                back_e.target = from;
-                                back_e.weight = e.weight;
-                                data[e.target].push_back(back_e);
+                        if (neighbors[e.target].find(from) == neighbors[from].end()) {
+                                Edge back;
+                                back.target = from;
+                                back.weight = e.weight;
+                                data[e.target].push_back(back);
+                                neighbors[e.target].insert(from);
                         }
                 }
         }

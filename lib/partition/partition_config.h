@@ -132,7 +132,7 @@ struct PartitionConfig
 
         bool gpa_grow_paths_between_blocks = true;
 
-        bool bidirectional;
+        bool bidirectional = false;
 
         //=======================================
         //===============MLSVM===================
