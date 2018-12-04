@@ -86,7 +86,7 @@ struct PartitionConfig
         std::string input_partition;
 
         // number of blocks the graph should be partitioned in
-        PartitionID k;
+        PartitionID k = 1;
 
         int seed = 0;
 
@@ -131,6 +131,8 @@ struct PartitionConfig
         bool balance_edges;
 
         bool gpa_grow_paths_between_blocks = true;
+
+        bool bidirectional;
 
         //=======================================
         //===============MLSVM===================

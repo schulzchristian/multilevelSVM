@@ -278,3 +278,43 @@ int graph_io::readGraphFromVec(graph_access & G, const std::vector<std::vector<E
         return 0;
 }
 
+EdgeID graph_io::makeEdgesBidirectional(std::vector<std::vector<Edge>> & data) {
+        size_t pre = 0;
+        size_t post = 0;
+
+        for (auto& nodeData : data) {
+                for (auto & edge : nodeData) {
+                        pre++;
+                }
+        }
+
+        for (NodeID from = 0; from < data.size(); ++from) {
+                for (EdgeID edge = 0; edge < data[from].size(); ++edge) {
+                        Edge e = data[from][edge];
+                        bool revese_egde_exists = false;
+
+                        for (NodeID back = 0; back < data[e.target].size(); ++back) {
+                                if (data[e.target][back].target == from) {
+                                        revese_egde_exists = true;
+                                        break;
+                                }
+                        }
+
+                        if (!revese_egde_exists) {
+                                Edge back_e;
+                                back_e.target = from;
+                                back_e.weight = e.weight;
+                                data[e.target].push_back(back_e);
+                        }
+                }
+        }
+
+        for (auto& nodeData : data) {
+                for (auto & edge : nodeData) {
+                        post++;
+                }
+        }
+
+        std::cout << "edges pre: " << pre << " post: " << post << std::endl;
+        return post;
+}

@@ -60,7 +60,6 @@ int main(int argn, char *argv[]) {
         std::cout << "timeout: " << partition_config.timeout << std::endl;
         std::cout << "seed: " << partition_config.seed << std::endl;
 
-
         random_functions::setSeed(partition_config.seed);
 
         results results;
@@ -73,7 +72,7 @@ int main(int argn, char *argv[]) {
         if(partition_config.import_kfold) {
                 kfold.reset(new k_fold_import(r, partition_config.kfold_iterations, filename));
         } else {
-                kfold.reset(new k_fold_build(partition_config.num_nn, partition_config.kfold_iterations, filename));
+                kfold.reset(new k_fold_build(partition_config, filename));
         }
 
         timer t_all;

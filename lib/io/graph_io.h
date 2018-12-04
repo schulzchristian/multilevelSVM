@@ -64,14 +64,14 @@ class graph_io {
                                         const std::vector<std::vector<Edge>> & data,
                                         EdgeID num_edges);
 
+                static
+                EdgeID makeEdgesBidirectional(std::vector<std::vector<Edge>> & data);
 
                 template<typename vectortype> 
                 static void writeVector(std::vector<vectortype> & vec, std::string filename);
 
                 template<typename vectortype> 
                 static void readVector(std::vector<vectortype> & vec, std::string filename);
-
-
 };
 
 template<typename vectortype> 

@@ -7,9 +7,10 @@
 #include "random_functions.h"
 
 
-k_fold_build::k_fold_build(int num_nn, int num_iter, const std::string & filename)
-        : k_fold(num_iter) {
-        this->num_nn = num_nn;
+k_fold_build::k_fold_build(const PartitionConfig & config, const std::string & filename)
+        : k_fold(config.kfold_iterations) {
+        this->num_nn = config.num_nn;
+        this->bidirectional = config.bidirectional;
         readData(filename);
 }
 
@@ -63,7 +64,13 @@ void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & feature
         std::vector<std::vector<Edge>> edges_subset;
         svm_flann::run_flann(feature_subset, edges_subset, this->num_nn);
 
-        graph_io::readGraphFromVec(target_graph, edges_subset, nodes * this->num_nn * 2);
+        EdgeID edges;
+        edges = nodes * this->num_nn;
+        if (bidirectional) {
+                edges = graph_io::makeEdgesBidirectional(edges_subset);
+        }
+
+        graph_io::readGraphFromVec(target_graph, edges_subset, edges*2);
         graph_io::readFeatures(target_graph, feature_subset);
 
         target_test.reserve(test_size);
