@@ -1,9 +1,9 @@
 #include "k_fold_import.h"
-#include "graph_io.h"
-#include "svm_io.h"
-#include "svm_flann.h"
-#include "random_functions.h"
-#include "timer.h"
+#include "io/graph_io.h"
+#include "io/svm_io.h"
+#include "svm/svm_flann.h"
+#include "tools/random_functions.h"
+#include "tools/timer.h"
 
 
 k_fold_import::k_fold_import(int num_exp, int num_iter, const std::string & basename)
@@ -35,7 +35,14 @@ void k_fold_import::next_intern(double & io_time) {
         io_time += t.elapsed();
         svm_flann::run_flann(min_features, min_edges);
         std::cout << "ran flann " << min_edges.size() << " edges" << std::endl;
-        graph_io::readGraphFromVec(this->cur_min_graph, min_edges, min_features.size() * nn * 4);
+
+
+        EdgeID edges = min_features.size() * nn * 2;
+        // if (bidirectional) {
+                // edges = graph_io::makeEdgesBidirectional(min_edges);
+        // }
+
+        graph_io::readGraphFromVec(this->cur_min_graph, min_edges, edges * 2);
         std::cout << "read graph from vec " << this->cur_min_graph.number_of_nodes() << " nodes " << this->cur_min_graph.number_of_edges() << " edges " << std::endl;
         graph_io::readFeatures(this->cur_min_graph, min_features);
         std::cout << "read features" << std::endl;
@@ -50,7 +57,13 @@ void k_fold_import::next_intern(double & io_time) {
         io_time += t.elapsed();
         svm_flann::run_flann(maj_features, maj_edges);
         std::cout << "ran flann " << maj_edges.size() << " edges" << std::endl;
-        graph_io::readGraphFromVec(this->cur_maj_graph, maj_edges, maj_features.size() * nn * 4);
+
+        edges = maj_features.size() * nn * 2;
+        // if (bidirectional) {
+                // edges = graph_io::makeEdgesBidirectional(maj_edges);
+        // }
+
+        graph_io::readGraphFromVec(this->cur_maj_graph, maj_edges, edges * 2);
         std::cout << "read graph from vec " << this->cur_maj_graph.number_of_nodes() << " nodes " << this->cur_maj_graph.number_of_edges() << " edges " << std::endl;
         graph_io::readFeatures(this->cur_maj_graph, maj_features);
         std::cout << "read features" << std::endl;

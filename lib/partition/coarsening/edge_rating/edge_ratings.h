@@ -24,7 +24,7 @@
 #define EDGE_RATING_FUNCTIONS_FUCW7H6Y
 
 #include "data_structure/graph_access.h"
-#include "partition_config.h"       
+#include "partition/partition_config.h"
 
 class edge_ratings {
 public:

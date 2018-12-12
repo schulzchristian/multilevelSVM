@@ -23,7 +23,7 @@
 #ifndef GPA_MATCHING_NXLQ0SIT
 #define GPA_MATCHING_NXLQ0SIT
 
-#include "coarsening/matching/matching.h"
+#include "partition/coarsening/matching/matching.h"
 #include "path.h"
 #include "path_set.h"
 

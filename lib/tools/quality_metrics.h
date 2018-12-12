@@ -26,7 +26,7 @@
 
 #include "data_structure/graph_access.h"
 #include "data_structure/matrix/matrix.h"
-#include "partition_config.h"
+#include "partition/partition_config.h"
 
 class quality_metrics {
 public:

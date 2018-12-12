@@ -20,9 +20,10 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#include "macros_assertions.h"
-#include "random_functions.h"
 #include "random_matching.h"
+
+#include "tools/macros_assertions.h"
+#include "tools/random_functions.h"
 
 random_matching::random_matching() {
 

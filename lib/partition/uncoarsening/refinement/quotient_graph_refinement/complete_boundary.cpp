@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "complete_boundary.h"
-#include "quality_metrics.h"
+#include "tools/quality_metrics.h"
 
 complete_boundary::complete_boundary(graph_access * G) {
         m_graph_ref   = G;

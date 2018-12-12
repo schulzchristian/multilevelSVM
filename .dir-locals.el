@@ -1,0 +1,15 @@
+((nil . ((projectile-project-compilation-cmd . "scons program=mlsvm variant=optimized-output")
+	 (flycheck-checker . c/c++-gcc)
+	 (flycheck-disabled-checker . c/c++-clang)
+	 ;; (flycheck-gcc-include-path . ((expand-file-name "lib" (projectile-project-root))
+	 ;; 			       (expand-file-name "lib/io" (projectile-project-root))
+	 ;; 			       ))
+	 (eval . (setq-local
+		  flycheck-gcc-include-path
+		  (list (expand-file-name "lib" (projectile-project-root))
+			(expand-file-name "extern/argtable-2.10/include" (projectile-project-root))
+			(expand-file-name "extern/flann-1.8.4/include" (projectile-project-root))
+			(expand-file-name "extern/libsvm-3.22/include" (projectile-project-root))
+				       )))
+	 (flycheck-gcc-language-standard . "c++11")
+	 )))

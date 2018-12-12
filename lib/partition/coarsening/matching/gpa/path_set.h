@@ -24,9 +24,9 @@
 #define PATH_SET_80E9CQT1
 
 #include "data_structure/graph_access.h"
-#include "macros_assertions.h"
-#include "partition_config.h"
+#include "partition/partition_config.h"
 #include "path.h"
+#include "tools/macros_assertions.h"
 
 class path_set {
         public:

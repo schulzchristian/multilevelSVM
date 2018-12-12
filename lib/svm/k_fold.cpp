@@ -1,9 +1,9 @@
-#include "k_fold.h"
-#include "graph_io.h"
-#include "timer.h"
-#include "svm_flann.h"
-#include "svm_convert.h"
-#include "random_functions.h"
+#include "io/graph_io.h"
+#include "svm/k_fold.h"
+#include "svm/svm_flann.h"
+#include "svm/svm_convert.h"
+#include "tools/random_functions.h"
+#include "tools/timer.h"
 
 k_fold::k_fold(int num_iter) {
         this->iterations = num_iter;

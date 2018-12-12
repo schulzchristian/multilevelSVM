@@ -25,7 +25,7 @@
 
 #include <math.h>
 
-#include "partition_config.h"
+#include "partition/partition_config.h"
 #include <iostream>
 
 class stop_rule {

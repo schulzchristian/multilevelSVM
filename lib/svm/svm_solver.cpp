@@ -4,10 +4,10 @@
 #include <cmath>
 #include <functional>
 
-#include "svm_solver.h"
-#include "svm_convert.h"
-#include "param_search.h"
-#include "timer.h"
+#include "svm/param_search.h"
+#include "svm/svm_solver.h"
+#include "svm/svm_convert.h"
+#include "tools/timer.h"
 
 svm_solver::svm_solver(const svm_instance & instance)
     : instance(instance) {

@@ -3,7 +3,7 @@
 #include <flann/flann.hpp>
 #include <utility>
 #include "definitions.h"
-#include "timer.h"
+#include "tools/timer.h"
 
 
 void svm_flann::run_flann(const std::vector<FeatureVec> & data, std::vector<std::vector<Edge>> & graph, int num_nn) {

@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 #include "contraction.h"
-#include "../uncoarsening/refinement/quotient_graph_refinement/complete_boundary.h"
-#include "macros_assertions.h"
+#include "partition/uncoarsening/refinement/quotient_graph_refinement/complete_boundary.h"
+#include "tools/macros_assertions.h"
 
 contraction::contraction() {
 

@@ -29,8 +29,8 @@
 
 #include "boundary_lookup.h"
 #include "data_structure/graph_access.h"
-#include "partial_boundary.h"
-#include "partition_config.h"
+#include "partition/uncoarsening/refinement/quotient_graph_refinement/partial_boundary.h"
+#include "partition/partition_config.h"
 
 struct block_informations {
         NodeWeight block_weight;

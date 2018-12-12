@@ -25,8 +25,8 @@
 
 #include "compare_rating.h"
 #include "gpa_matching.h"
-#include "macros_assertions.h"
-#include "random_functions.h"
+#include "tools/macros_assertions.h"
+#include "tools/random_functions.h"
 
 gpa_matching::gpa_matching() {
 

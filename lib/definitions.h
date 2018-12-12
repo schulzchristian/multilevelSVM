@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "limits.h"
-#include "macros_assertions.h"
+#include "tools/macros_assertions.h"
 #include "stdio.h"
 
 // allows us to disable most of the output during partitioning

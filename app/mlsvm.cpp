@@ -7,7 +7,7 @@
 #include <string.h>
 #include <memory>
 
-#include "coarsening/coarsening.h"
+#include "partition/coarsening/coarsening.h"
 #include "data_structure/graph_access.h"
 #include "data_structure/graph_hierarchy.h"
 #include "io/graph_io.h"

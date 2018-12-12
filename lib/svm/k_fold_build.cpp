@@ -1,10 +1,10 @@
 #include "k_fold_build.h"
-#include "timer.h"
-#include "graph_io.h"
-#include "svm_io.h"
-#include "svm_flann.h"
-#include "svm_convert.h"
-#include "random_functions.h"
+#include "io/graph_io.h"
+#include "io/svm_io.h"
+#include "svm/svm_flann.h"
+#include "svm/svm_convert.h"
+#include "tools/random_functions.h"
+#include "tools/timer.h"
 
 
 k_fold_build::k_fold_build(const PartitionConfig & config, const std::string & filename)

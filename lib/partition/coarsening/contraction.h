@@ -26,7 +26,7 @@
 
 #include "data_structure/graph_access.h"
 #include "matching/matching.h"
-#include "partition_config.h"
+#include "partition/partition_config.h"
 
 typedef NodeID Regions;
 

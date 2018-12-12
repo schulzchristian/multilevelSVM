@@ -27,9 +27,9 @@
 
 #include "data_structure/priority_queues/priority_queue_interface.h"
 #include "definitions.h"
-#include "random_functions.h"
-#include "uncoarsening/refinement/refinement.h"
-#include "uncoarsening/refinement/quotient_graph_refinement/2way_fm_refinement/vertex_moved_hashtable.h"
+#include "partition/uncoarsening/refinement/refinement.h"
+#include "partition/uncoarsening/refinement/quotient_graph_refinement/2way_fm_refinement/vertex_moved_hashtable.h"
+#include "tools/random_functions.h"
 
 class kway_graph_refinement_commons  {
         public:

@@ -24,7 +24,7 @@
 #define MATCHING_QL4RUO3D
 
 #include "data_structure/graph_access.h"
-#include "partition_config.h"
+#include "partition/partition_config.h"
 
 class matching {
         public:

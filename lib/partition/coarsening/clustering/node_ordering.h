@@ -27,8 +27,8 @@
 #include <algorithm>
 
 #include "definitions.h"
-#include "partition_config.h"
 #include "data_structure/graph_access.h"
+#include "partition/partition_config.h"
 #include "tools/random_functions.h"
 
 class node_ordering {

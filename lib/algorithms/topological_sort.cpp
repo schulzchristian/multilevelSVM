@@ -22,7 +22,7 @@
 
 #include <algorithm>
 
-#include "random_functions.h"
+#include "tools/random_functions.h"
 #include "topological_sort.h"
 
 topological_sort::topological_sort() {

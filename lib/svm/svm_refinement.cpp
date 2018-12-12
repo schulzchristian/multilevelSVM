@@ -1,11 +1,11 @@
 #include <iostream>
 #include <unordered_set>
 
-#include "svm_refinement.h"
-#include "svm_instance.h"
-#include "svm_convert.h"
-#include "param_search.h"
-#include "timer.h"
+#include "svm/param_search.h"
+#include "svm/svm_refinement.h"
+#include "svm/svm_instance.h"
+#include "svm/svm_convert.h"
+#include "tools/timer.h"
 
 svm_refinement::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy & maj_hierarchy,
                                const svm_result & initial_result, int num_skip_ms, int inherit_ud)
