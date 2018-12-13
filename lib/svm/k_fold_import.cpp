@@ -6,10 +6,12 @@
 #include "tools/timer.h"
 
 
-k_fold_import::k_fold_import(int num_exp, int num_iter, const std::string & basename)
-        : k_fold(num_iter) {
+k_fold_import::k_fold_import(const PartitionConfig & config, int num_exp, const std::string & basename)
+        : k_fold(config.kfold_iterations) {
         this->num_exp = num_exp;
         this->basename = basename;
+        this->bidirectional = config.bidirectional;
+        this->num_nn = config.num_nn;
 }
 
 k_fold_import::~k_fold_import() {
@@ -24,8 +26,6 @@ void k_fold_import::next_intern(double & io_time) {
 
         std::cout << "reading " << min_train_name << std::endl;
 
-        int nn = 10;
-
         timer t;
 
         std::vector<FeatureVec> min_features;
@@ -33,14 +33,14 @@ void k_fold_import::next_intern(double & io_time) {
         svm_io::readFeaturesLines(min_train_name, min_features);
         std::cout << "read " << min_features.size() << " lines" << std::endl;
         io_time += t.elapsed();
-        svm_flann::run_flann(min_features, min_edges);
+        svm_flann::run_flann(min_features, min_edges, num_nn);
         std::cout << "ran flann " << min_edges.size() << " edges" << std::endl;
 
 
-        EdgeID edges = min_features.size() * nn * 2;
-        // if (bidirectional) {
-                // edges = graph_io::makeEdgesBidirectional(min_edges);
-        // }
+        EdgeID edges = min_features.size() * num_nn * 2;
+        if (bidirectional) {
+                edges = graph_io::makeEdgesBidirectional(min_edges);
+        }
 
         graph_io::readGraphFromVec(this->cur_min_graph, min_edges, edges * 2);
         std::cout << "read graph from vec " << this->cur_min_graph.number_of_nodes() << " nodes " << this->cur_min_graph.number_of_edges() << " edges " << std::endl;
@@ -55,13 +55,13 @@ void k_fold_import::next_intern(double & io_time) {
         svm_io::readFeaturesLines(maj_train_name, maj_features);
         std::cout << "read " << maj_features.size() << " lines" << std::endl;
         io_time += t.elapsed();
-        svm_flann::run_flann(maj_features, maj_edges);
+        svm_flann::run_flann(maj_features, maj_edges, num_nn);
         std::cout << "ran flann " << maj_edges.size() << " edges" << std::endl;
 
-        edges = maj_features.size() * nn * 2;
-        // if (bidirectional) {
-                // edges = graph_io::makeEdgesBidirectional(maj_edges);
-        // }
+        edges = maj_features.size() * num_nn * 2;
+        if (bidirectional) {
+                edges = graph_io::makeEdgesBidirectional(maj_edges);
+        }
 
         graph_io::readGraphFromVec(this->cur_maj_graph, maj_edges, edges * 2);
         std::cout << "read graph from vec " << this->cur_maj_graph.number_of_nodes() << " nodes " << this->cur_maj_graph.number_of_edges() << " edges " << std::endl;

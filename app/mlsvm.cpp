@@ -49,6 +49,7 @@ int main(int argn, char *argv[]) {
         std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
         std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
         std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
+        std::cout << "bidirectional: " << partition_config.bidirectional << std::endl;
         std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
         std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
         std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
@@ -69,7 +70,7 @@ int main(int argn, char *argv[]) {
         std::unique_ptr<k_fold> kfold;
 
         if(partition_config.import_kfold) {
-                kfold.reset(new k_fold_import(r, partition_config.kfold_iterations, filename));
+                kfold.reset(new k_fold_import(partition_config, r, filename));
         } else {
                 kfold.reset(new k_fold_build(partition_config, filename));
         }
