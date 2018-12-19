@@ -117,7 +117,7 @@ struct PartitionConfig
         int repetitions = 1;
 
         //=======================================
-        //=========LABEL PROPAGATION=============
+        //==========LABEL PROPAGATION============
         //=======================================
 
         NodeWeight cluster_upperbound = std::numeric_limits<NodeWeight>::max()/2;

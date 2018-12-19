@@ -39,33 +39,40 @@ int parse_parameters(int argn, char **argv,
         struct arg_str *filename                             = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to graph file to partition.");
         struct arg_str *filename_output                      = arg_str0(NULL, "output_filename", NULL, "Specify the name of the output file (that contains the partition).");
         struct arg_int *user_seed                            = arg_int0(NULL, "seed", NULL, "Seed to use for the PRNG.");
+        struct arg_int *num_experiments                      = arg_int0("e", "num_experiments", NULL, "Number of experiments i.e. full kfold runs (default 1)");
+        struct arg_int *kfold_iterations                     = arg_int0("k", "kfold_iterations", NULL, "Number of kfold iterations (Default: 5)");
+        struct arg_dbl *time_limit                           = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 0s .");
+        struct arg_int *timeout                              = arg_int0(NULL, "timeout", NULL, "Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)");
+
+
+        // matching/clustering
         struct arg_rex *edge_rating                          = arg_rex0(NULL, "edge_rating", "^(weight|realweight|expansionstar|expansionstar2|expansionstar2deg|punch|expansionstar2algdist|expansionstar2algdist2|algdist|algdist2|sepmultx|sepaddx|sepmax|seplog|r1|r2|r3|r4|r5|r6|r7|r8)$", "RATING", REG_EXTENDED, "Edge rating to use. One of {weight, expansionstar, expansionstar2, punch, sepmultx, sepaddx, sepmax, seplog, " " expansionstar2deg}. Default: weight"  );
         struct arg_rex *matching_type                        = arg_rex0(NULL, "matching", "^(random|gpa|randomgpa|lp_clustering|simple_clustering)$", "TYPE", REG_EXTENDED, "Type of matchings to use during coarsening. One of {random, gpa, randomgpa, lp_clustering, simple_clustering}."  );
         struct arg_lit *gpa_grow_internal                    = arg_lit0(NULL, "gpa_grow_internal", "If the graph is allready partitions the paths are grown only block internally.");
         struct arg_rex *permutation_quality                  = arg_rex0(NULL, "permutation_quality", "^(none|fast|good|cacheefficient)$", "QUALITY", REG_EXTENDED, "The quality of permutations to use. One of {none, fast," " good, cacheefficient}."  );
+        // stop rule
         struct arg_rex *stop_rule                            = arg_rex0(NULL, "stop_rule", "^(fix|simple|simple-fix|multiplek|strong)$", "VARIANT", REG_EXTENDED, "Stop rule to use. One of {simple, multiplek, strong}. Default: simple" );
         struct arg_int *num_vert_stop_factor                 = arg_int0(NULL, "num_vert_stop_factor", NULL, "x*k (for multiple_k stop rule). Default 20.");
         struct arg_int *fix_num_vert_stop                    = arg_int0(NULL, "fix_num_vert_stop", NULL, "Number of vertices to fix stop coarsening at.");
 
-        struct arg_dbl *time_limit                           = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 0s .");
-        struct arg_int *timeout                          = arg_int0(NULL, "timeout", NULL, "Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)");
+        struct arg_lit *balance_edges                        = arg_lit0(NULL, "balance_edges", "Turn on balancing of edges among blocks.");
 
-        struct arg_lit *balance_edges                  = arg_lit0(NULL, "balance_edges", "Turn on balancing of edges among blocks.");
-
+        // label propagation
         struct arg_int *cluster_upperbound                   = arg_int0(NULL, "cluster_upperbound", NULL, "Set a size-constraint on the size of a cluster. Default: none");
         struct arg_int *label_propagation_iterations         = arg_int0(NULL, "label_propagation_iterations", NULL, "Set the number of label propgation iterations. Default: 10.");
 
 
-        // MLSVM stuff
-        struct arg_int *num_experiments                      = arg_int0("e", "num_experiments", NULL, "Number of experiments i.e. full kfold runs (default 1)");
-        struct arg_int *kfold_iterations                     = arg_int0("k", "kfold_iterations", NULL, "Number of kfold iterations (Default: 5)");
-        struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
+        // MLSVM import
         struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
+        struct arg_lit *bidirectional                           = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
+
+        struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
+
+        // MLSVM refinement
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
         struct arg_lit *no_inherit_ud                           = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
 
-        struct arg_lit *bidirectional                           = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
         struct arg_end *end                                  = arg_end(100);
 
         // Define argtable.

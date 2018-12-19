@@ -29,7 +29,7 @@ void results::setString(const std::string & tag, const std::string & result) {
 }
 
 void results::print() {
-        std::cout << std::setprecision(3) << std::defaultfloat;
+        std::cout << std::setprecision(3) << std::fixed;
         for (const auto& tag : this->tag_order) {
                 if (this->floats.find(tag) != this->floats.end()) {
                         std::vector<float> & ress = this->floats[tag];
