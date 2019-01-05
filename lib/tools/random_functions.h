@@ -189,6 +189,11 @@ class random_functions {
                         return rnbr;
                 }
 
+                static double nextFromExp(double beta) {
+                        std::exponential_distribution<> d(beta);
+                        return d(m_mt);
+                }
+
                 static void setSeed(int seed) {
                         m_seed = seed;
                         srand(seed);

@@ -42,7 +42,8 @@ void contraction::contract(const PartitionConfig & partition_config,
                            const NodePermutationMap & permutation) const {
 
         if(partition_config.matching_type == CLUSTER_COARSENING
-           || partition_config.matching_type == SIMPLE_CLUSTERING) {
+           || partition_config.matching_type == SIMPLE_CLUSTERING
+           || partition_config.matching_type == LOW_DIAMETER) {
                 return contract_clustering(partition_config, G, coarser, edge_matching, coarse_mapping, no_of_coarse_vertices, permutation);
         }
 

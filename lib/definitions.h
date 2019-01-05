@@ -129,7 +129,8 @@ typedef enum {
         MATCHING_GPA,
         MATCHING_RANDOM_GPA,
         CLUSTER_COARSENING,
-        SIMPLE_CLUSTERING
+        SIMPLE_CLUSTERING,
+        LOW_DIAMETER
 } MatchingType;
 
 typedef enum {

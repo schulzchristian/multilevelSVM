@@ -47,7 +47,7 @@ int parse_parameters(int argn, char **argv,
 
         // matching/clustering
         struct arg_rex *edge_rating                          = arg_rex0(NULL, "edge_rating", "^(weight|realweight|expansionstar|expansionstar2|expansionstar2deg|punch|expansionstar2algdist|expansionstar2algdist2|algdist|algdist2|sepmultx|sepaddx|sepmax|seplog|r1|r2|r3|r4|r5|r6|r7|r8)$", "RATING", REG_EXTENDED, "Edge rating to use. One of {weight, expansionstar, expansionstar2, punch, sepmultx, sepaddx, sepmax, seplog, " " expansionstar2deg}. Default: weight"  );
-        struct arg_rex *matching_type                        = arg_rex0(NULL, "matching", "^(random|gpa|randomgpa|lp_clustering|simple_clustering)$", "TYPE", REG_EXTENDED, "Type of matchings to use during coarsening. One of {random, gpa, randomgpa, lp_clustering, simple_clustering}."  );
+        struct arg_rex *matching_type                        = arg_rex0(NULL, "matching", "^(random|gpa|randomgpa|lp_clustering|simple_clustering|low_diameter)$", "TYPE", REG_EXTENDED, "Type of matchings to use during coarsening. One of {random, gpa, randomgpa, lp_clustering, simple_clustering, low_diameter}."  );
         struct arg_lit *gpa_grow_internal                    = arg_lit0(NULL, "gpa_grow_internal", "If the graph is allready partitions the paths are grown only block internally.");
         struct arg_rex *permutation_quality                  = arg_rex0(NULL, "permutation_quality", "^(none|fast|good|cacheefficient)$", "QUALITY", REG_EXTENDED, "The quality of permutations to use. One of {none, fast," " good, cacheefficient}."  );
         // stop rule
@@ -61,6 +61,8 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *cluster_upperbound                   = arg_int0(NULL, "cluster_upperbound", NULL, "Set a size-constraint on the size of a cluster. Default: none");
         struct arg_int *label_propagation_iterations         = arg_int0(NULL, "label_propagation_iterations", NULL, "Set the number of label propgation iterations. Default: 10.");
 
+        // low_diameter
+        struct arg_dbl *diameter_upperbound                  = arg_dbl0(NULL, "diameter_upperbound", NULL, "Set a size-constraint on the size of a low diameter cluster. Default: 20");
 
         // MLSVM import
         struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
@@ -89,6 +91,7 @@ int parse_parameters(int argn, char **argv,
                             matching_type,
                             cluster_upperbound,
                             label_propagation_iterations,
+                            diameter_upperbound,
                             filename_output,
                             import_kfold,
                             num_nn,
@@ -237,6 +240,8 @@ int parse_parameters(int argn, char **argv,
                         partition_config.matching_type = CLUSTER_COARSENING;
                 } else if (strcmp("simple_clustering", matching_type->sval[0]) == 0) {
                         partition_config.matching_type = SIMPLE_CLUSTERING;
+                } else if (strcmp("low_diameter", matching_type->sval[0]) == 0) {
+                        partition_config.matching_type = LOW_DIAMETER;
                 } else {
                         fprintf(stderr, "Invalid matching variant: \"%s\"\n", matching_type->sval[0]);
                         exit(0);
@@ -249,6 +254,10 @@ int parse_parameters(int argn, char **argv,
 
         if (cluster_upperbound->count > 0) {
                 partition_config.cluster_upperbound = cluster_upperbound->ival[0];
+        }
+
+        if (diameter_upperbound->count > 0) {
+                partition_config.diameter_upperbound = diameter_upperbound->dval[0];
         }
 
         if (num_experiments->count > 0) {

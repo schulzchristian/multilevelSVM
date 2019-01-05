@@ -31,6 +31,7 @@
 #include "matching/random_matching.h"
 #include "clustering/simple_clustering.h"
 #include "clustering/size_constraint_label_propagation.h"
+#include "clustering/low_diameter_clustering.h"
 #include "stop_rules/stop_rules.h"
 
 class coarsening_configurator {
@@ -57,13 +58,15 @@ inline void coarsening_configurator::configure_coarsening( const PartitionConfig
                 case MATCHING_RANDOM_GPA:
                         *edge_matcher = new gpa_matching();
                         break;
-               case CLUSTER_COARSENING:
-                        *edge_matcher = new size_constraint_label_propagation();
+                case CLUSTER_COARSENING:
+                       *edge_matcher = new size_constraint_label_propagation();
                         break;
                 case SIMPLE_CLUSTERING:
                         *edge_matcher = new simple_clustering();
                         break;
-
+                case LOW_DIAMETER:
+                        *edge_matcher = new low_diameter_clustering();
+                        break;
         }
 
         if( partition_config.matching_type == MATCHING_RANDOM_GPA && level < partition_config.aggressive_random_levels) {

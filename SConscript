@@ -54,6 +54,7 @@ libkaffpa_files = [ 'lib/data_structure/graph_hierarchy.cpp',
                     'lib/partition/coarsening/clustering/node_ordering.cpp',
                     'lib/partition/coarsening/clustering/size_constraint_label_propagation.cpp',
                     'lib/partition/coarsening/clustering/simple_clustering.cpp',
+                    'lib/partition/coarsening/clustering/low_diameter_clustering.cpp',
                     'lib/partition/uncoarsening/refinement/quotient_graph_refinement/complete_boundary.cpp',
                     'lib/partition/uncoarsening/refinement/quotient_graph_refinement/partial_boundary.cpp',
                     ]
