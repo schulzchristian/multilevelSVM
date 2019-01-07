@@ -1,0 +1,381 @@
+#+TITLE: KaSVM
+#+SELECT_TAGS: export
+
+# Evaluate source code blocks interactivly and not on export
+#+PROPERTY: header-args :eval never-export
+#+PROPERTY: header-args :results output
+# #+PROPERTY: header-args :exports both
+
+The multilevel support vector machine framework KaSVM.
+
+* Overview
+The framework build on the multilevel support vector machine approach of https://github.com/esadr/mlsvm an introduces several new coarsening strategies.
+
+** Paper
+[[https://arxiv.org/abs/1808.06394][Faster Support Vector Machines]] [ALENEX19] - Sebastian Schlag, Matthias Schmitt, Christian Schulz 
+
+* Compilation
+
+To compile please install the following dependencies:
+
+- Scons (http://www.scons.org/)
+- Argtable (http://argtable.sourceforge.net/)
+- OpenMPI (http://www.open-mpi.de/)
+
+Once you installed the packages compile the programs with
+
+#+BEGIN_SRC sh
+scons program=prepare variant=optimized_output -j 4
+scons program=mlsvm variant=optimized_output -j 4
+#+END_SRC
+
+* Usage
+** Preprocessing
+Befor using the framework the data needs to be preprocessed.
+The ~prepare~ utility can read CSV and LibSVM files.
+It normalized the data and seperates the classes.
+
+#+BEGIN_SRC sh :results output
+./optimized_output/prepare examples/twonorm.csv
+#+END_SRC
+
+output of prepare
+
+# #+RESULTS:
+#+begin_example
+read csv time 0.0470669
+rows: 7400 cols: 20
+normalization time 0.000550985
+splitting time 0.00131702
+nodes - min 3703 maj 3697
+finished writing features to examples/twonorm_min_data in 0.033473
+finished writing features to examples/twonorm_maj_data in 0.033633
+#+end_example
+
+** Classifier
+After the data has been preprocessed run the ~mlsvm~ program.
+As path argument use the path of the original data file without the extension.
+
+#+BEGIN_SRC sh :results output
+./optimized_output/mlsvm examples/twonorm
+#+END_SRC
+
+output of mlsvm
+
+# #+RESULTS:
+#+begin_example
+num_experiments: 1
+kfold_iterations: 5
+import_kfold: 0
+bidirectional: 0
+fix stop vertices: 500
+cluster_upperbound: 2147483647
+upper_bound_partition: 2147483647
+label_iterations: 10
+node_ordering: 1
+num_skip_ms: 10000
+inherit_ud: 1
+timeout: 0
+seed: 0
+ \/\/\/\/\/\/\/\/\/ EXPERIMENT 0 \/\/\/\/\/\/\/
+io time: 0.055306
+full graph - min: 3703 maj: 3697 features: 20
+------------- K-FOLD ITERATION 0 -------------
+fold time: 0.0964451
+graph - min: 2963 maj: 2958
+test - min: 740 maj: 739
+sample - min: 299 maj: 300
+no of coarser vertices 91 and no of edges 5752
+no of coarser vertices 91 and no of edges 6032
+coarsening time: 0.070224
+coarse nodes - min: 91 maj: 91
+1st sweep with initial logC=0 logGamma=0
+log C=5.00	log gamma=0.00  	ACC=0.509	Gmean=0.129	SVs=116 (57,59)
+log C=-5.00	log gamma=-2.50  	ACC=0.963	Gmean=0.963	SVs=137 (68,69)
+log C=10.00	log gamma=7.50  	ACC=0.499	Gmean=0.000	SVs=182 (91,91)
+log C=-2.50	log gamma=5.00  	ACC=0.499	Gmean=0.000	SVs=182 (91,91)
+log C=0.00	log gamma=-7.50  	ACC=0.977	Gmean=0.977	SVs=45 (22,23)
+log C=15.00	log gamma=2.50  	ACC=0.499	Gmean=0.000	SVs=182 (91,91)
+log C=12.50	log gamma=-5.00  	ACC=0.972	Gmean=0.972	SVs=20 (11,9)
+log C=7.50	log gamma=-10.00  	ACC=0.973	Gmean=0.973	SVs=16 (9,7)
+log C=2.50	log gamma=10.00  	ACC=0.503	Gmean=0.058	SVs=182 (91,91)
+2nd sweep with logC=7.5 logGamma=-10
+log C: 7.5 log g: -10 AC:0.973 SN:0.967 SP:0.980 PPV:0.980 NPV:0.967 F1:0.973 GM:0.973 SV_min:9 SV_maj:7 TP:289 TN:294 FP:6 FN:10
+log C=5.00	log gamma=-10.00  	ACC=0.973	Gmean=0.973	SVs=18 (10,8)
+log C=7.50	log gamma=-2.50  	ACC=0.826	Gmean=0.809	SVs=42 (22,20)
+log C=12.50	log gamma=-9.02  	ACC=0.975	Gmean=0.975	SVs=16 (9,7)
+log C=15.00	log gamma=-5.00  	ACC=0.972	Gmean=0.972	SVs=20 (11,9)
+BEST (12.5,-9.02)
+log C: 12.5 log g: -9.0198 AC:0.975 SN:0.970 SP:0.980 PPV:0.980 NPV:0.970 F1:0.975 GM:0.975 SV_min:9 SV_maj:7 TP:290 TN:294 FP:6 FN:9
+init train time: 0.0554
+inital validation on testing:
+log C: 12.5 log g: -9.0198 AC:0.976 SN:0.978 SP:0.973 PPV:0.973 NPV:0.978 F1:0.976 GM:0.976 SV_min:9 SV_maj:7 TP:724 TN:719 FP:20 FN:16
+init test time: 0.00138
+min hierarchy 1 -- maj hierarchy 1
+minority uncoarsed
+uncoarsened nodes 2963 SV 9 resulting neighbors 62
+majority uncoarsed
+uncoarsened nodes 2958 SV 7 resulting neighbors 81
+min hierarchy 0 -- maj hierarchy 0
+current level nodes min 62 maj 81
+2nd sweep with logC=12.5 logGamma=-9.02
+log C=10.00	log gamma=-9.02  	ACC=0.958	Gmean=0.958	SVs=33 (16,17)
+log C=12.50	log gamma=-1.52  	ACC=0.521	Gmean=0.200	SVs=143 (62,81)
+log C=15.00	log gamma=-9.24  	ACC=0.958	Gmean=0.958	SVs=33 (15,18)
+log C=14.99	log gamma=-4.02  	ACC=0.973	Gmean=0.973	SVs=92 (41,51)
+log C=15.00	log gamma=-6.52  	ACC=0.963	Gmean=0.963	SVs=47 (21,26)
+log C=12.50	log gamma=-9.02  	ACC=0.960	Gmean=0.960	SVs=33 (15,18)
+BEST (10,-9.02)
+log C: 10 log g: -9.0198 AC:0.958 SN:0.940 SP:0.977 PPV:0.976 NPV:0.942 F1:0.957 GM:0.958 SV_min:16 SV_maj:17 TP:281 TN:293 FP:7 FN:18
+refinement at level 0 took 0.0198
+refinement time 0.0199
+best validation on testing data:
+test time 0.00171
+log C: 12.5 log g: -9.0198 AC:0.976 SN:0.978 SP:0.973 PPV:0.973 NPV:0.978 F1:0.976 GM:0.976 SV_min:9 SV_maj:7 TP:724 TN:719 FP:20 FN:16
+iteration time: 0.244
+------------- K-FOLD ITERATION 1 -------------
+fold time: 0.0937
+graph - min: 2963 maj: 2958
+test - min: 740 maj: 739
+sample - min: 316 maj: 288
+no of coarser vertices 92 and no of edges 6262
+no of coarser vertices 76 and no of edges 4304
+coarsening time: 0.0685
+coarse nodes - min: 92 maj: 76
+1st sweep with initial logC=0 logGamma=0
+log C=5.00	log gamma=0.00  	ACC=0.523	Gmean=0.000	SVs=102 (54,48)
+log C=-5.00	log gamma=-2.50  	ACC=0.722	Gmean=0.645	SVs=126 (63,63)
+log C=10.00	log gamma=7.50  	ACC=0.523	Gmean=0.000	SVs=168 (92,76)
+log C=-2.50	log gamma=5.00  	ACC=0.523	Gmean=0.000	SVs=168 (92,76)
+log C=0.00	log gamma=-7.50  	ACC=0.977	Gmean=0.977	SVs=47 (24,23)
+log C=15.00	log gamma=2.50  	ACC=0.523	Gmean=0.000	SVs=168 (92,76)
+log C=12.50	log gamma=-5.00  	ACC=0.974	Gmean=0.973	SVs=13 (7,6)
+log C=7.50	log gamma=-10.00  	ACC=0.969	Gmean=0.968	SVs=8 (4,4)
+log C=2.50	log gamma=10.00  	ACC=0.523	Gmean=0.000	SVs=168 (92,76)
+2nd sweep with logC=7.5 logGamma=-10
+log C: 7.5 log g: -10 AC:0.969 SN:0.978 SP:0.958 PPV:0.963 NPV:0.975 F1:0.970 GM:0.968 SV_min:4 SV_maj:4 TP:309 TN:276 FP:12 FN:7
+log C=5.00	log gamma=-10.00  	ACC=0.977	Gmean=0.976	SVs=12 (6,6)
+log C=7.50	log gamma=-2.50  	ACC=0.972	Gmean=0.972	SVs=39 (23,16)
+log C=12.50	log gamma=-9.82  	ACC=0.969	Gmean=0.968	SVs=8 (4,4)
+log C=15.00	log gamma=-5.00  	ACC=0.974	Gmean=0.973	SVs=13 (7,6)
+BEST (12.5,-9.82)
+log C: 12.5 log g: -9.8197 AC:0.969 SN:0.978 SP:0.958 PPV:0.963 NPV:0.975 F1:0.970 GM:0.968 SV_min:4 SV_maj:4 TP:309 TN:276 FP:12 FN:7
+init train time: 0.049
+inital validation on testing:
+log C: 12.5 log g: -9.8197 AC:0.963 SN:0.968 SP:0.959 PPV:0.960 NPV:0.967 F1:0.964 GM:0.963 SV_min:4 SV_maj:4 TP:716 TN:709 FP:30 FN:24
+init test time: 0.000776
+min hierarchy 1 -- maj hierarchy 1
+minority uncoarsed
+uncoarsened nodes 2963 SV 4 resulting neighbors 45
+majority uncoarsed
+uncoarsened nodes 2958 SV 4 resulting neighbors 34
+min hierarchy 0 -- maj hierarchy 0
+current level nodes min 45 maj 34
+2nd sweep with logC=12.5 logGamma=-9.82
+log C=10.00	log gamma=-9.82  	ACC=0.954	Gmean=0.953	SVs=24 (12,12)
+log C=12.50	log gamma=-2.32  	ACC=0.677	Gmean=0.575	SVs=79 (45,34)
+log C=14.98	log gamma=-10.81  	ACC=0.940	Gmean=0.939	SVs=21 (10,11)
+log C=14.99	log gamma=-4.82  	ACC=0.972	Gmean=0.971	SVs=49 (24,25)
+log C=15.00	log gamma=-7.32  	ACC=0.960	Gmean=0.960	SVs=28 (16,12)
+log C=12.50	log gamma=-9.82  	ACC=0.949	Gmean=0.947	SVs=23 (11,12)
+BEST (15,-10.8)
+log C: 14.98 log g: -10.811 AC:0.940 SN:0.962 SP:0.917 PPV:0.927 NPV:0.957 F1:0.944 GM:0.939 SV_min:10 SV_maj:11 TP:304 TN:264 FP:24 FN:12
+refinement at level 0 took 0.011
+refinement time 0.011
+best validation on testing data:
+test time 0.000891
+log C: 12.5 log g: -9.8197 AC:0.963 SN:0.968 SP:0.959 PPV:0.960 NPV:0.967 F1:0.964 GM:0.963 SV_min:4 SV_maj:4 TP:716 TN:709 FP:30 FN:24
+iteration time: 0.224
+------------- K-FOLD ITERATION 2 -------------
+fold time: 0.0938
+graph - min: 2963 maj: 2958
+test - min: 740 maj: 739
+sample - min: 302 maj: 300
+no of coarser vertices 77 and no of edges 4318
+no of coarser vertices 84 and no of edges 5236
+coarsening time: 0.0679
+coarse nodes - min: 77 maj: 84
+1st sweep with initial logC=0 logGamma=0
+log C=5.00	log gamma=0.00  	ACC=0.505	Gmean=0.082	SVs=100 (50,50)
+log C=-5.00	log gamma=-2.50  	ACC=0.973	Gmean=0.973	SVs=127 (64,63)
+log C=10.00	log gamma=7.50  	ACC=0.498	Gmean=0.000	SVs=161 (77,84)
+log C=-2.50	log gamma=5.00  	ACC=0.498	Gmean=0.000	SVs=161 (77,84)
+log C=0.00	log gamma=-7.50  	ACC=0.973	Gmean=0.973	SVs=47 (23,24)
+log C=15.00	log gamma=2.50  	ACC=0.498	Gmean=0.000	SVs=161 (77,84)
+log C=12.50	log gamma=-5.00  	ACC=0.968	Gmean=0.968	SVs=19 (10,9)
+log C=7.50	log gamma=-10.00  	ACC=0.952	Gmean=0.952	SVs=9 (5,4)
+log C=2.50	log gamma=10.00  	ACC=0.498	Gmean=0.000	SVs=161 (77,84)
+2nd sweep with logC=12.5 logGamma=-5
+log C: 12.5 log g: -5 AC:0.968 SN:0.983 SP:0.953 PPV:0.955 NPV:0.983 F1:0.969 GM:0.968 SV_min:10 SV_maj:9 TP:297 TN:286 FP:14 FN:5
+log C=10.00	log gamma=-5.00  	ACC=0.968	Gmean=0.968	SVs=19 (10,9)
+log C=12.50	log gamma=2.50  	ACC=0.498	Gmean=0.000	SVs=161 (77,84)
+log C=15.01	log gamma=-7.50  	ACC=0.955	Gmean=0.955	SVs=10 (6,4)
+log C=15.01	log gamma=0.00  	ACC=0.505	Gmean=0.082	SVs=100 (50,50)
+BEST (15,-7.5)
+log C: 15.01 log g: -7.5 AC:0.955 SN:0.947 SP:0.963 PPV:0.963 NPV:0.948 F1:0.955 GM:0.955 SV_min:6 SV_maj:4 TP:286 TN:289 FP:11 FN:16
+init train time: 0.0583
+inital validation on testing:
+log C: 15.01 log g: -7.5 AC:0.965 SN:0.959 SP:0.970 PPV:0.970 NPV:0.960 F1:0.965 GM:0.965 SV_min:6 SV_maj:4 TP:710 TN:717 FP:22 FN:30
+init test time: 0.000935
+min hierarchy 1 -- maj hierarchy 1
+minority uncoarsed
+uncoarsened nodes 2963 SV 6 resulting neighbors 36
+majority uncoarsed
+uncoarsened nodes 2958 SV 4 resulting neighbors 34
+min hierarchy 0 -- maj hierarchy 0
+current level nodes min 36 maj 34
+2nd sweep with logC=15 logGamma=-7.5
+log C=12.51	log gamma=-7.50  	ACC=0.942	Gmean=0.942	SVs=30 (18,12)
+log C=14.98	log gamma=0.00  	ACC=0.505	Gmean=0.082	SVs=70 (36,34)
+log C=14.98	log gamma=-10.00  	ACC=0.927	Gmean=0.927	SVs=23 (13,10)
+log C=15.01	log gamma=-2.50  	ACC=0.832	Gmean=0.822	SVs=70 (36,34)
+log C=14.99	log gamma=-5.00  	ACC=0.937	Gmean=0.937	SVs=47 (24,23)
+log C=15.01	log gamma=-7.50  	ACC=0.942	Gmean=0.942	SVs=30 (18,12)
+BEST (15,-10)
+log C: 14.978 log g: -10 AC:0.927 SN:0.917 SP:0.937 PPV:0.936 NPV:0.918 F1:0.926 GM:0.927 SV_min:13 SV_maj:10 TP:277 TN:281 FP:19 FN:25
+refinement at level 0 took 0.012
+refinement time 0.0121
+best validation on testing data:
+test time 0.00106
+log C: 15.01 log g: -7.5 AC:0.965 SN:0.959 SP:0.970 PPV:0.970 NPV:0.960 F1:0.965 GM:0.965 SV_min:6 SV_maj:4 TP:710 TN:717 FP:22 FN:30
+iteration time: 0.234
+------------- K-FOLD ITERATION 3 -------------
+fold time: 0.0938
+graph - min: 2963 maj: 2958
+test - min: 740 maj: 739
+sample - min: 272 maj: 263
+no of coarser vertices 88 and no of edges 5340
+no of coarser vertices 81 and no of edges 4506
+coarsening time: 0.069
+coarse nodes - min: 88 maj: 81
+1st sweep with initial logC=0 logGamma=0
+log C=5.00	log gamma=0.00  	ACC=0.508	Gmean=0.000	SVs=107 (54,53)
+log C=-5.00	log gamma=-2.50  	ACC=0.819	Gmean=0.795	SVs=135 (67,68)
+log C=10.00	log gamma=7.50  	ACC=0.508	Gmean=0.000	SVs=169 (88,81)
+log C=-2.50	log gamma=5.00  	ACC=0.508	Gmean=0.000	SVs=169 (88,81)
+log C=0.00	log gamma=-7.50  	ACC=0.989	Gmean=0.989	SVs=42 (20,22)
+log C=15.00	log gamma=2.50  	ACC=0.508	Gmean=0.000	SVs=169 (88,81)
+log C=12.50	log gamma=-5.00  	ACC=0.974	Gmean=0.974	SVs=16 (9,7)
+log C=7.50	log gamma=-10.00  	ACC=0.972	Gmean=0.972	SVs=11 (6,5)
+log C=2.50	log gamma=10.00  	ACC=0.508	Gmean=0.000	SVs=169 (88,81)
+2nd sweep with logC=7.5 logGamma=-10
+log C: 7.5 log g: -10 AC:0.972 SN:0.963 SP:0.981 PPV:0.981 NPV:0.963 F1:0.972 GM:0.972 SV_min:6 SV_maj:5 TP:262 TN:258 FP:5 FN:10
+log C=5.00	log gamma=-10.00  	ACC=0.981	Gmean=0.981	SVs=15 (8,7)
+log C=7.50	log gamma=-2.50  	ACC=0.815	Gmean=0.791	SVs=44 (24,20)
+log C=12.50	log gamma=-9.31  	ACC=0.972	Gmean=0.972	SVs=11 (6,5)
+log C=15.00	log gamma=-5.00  	ACC=0.974	Gmean=0.974	SVs=16 (9,7)
+BEST (12.5,-9.31)
+log C: 12.5 log g: -9.309 AC:0.972 SN:0.963 SP:0.981 PPV:0.981 NPV:0.963 F1:0.972 GM:0.972 SV_min:6 SV_maj:5 TP:262 TN:258 FP:5 FN:10
+init train time: 0.0464
+inital validation on testing:
+log C: 12.5 log g: -9.309 AC:0.973 SN:0.965 SP:0.981 PPV:0.981 NPV:0.965 F1:0.973 GM:0.973 SV_min:6 SV_maj:5 TP:714 TN:725 FP:14 FN:26
+init test time: 0.00108
+min hierarchy 1 -- maj hierarchy 1
+minority uncoarsed
+uncoarsened nodes 2963 SV 6 resulting neighbors 205
+majority uncoarsed
+uncoarsened nodes 2958 SV 5 resulting neighbors 23
+min hierarchy 0 -- maj hierarchy 0
+current level nodes min 205 maj 23
+2nd sweep with logC=12.5 logGamma=-9.31
+log C=10.00	log gamma=-9.31  	ACC=0.936	Gmean=0.933	SVs=25 (14,11)
+log C=12.50	log gamma=-1.81  	ACC=0.510	Gmean=0.062	SVs=228 (205,23)
+log C=15.00	log gamma=-10.24  	ACC=0.940	Gmean=0.937	SVs=23 (13,10)
+log C=15.01	log gamma=-4.31  	ACC=0.860	Gmean=0.846	SVs=84 (62,22)
+log C=15.00	log gamma=-6.81  	ACC=0.907	Gmean=0.901	SVs=40 (25,15)
+log C=12.50	log gamma=-9.31  	ACC=0.936	Gmean=0.933	SVs=25 (14,11)
+BEST (15,-10.2)
+log C: 15.001 log g: -10.241 AC:0.940 SN:0.996 SP:0.882 PPV:0.897 NPV:0.996 F1:0.944 GM:0.937 SV_min:13 SV_maj:10 TP:271 TN:232 FP:31 FN:1
+refinement at level 0 took 0.0226
+refinement time 0.0227
+best validation on testing data:
+test time 0.00125
+log C: 12.5 log g: -9.309 AC:0.973 SN:0.965 SP:0.981 PPV:0.981 NPV:0.965 F1:0.973 GM:0.973 SV_min:6 SV_maj:5 TP:714 TN:725 FP:14 FN:26
+iteration time: 0.234
+------------- K-FOLD ITERATION 4 -------------
+fold time: 0.0956
+graph - min: 2963 maj: 2958
+test - min: 740 maj: 739
+sample - min: 306 maj: 293
+no of coarser vertices 101 and no of edges 7156
+no of coarser vertices 77 and no of edges 4304
+coarsening time: 0.0696
+coarse nodes - min: 101 maj: 77
+1st sweep with initial logC=0 logGamma=0
+log C=5.00	log gamma=0.00  	ACC=0.511	Gmean=0.000	SVs=111 (65,46)
+log C=-5.00	log gamma=-2.50  	ACC=0.611	Gmean=0.453	SVs=135 (68,67)
+log C=10.00	log gamma=7.50  	ACC=0.511	Gmean=0.000	SVs=178 (101,77)
+log C=-2.50	log gamma=5.00  	ACC=0.511	Gmean=0.000	SVs=178 (101,77)
+log C=0.00	log gamma=-7.50  	ACC=0.982	Gmean=0.982	SVs=46 (24,22)
+log C=15.00	log gamma=2.50  	ACC=0.511	Gmean=0.000	SVs=178 (101,77)
+log C=12.50	log gamma=-5.00  	ACC=0.972	Gmean=0.972	SVs=16 (7,9)
+log C=7.50	log gamma=-10.00  	ACC=0.968	Gmean=0.968	SVs=11 (4,7)
+log C=2.50	log gamma=10.00  	ACC=0.511	Gmean=0.000	SVs=178 (101,77)
+2nd sweep with logC=7.5 logGamma=-10
+log C: 7.5 log g: -10 AC:0.968 SN:0.977 SP:0.959 PPV:0.961 NPV:0.976 F1:0.969 GM:0.968 SV_min:4 SV_maj:7 TP:299 TN:281 FP:12 FN:7
+log C=5.00	log gamma=-10.00  	ACC=0.978	Gmean=0.978	SVs=18 (10,8)
+log C=7.50	log gamma=-2.50  	ACC=0.937	Gmean=0.934	SVs=38 (20,18)
+log C=12.50	log gamma=-9.27  	ACC=0.968	Gmean=0.968	SVs=11 (4,7)
+log C=15.00	log gamma=-5.00  	ACC=0.972	Gmean=0.972	SVs=16 (7,9)
+BEST (12.5,-9.27)
+log C: 12.5 log g: -9.2729 AC:0.968 SN:0.977 SP:0.959 PPV:0.961 NPV:0.976 F1:0.969 GM:0.968 SV_min:4 SV_maj:7 TP:299 TN:281 FP:12 FN:7
+init train time: 0.0539
+inital validation on testing:
+log C: 12.5 log g: -9.2729 AC:0.964 SN:0.966 SP:0.962 PPV:0.962 NPV:0.966 F1:0.964 GM:0.964 SV_min:4 SV_maj:7 TP:715 TN:711 FP:28 FN:25
+init test time: 0.00105
+min hierarchy 1 -- maj hierarchy 1
+minority uncoarsed
+uncoarsened nodes 2963 SV 4 resulting neighbors 41
+majority uncoarsed
+uncoarsened nodes 2958 SV 7 resulting neighbors 45
+min hierarchy 0 -- maj hierarchy 0
+current level nodes min 41 maj 45
+2nd sweep with logC=12.5 logGamma=-9.27
+log C=10.00	log gamma=-9.27  	ACC=0.943	Gmean=0.943	SVs=22 (10,12)
+log C=12.50	log gamma=-1.77  	ACC=0.578	Gmean=0.423	SVs=86 (41,45)
+log C=14.99	log gamma=-9.90  	ACC=0.947	Gmean=0.947	SVs=20 (10,10)
+log C=14.98	log gamma=-4.27  	ACC=0.958	Gmean=0.958	SVs=63 (33,30)
+log C=15.00	log gamma=-6.77  	ACC=0.953	Gmean=0.953	SVs=33 (15,18)
+log C=12.50	log gamma=-9.27  	ACC=0.943	Gmean=0.943	SVs=22 (10,12)
+BEST (15,-9.9)
+log C: 14.994 log g: -9.9001 AC:0.947 SN:0.931 SP:0.962 PPV:0.963 NPV:0.931 F1:0.947 GM:0.947 SV_min:10 SV_maj:10 TP:285 TN:282 FP:11 FN:21
+refinement at level 0 took 0.0119
+refinement time 0.012
+best validation on testing data:
+test time 0.00131
+log C: 12.5 log g: -9.2729 AC:0.964 SN:0.966 SP:0.962 PPV:0.962 NPV:0.966 F1:0.964 GM:0.964 SV_min:4 SV_maj:7 TP:715 TN:711 FP:28 FN:25
+iteration time: 0.233
+-------------- K-FOLD DONE -------------- 
+KFOLD_TIME	0.0947
+COARSE_TIME	0.0691
+COARSE_MIN	89.8000
+COARSE_MAJ	81.8000
+HIERARCHY_MIN_SIZE	1.0000
+HIERARCHY_MAJ_SIZE	1.0000
+	INIT_TRAIN_TIME	0.0526
+INIT_AC  	0.9678
+INIT_GM  	0.9676
+INIT_AC_TEST	0.9682
+INIT_GM_TEST	0.9682
+LEVEL0_AC	0.9425
+LEVEL0_GM	0.9417
+	REFINEMENT_TIME	0.0155
+[BEST_INDEX]
+fold 0: 0
+fold 1: 0
+fold 2: 0
+fold 3: 0
+fold 4: 0
+BEST_AC	0.9678
+BEST_SN	0.9670
+BEST_SP	0.9683
+BEST_GM	0.9676
+BEST_F1	0.9683
+	TEST_TIME	0.0012
+BEST_AC_TEST	0.9682
+BEST_SN_TEST	0.9673
+BEST_SP_TEST	0.9691
+BEST_GM_TEST	0.9682
+BEST_F1_TEST	0.9682
+TIME	0.2335
+#+end_example
