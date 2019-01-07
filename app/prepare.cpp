@@ -9,7 +9,7 @@
 #include <locale>
 #include <argtable2.h>
 #include "svm/svm_flann.h"
-#include "timer.h"
+#include "tools/timer.h"
 #include "definitions.h"
 
 using namespace std;
