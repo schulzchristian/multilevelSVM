@@ -32,13 +32,14 @@ void svm_flann::run_flann(const std::vector<FeatureVec> & data, std::vector<std:
         graph.clear();
         graph.reserve(rows);
         for (size_t i = 0; i < rows; ++i) {
-                graph.push_back(std::vector<Edge>(num_nn));
+		graph.push_back(std::vector<Edge>());
+		graph.back().reserve(num_nn);
 
                 for (size_t j = 0; j < (size_t) num_nn + 1; ++j) {
                         int target = indices[i][j];
                         float weight = 1 / distances[i][j];
 
-                        if (target == (size_t) i) //exclude self loops
+                        if (target == i) //exclude self loops
                                 continue;
 
                         Edge edge;
