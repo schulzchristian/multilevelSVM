@@ -43,7 +43,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *kfold_iterations                     = arg_int0("k", "kfold_iterations", NULL, "Number of kfold iterations (Default: 5)");
         struct arg_dbl *time_limit                           = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 0s .");
         struct arg_int *timeout                              = arg_int0(NULL, "timeout", NULL, "Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)");
-
+        struct arg_lit *export_graph                         = arg_lit0(NULL, "export_graph","Export the graph at every level (this exits after one multilevel cycle).");
 
         // matching/clustering
         struct arg_rex *edge_rating                          = arg_rex0(NULL, "edge_rating", "^(weight|realweight|expansionstar|expansionstar2|expansionstar2deg|punch|expansionstar2algdist|expansionstar2algdist2|algdist|algdist2|sepmultx|sepaddx|sepmax|seplog|r1|r2|r3|r4|r5|r6|r7|r8)$", "RATING", REG_EXTENDED, "Edge rating to use. One of {weight, expansionstar, expansionstar2, punch, sepmultx, sepaddx, sepmax, seplog, " " expansionstar2deg}. Default: weight"  );
@@ -99,6 +99,7 @@ int parse_parameters(int argn, char **argv,
                             no_inherit_ud,
                             timeout,
                             bidirectional,
+			    export_graph,
 #endif
                             end
         };
@@ -290,6 +291,10 @@ int parse_parameters(int argn, char **argv,
 
         if(timeout->count > 0) {
                 partition_config.timeout = timeout->ival[0];
+        }
+
+        if(export_graph->count > 0) {
+		partition_config.export_graph = true;
         }
 
         if(bidirectional->count > 0) {

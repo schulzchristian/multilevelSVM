@@ -48,6 +48,9 @@ class graph_io {
                 static
                 int writeGraph(graph_access & G, std::string filename);
 
+		static
+		int writeGraphGDF(const graph_access & G_min, const graph_access & G_maj, std::string filename);
+
                 static 
                 int readPartition(graph_access& G, std::string filename); 
 

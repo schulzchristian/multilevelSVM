@@ -27,6 +27,9 @@ public:
 
         svm_data get_SV(const graph_access & G, const std::vector<NodeID> & sv);
 
+	graph_access * G_min;
+	graph_access * G_maj;
+
 private:
         graph_hierarchy * min_hierarchy;
         graph_hierarchy * maj_hierarchy;

@@ -131,6 +131,15 @@ int main(int argn, char *argv[]) {
         results.setFloat("HIERARCHY_MIN_SIZE", min_hierarchy.size());
         results.setFloat("HIERARCHY_MAJ_SIZE", maj_hierarchy.size());
 
+
+        int init_level = std::max(min_hierarchy.size(), maj_hierarchy.size());
+	if (partition_config.export_graph) {
+		std::ostringstream initial_out_graph;
+		initial_out_graph << "graph_" << init_level << ".gdf";
+		std::cout << "write " << initial_out_graph.str() << std::endl;
+		graph_io::writeGraphGDF(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest(), initial_out_graph.str());
+	}
+
         // ------------- INITIAL TRAINING -----------------
 
         t.restart();
@@ -187,6 +196,14 @@ int main(int argn, char *argv[]) {
                 fmt_gm << "LEVEL" << refinement.get_level() << "_GM";
                 results.setFloat(fmt_ac.str(), current_result.best().Acc);
                 results.setFloat(fmt_gm.str(), current_result.best().Gmean);
+
+
+		if (partition_config.export_graph) {
+			std::ostringstream out_graph;
+			out_graph << "graph_" << refinement.get_level() << ".gdf";
+			std::cout << "write " << out_graph.str() << std::endl;
+			graph_io::writeGraphGDF(*refinement.G_min, *refinement.G_maj, out_graph.str());
+		}
 
                 /*
                 std::cout << "level " << refinement.get_level()
@@ -248,10 +265,15 @@ int main(int argn, char *argv[]) {
 
         results.setFloat("TIME", time_iteration);
 
-        if(partition_config.timeout != 0 && time_iteration > partition_config.timeout) {
+        if (partition_config.timeout != 0 && time_iteration > partition_config.timeout) {
                 std::cout << "timeout reached exiting..." << std::endl;
                 exit(123);
         }
+
+	if (partition_config.export_graph) {
+                std::cout << "Exporting graph: Abort after one multilevel cycle." << std::endl;
+                exit(0);
+	}
 
         t_all.restart();
         t.restart();

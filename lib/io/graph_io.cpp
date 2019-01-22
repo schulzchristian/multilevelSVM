@@ -63,13 +63,60 @@ int graph_io::writeGraph(graph_access & G, std::string filename) {
         return 0;
 }
 
+int graph_io::writeGraphGDF(const graph_access & G_min, const graph_access & G_maj, std::string filename) {
+        std::ofstream f(filename.c_str());
+
+        size_t min_nodes = G_min.number_of_nodes();
+
+	f << "nodedef>name VARCHAR,class VARCHAR, weight DOUBLE";
+	for (size_t i = 0; i < G_min.getFeatureVec(0).size(); ++i) {
+		f << ",feature" << i << " DOUBLE";
+	}
+	f << std::endl;
+
+	// NODES
+	forall_nodes(G_min, node) {
+		f <<  node << ",-1," << G_min.getNodeWeight(node);
+		for (auto &feature : G_min.getFeatureVec(node)) {
+			f << "," << feature;
+		}
+		f << std::endl;
+	} endfor
+
+	forall_nodes(G_maj, node) {
+		f <<  node + min_nodes << ",1," << G_maj.getNodeWeight(node);
+		for (auto &feature : G_maj.getFeatureVec(node)) {
+			f << "," << feature;
+		}
+		f << std::endl;
+	} endfor
+
+
+	f << "edgedef>node1 VARCHAR,node2 VARCHAR" << std::endl;
+
+	// EDGES
+	forall_nodes(G_min, node) {
+                forall_out_edges(G_min, e, node) {
+                        f << node << "," << G_min.getEdgeTarget(e) << std::endl;
+                } endfor 
+        } endfor
+	forall_nodes(G_maj, node) {
+                forall_out_edges(G_maj, e, node) {
+                        f << node + min_nodes << "," << G_maj.getEdgeTarget(e) + min_nodes << std::endl;
+                } endfor 
+        } endfor
+        f.close();
+        return 0;
+}
+
+
 int graph_io::readPartition(graph_access & G, std::string filename) {
         std::string line;
 
         // open file for reading
         std::ifstream in(filename.c_str());
         if (!in) {
-                std::cerr << "Error opening file" << filename << std::endl;
+                std::cerr << "Error opening file " << filename << std::endl;
                 return 1;
         }
 
@@ -227,7 +274,7 @@ int graph_io::readFeatures(graph_access & G, const std::string & filename) {
         // open file for reading
         std::ifstream in(filename);
         if (!in) {
-                std::cerr << "Error opening file" << filename << std::endl;
+                std::cerr << "Error opening file " << filename << std::endl;
                 return 1;
         }
 
@@ -271,6 +318,7 @@ int graph_io::readGraphFromVec(graph_access & G, const std::vector<std::vector<E
                 for (auto & edge : nodeData) {
                         EdgeID e = G.new_edge(node, edge.target);
                         G.setEdgeWeight(e, edge.weight);
+			// std::cout << edge.target << "," << edge.weight <<std::endl;
                         last = e;
                 }
         }

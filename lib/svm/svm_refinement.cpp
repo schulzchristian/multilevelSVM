@@ -37,14 +37,14 @@ void svm_refinement::uncoarse() {
         // if maj_hierarchy is larger then start by only uncoarse the maj graph
         if (!min_hierarchy->isEmpty() && min_hierarchy->size() >= maj_hierarchy->size()) {
                 std::cout << "minority uncoarsed" << std::endl;
-                graph_access* G_min = min_hierarchy->pop_finer_and_project();
+                this->G_min = min_hierarchy->pop_finer_and_project();
                 CoarseMapping* mapping_min = min_hierarchy->get_mapping_of_current_finer();
                 this->neighbors_min = get_SV_neighbors(*G_min, *mapping_min, sv_min);
                 this->training_inherit = true; // after the first uncoarsening of the min data inherit params
         }
         if (!maj_hierarchy->isEmpty()) {
                 std::cout << "majority uncoarsed" << std::endl;
-                graph_access* G_maj = maj_hierarchy->pop_finer_and_project();
+                this->G_maj = maj_hierarchy->pop_finer_and_project();
                 CoarseMapping* mapping_maj = maj_hierarchy->get_mapping_of_current_finer();
                 this->neighbors_maj = get_SV_neighbors(*G_maj, *mapping_maj, sv_maj);
         }

@@ -98,6 +98,8 @@ struct PartitionConfig
 
         int timeout = 0;
 
+	bool export_graph = false;
+
         //=======================================
         //===========SNW PARTITIONING============
         //=======================================
