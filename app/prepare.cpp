@@ -56,7 +56,7 @@ static inline std::string trim_copy(std::string s) {
 }
 
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile);
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile);
 
 void read_csv(const string & filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
 
@@ -77,8 +77,8 @@ void write_features(const MyMat & data, const string filename);
 int main(int argc, char *argv[]) {
         int nn_num = 10;
         int label_col = 0;
-        bool norm = true; //indicates whether to normalize or scale to [0,1]
-                          //the later will preserve null entries
+        int norm = true; //indicates whether to normalize or scale to [0,1] or neither
+                         //scaling can preserve null entries
         bool libsvm = false; // read libsvm data instead of csv
         bool processed_csv = false;
         string inputfile;
@@ -113,13 +113,18 @@ int main(int argc, char *argv[]) {
 
         t.restart();
 
-        if (norm) {
+	switch (norm) {
+	case 0:
                 normalize(data);
                 cout << "normalization time " << t.elapsed() << endl;
-        } else {
+		break;
+	case 1:
                 scale(data);
                 cout << "scale time " << t.elapsed() << endl;
-        }
+		break;
+	case 2:
+		break;
+	}
 
         MyMat min_data;
         MyMat maj_data;
@@ -160,18 +165,19 @@ int main(int argc, char *argv[]) {
         return 0;
 }
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile) {
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile) {
         // Setup argtable parameters.
         struct arg_end *end                 = arg_end(100);
         struct arg_lit *help                = arg_lit0("h", "help","Print help.");
         struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute. (default 10)");
         struct arg_int *label_column        = arg_int0(NULL, "label_col", NULL, "column in which the labels are written (starting at 0)");
-        struct arg_lit *p_csv       = arg_lit0("c", NULL, "export the csv where the categorical attributes where converted to binary");
+        struct arg_lit *p_csv               = arg_lit0("c", NULL, "export the csv where the categorical attributes where converted to binary");
         struct arg_lit *scale               = arg_lit0(NULL, "scale", "don't normalize just scale to [0,1]");
+        struct arg_lit *no_scale            = arg_lit0(NULL, "no_scale", "neither normalize nor scale to [0,1]");
         struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to csv file to process.");
         struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
 
-        void* argtable[] = {help, nearest_neighbors, label_column, scale, p_csv, filename, filename_output
+        void* argtable[] = {help, nearest_neighbors, label_column, scale, no_scale, p_csv, filename, filename_output
                             ,end};
 
         // Parse arguments.
@@ -197,7 +203,10 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, bool & nor
         }
 
         if (scale->count > 0) {
-                normalize = false;
+                normalize = 1;
+        }
+	else if (no_scale->count > 0) {
+                normalize = 2;
         }
 
         if (p_csv->count > 0) {
