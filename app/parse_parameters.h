@@ -238,7 +238,7 @@ int parse_parameters(int argn, char **argv,
                 } else if (strcmp("randomgpa", matching_type->sval[0]) == 0) {
                         partition_config.matching_type = MATCHING_RANDOM_GPA;
                 } else if (strcmp("lp_clustering", matching_type->sval[0]) == 0) {
-                        partition_config.matching_type = CLUSTER_COARSENING;
+                        partition_config.matching_type = LP_CLUSTERING;
                 } else if (strcmp("simple_clustering", matching_type->sval[0]) == 0) {
                         partition_config.matching_type = SIMPLE_CLUSTERING;
                 } else if (strcmp("low_diameter", matching_type->sval[0]) == 0) {

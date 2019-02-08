@@ -40,7 +40,7 @@ struct PartitionConfig
 
         PermutationQuality permutation_quality = PERMUTATION_QUALITY_FAST;
 
-        MatchingType matching_type = CLUSTER_COARSENING;
+        MatchingType matching_type = LP_CLUSTERING;
 
         bool first_level_random_matching = false;
 

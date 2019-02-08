@@ -58,8 +58,8 @@ inline void coarsening_configurator::configure_coarsening( const PartitionConfig
                 case MATCHING_RANDOM_GPA:
                         *edge_matcher = new gpa_matching();
                         break;
-                case CLUSTER_COARSENING:
-                       *edge_matcher = new size_constraint_label_propagation();
+		case LP_CLUSTERING:
+		       *edge_matcher = new size_constraint_label_propagation();
                         break;
                 case SIMPLE_CLUSTERING:
                         *edge_matcher = new simple_clustering();

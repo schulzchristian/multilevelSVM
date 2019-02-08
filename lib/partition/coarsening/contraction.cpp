@@ -41,7 +41,7 @@ void contraction::contract(const PartitionConfig & partition_config,
                            const NodeID & no_of_coarse_vertices,
                            const NodePermutationMap & permutation) const {
 
-        if(partition_config.matching_type == CLUSTER_COARSENING
+        if(partition_config.matching_type == LP_CLUSTERING
            || partition_config.matching_type == SIMPLE_CLUSTERING
            || partition_config.matching_type == LOW_DIAMETER) {
                 return contract_clustering(partition_config, G, coarser, edge_matching, coarse_mapping, no_of_coarse_vertices, permutation);
@@ -155,7 +155,7 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
 
         forall_nodes(G, node) {
                 NodeID coarsed_node = coarse_mapping[node];
-                G.setPartitionIndex(node, partition_map[node]);
+                // G.setPartitionIndex(node, partition_map[node]);
                 coarser.setPartitionIndex(coarsed_node, G.getPartitionIndex(node));
 
                 addWeightedToVec(combined_feature_vecs[coarsed_node],
@@ -185,7 +185,7 @@ void contraction::contract_partitioned(const PartitionConfig & partition_config,
                                        const NodeID & no_of_coarse_vertices,
                                        const NodePermutationMap & permutation) const {
 
-        if(partition_config.matching_type == CLUSTER_COARSENING) {
+        if(partition_config.matching_type == LP_CLUSTERING) {
                 return contract_clustering(partition_config, G, coarser, edge_matching, coarse_mapping, no_of_coarse_vertices, permutation);
         }
 

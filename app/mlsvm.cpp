@@ -50,7 +50,9 @@ int main(int argn, char *argv[]) {
         std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
         std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
         std::cout << "bidirectional: " << partition_config.bidirectional << std::endl;
+        std::cout << "stop rule: " << partition_config.stop_rule << std::endl;
         std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
+        std::cout << "matching type: " << partition_config.matching_type << std::endl;
         std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
         std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
         std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
@@ -135,7 +137,7 @@ int main(int argn, char *argv[]) {
         int init_level = std::max(min_hierarchy.size(), maj_hierarchy.size());
 	if (partition_config.export_graph) {
 		std::ostringstream initial_out_graph;
-		initial_out_graph << "graph_" << init_level << ".gdf";
+		initial_out_graph << filename << "_graph_" << partition_config.matching_type << "_" << init_level << ".gdf";
 		std::cout << "write " << initial_out_graph.str() << std::endl;
 		graph_io::writeGraphGDF(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest(), initial_out_graph.str());
 	}
@@ -200,7 +202,7 @@ int main(int argn, char *argv[]) {
 
 		if (partition_config.export_graph) {
 			std::ostringstream out_graph;
-			out_graph << "graph_" << refinement.get_level() << ".gdf";
+			out_graph << filename << "_graph_" << partition_config.matching_type << "_" << refinement.get_level() << ".gdf";
 			std::cout << "write " << out_graph.str() << std::endl;
 			graph_io::writeGraphGDF(*refinement.G_min, *refinement.G_maj, out_graph.str());
 		}

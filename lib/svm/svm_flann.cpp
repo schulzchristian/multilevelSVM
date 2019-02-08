@@ -46,7 +46,6 @@ void svm_flann::run_flann(const std::vector<FeatureVec> & data, std::vector<std:
                         edge.target = target;
                         edge.weight = weight;
                         graph.back().push_back(edge);
-                }
+		}
         }
-
 }

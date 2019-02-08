@@ -12,7 +12,7 @@ void svm_io::readFeaturesLines(const std::string & filename, std::vector<Feature
         // open file for reading
         std::ifstream in(filename);
         if (!in) {
-                std::cerr << "Error opening file" << filename << std::endl;
+                std::cerr << "Error opening file " << filename << std::endl;
                 exit(1);
         }
 
@@ -45,7 +45,7 @@ void svm_io::readTestSplit(const std::string & filename, std::vector<svm_feature
         // open file for reading
         std::ifstream in(filename);
         if (!in) {
-                std::cerr << "Error opening file" << filename << std::endl;
+                std::cerr << "Error opening file " << filename << std::endl;
                 exit(1);
         }
 
