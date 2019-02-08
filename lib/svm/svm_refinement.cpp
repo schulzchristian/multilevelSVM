@@ -12,6 +12,8 @@ svm_refinement::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy 
     : result(initial_result) {
         this->min_hierarchy = &min_hierarchy;
         this->maj_hierarchy = &maj_hierarchy;
+	this->G_min = min_hierarchy.get_coarsest();
+	this->G_maj = maj_hierarchy.get_coarsest();
         this->neighbors_min = svm_convert::graph_to_nodes(* this->min_hierarchy->get_coarsest());
         this->neighbors_maj = svm_convert::graph_to_nodes(* this->maj_hierarchy->get_coarsest());
         this->training_inherit = false;

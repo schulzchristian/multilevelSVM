@@ -68,7 +68,7 @@ int graph_io::writeGraphGDF(const graph_access & G_min, const graph_access & G_m
 
         size_t min_nodes = G_min.number_of_nodes();
 
-	f << "nodedef>name VARCHAR,class VARCHAR, weight DOUBLE";
+	f << "nodedef>name VARCHAR,class VARCHAR,partition VARCHAR, weight DOUBLE";
 	for (size_t i = 0; i < G_min.getFeatureVec(0).size(); ++i) {
 		f << ",feature" << i << " DOUBLE";
 	}
@@ -76,7 +76,7 @@ int graph_io::writeGraphGDF(const graph_access & G_min, const graph_access & G_m
 
 	// NODES
 	forall_nodes(G_min, node) {
-		f <<  node << ",-1," << G_min.getNodeWeight(node);
+		f <<  node << ",-1," << G_min.getPartitionIndex(node) << "," << G_min.getNodeWeight(node);
 		for (auto &feature : G_min.getFeatureVec(node)) {
 			f << "," << feature;
 		}
@@ -84,7 +84,7 @@ int graph_io::writeGraphGDF(const graph_access & G_min, const graph_access & G_m
 	} endfor
 
 	forall_nodes(G_maj, node) {
-		f <<  node + min_nodes << ",1," << G_maj.getNodeWeight(node);
+	  f <<  node + min_nodes << ",1," << G_maj.getPartitionIndex(node) << "," << G_maj.getNodeWeight(node);
 		for (auto &feature : G_maj.getFeatureVec(node)) {
 			f << "," << feature;
 		}
@@ -92,7 +92,7 @@ int graph_io::writeGraphGDF(const graph_access & G_min, const graph_access & G_m
 	} endfor
 
 
-	f << "edgedef>node1 VARCHAR,node2 VARCHAR" << std::endl;
+	f << "edgedef>from VARCHAR,to VARCHAR" << std::endl;
 
 	// EDGES
 	forall_nodes(G_min, node) {
