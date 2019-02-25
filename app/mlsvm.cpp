@@ -57,6 +57,7 @@ int main(int argn, char *argv[]) {
         std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
         std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
         std::cout << "node_ordering: " << partition_config.node_ordering << std::endl;
+        std::cout << "diameter_upperbound: " << partition_config.diameter_upperbound << std::endl;
         std::cout << "num_skip_ms: " << partition_config.num_skip_ms << std::endl;
         std::cout << "inherit_ud: " << partition_config.inherit_ud << std::endl;
         std::cout << "timeout: " << partition_config.timeout << std::endl;

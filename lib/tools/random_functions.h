@@ -189,8 +189,8 @@ class random_functions {
                         return rnbr;
                 }
 
-                static double nextFromExp(double beta) {
-                        std::exponential_distribution<> d(beta);
+                static double nextFromExp(double lambda) {
+                        std::exponential_distribution<> d(lambda);
                         return d(m_mt);
                 }
 
