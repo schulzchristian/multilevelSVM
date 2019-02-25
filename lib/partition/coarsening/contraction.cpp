@@ -155,6 +155,7 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
 
         forall_nodes(G, node) {
                 NodeID coarsed_node = coarse_mapping[node];
+		// line commented out to keep the cluster index of the clustering in the partition index
                 // G.setPartitionIndex(node, partition_map[node]);
                 coarser.setPartitionIndex(coarsed_node, G.getPartitionIndex(node));
 
@@ -173,6 +174,15 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
                 divideVec(combined_feature_vecs[node], block_size[node]);
                 coarser.setFeatureVec(node, combined_feature_vecs[node]);
         endfor }
+
+	//calculate weights based on the distance of the feature vec
+	forall_nodes(coarser, node) {
+		forall_out_edges(coarser, e, node) {
+			NodeID target = coarser.getEdgeTarget(e);
+			EdgeWeight newWeight = 1 / calcEdgeWeight(coarser.getFeatureVec(node), coarser.getFeatureVec(target));
+			coarser.setEdgeWeight(e, newWeight);
+		endfor }
+	endfor }
 }
 
 
@@ -225,10 +235,10 @@ void contraction::contract_partitioned(const PartitionConfig & partition_config,
                 }
                 // do something with all outgoing edges (in auxillary graph)
                 forall_out_edges(G, e, node) {
-                                visit_edge(G, coarser, edge_positions, coarseNode, e, new_edge_targets);
-                } endfor
+			visit_edge(G, coarser, edge_positions, coarseNode, e, new_edge_targets);
+		} endfor
 
-                //this node was really matched
+		//this node was really matched
                 NodeID matched_neighbor = edge_matching[node];
                 if(node != matched_neighbor) {
                         //update weight of coarser node
@@ -267,7 +277,6 @@ FeatureVec contraction::combineFeatureVec(const FeatureVec & vec1, NodeWeight we
 }
 
 void contraction::divideVec(FeatureVec & vec, NodeWeight weights) const {
-        // TODO use map aka. std::for_each
         size_t features = vec.size();
 
         for (size_t i = 0; i < features; ++i) {
@@ -281,4 +290,16 @@ void contraction::addWeightedToVec(FeatureVec & vec, const FeatureVec & vecToAdd
         for (size_t i = 0; i < features; ++i) {
                 vec[i] += vecToAdd[i] * weight;
         }
+}
+
+EdgeWeight contraction::calcEdgeWeight(const FeatureVec & vec1,  const FeatureVec & vec2) const {
+        size_t features = vec1.size();
+	EdgeWeight dist = 0;
+
+        for (size_t i = 0; i < features; ++i) {
+		EdgeWeight tmp = vec1[i] - vec2[i];
+                dist += tmp * tmp;
+        }
+
+	return std::sqrt(dist);
 }
