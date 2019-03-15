@@ -4,12 +4,18 @@
 # Evaluate source code blocks interactivly and not on export
 #+PROPERTY: header-args :eval never-export
 #+PROPERTY: header-args :results output
-# #+PROPERTY: header-args :exports both
+#+PROPERTY: header-args :exports both
 
 The multilevel support vector machine framework KaSVM.
 
 * Overview
-The framework build on the multilevel support vector machine approach of https://github.com/esadr/mlsvm an introduces several new coarsening strategies.
+Our framework is build on the multilevel support vector machine approach of https://github.com/esadr/mlsvm and introduces several new coarsening strategies.
+
+While regular SVM perform the entire training in one - time consuming - optimization step, multilevel SVMs first build a hierarchy of problems
+decreasing in size that resemble the original problem and then train an SVM model for each hierarchy level benefiting from the solved models of previous
+levels.
+
+Our framework utilizes the near-linear time label propagation algorithm for the construction of the problem hierarchy and we are experimenting with other coarsening strategies.
 
 ** Paper
 [[https://arxiv.org/abs/1808.06394][Faster Support Vector Machines]] [ALENEX19] - Sebastian Schlag, Matthias Schmitt, Christian Schulz 
@@ -31,7 +37,7 @@ scons program=mlsvm variant=optimized_output -j 4
 
 * Usage
 ** Preprocessing
-Befor using the framework the data needs to be preprocessed.
+Before using the framework the data needs to be preprocessed.
 The ~prepare~ utility can read CSV and LibSVM files.
 It normalized the data and seperates the classes.
 
