@@ -4,7 +4,8 @@
 
 #include "svm_summary.h"
 
-svm_summary::svm_summary(std::shared_ptr<svm_model> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
+template<class T>
+svm_summary<T>::svm_summary(std::shared_ptr<T> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn, std::vector<NodeID> SV_min, std::vector<NodeID> SV_maj) {
         this->model = model;
         this->TP = tp;
         this->FP = fp;
@@ -30,27 +31,13 @@ svm_summary::svm_summary(std::shared_ptr<svm_model> model, const svm_instance & 
         this->gamma = model->param.gamma;
         this->C_log = std::log(this->C) / std::log(2);
         this->gamma_log = std::log(this->gamma) / std::log(2);
-
-        this->SV_min.reserve(model->nSV[0]);
-        for(int i = 0; i < model->nSV[0]; i++) {
-                // libSVM uses 1 as first index while we need our NodeID
-                NodeID id = model->sv_indices[i] - 1;
-                this->SV_min.push_back(id);
-                // std::cout << id << ", ";
-        }
-        // std::cout << std::endl;
-
-        this->SV_maj.reserve(model->nSV[1]);
-        for(int i = 0; i < model->nSV[1]; i++) {
-                int id = model->sv_indices[model->nSV[0] + i] - 1 - instance.num_min;
-                this->SV_maj.push_back(id);
-                // std::cout << id << ", ";
-        }
-        // std::cout << std::endl;
-
+	this->SV_min = SV_min;
+	this->SV_maj = SV_maj;
 }
 
-void svm_summary::print() {
+
+template<class T>
+void svm_summary<T>::print() {
         std::cout << std::setprecision(5)
                   << "log C: " << this->C_log
                   << " log g: " << this->gamma_log
@@ -76,7 +63,8 @@ void svm_summary::print() {
         std::cout.unsetf(std::ios_base::floatfield);
 }
 
-void svm_summary::print_short() {
+template<class T>
+void svm_summary<T>::print_short() {
         std::cout << std::setprecision(3)
                   << "  \tACC=" << this->Acc
                   << "\tGmean=" << this->Gmean
@@ -87,10 +75,14 @@ void svm_summary::print_short() {
         std::cout.unsetf(std::ios_base::floatfield);
 }
 
-NodeID svm_summary::num_SV_min() {
+template<class T>
+NodeID svm_summary<T>::num_SV_min() {
         return this->SV_min.size();
 }
 
-NodeID svm_summary::num_SV_maj() {
+template<class T>
+NodeID svm_summary<T>::num_SV_maj() {
         return this->SV_maj.size();
 }
+
+template class svm_summary<svm_model>;

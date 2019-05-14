@@ -3,12 +3,15 @@
 
 #include "svm/param_search.h"
 #include "svm/svm_refinement.h"
+#include "svm/svm_solver_factory.h"
 #include "svm/svm_instance.h"
 #include "svm/svm_convert.h"
 #include "tools/timer.h"
 
-svm_refinement::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy & maj_hierarchy,
-                               const svm_result & initial_result, int num_skip_ms, int inherit_ud)
+
+template<class T>
+svm_refinement<T>::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy & maj_hierarchy,
+				  const svm_result<T> & initial_result, int num_skip_ms, int inherit_ud)
     : result(initial_result) {
         this->min_hierarchy = &min_hierarchy;
         this->maj_hierarchy = &maj_hierarchy;
@@ -21,18 +24,22 @@ svm_refinement::svm_refinement(graph_hierarchy & min_hierarchy, graph_hierarchy 
         this->inherit_ud = inherit_ud;
 }
 
-svm_refinement::~svm_refinement() {
+template<class T>
+svm_refinement<T>::~svm_refinement() {
 }
 
-bool svm_refinement::is_done() {
+template<class T>
+bool svm_refinement<T>::is_done() {
         return min_hierarchy->isEmpty() && maj_hierarchy->isEmpty();
 }
 
-int svm_refinement::get_level() {
+template<class T>
+int svm_refinement<T>::get_level() {
         return std::max(min_hierarchy->size(), maj_hierarchy->size());
 }
 
-void svm_refinement::uncoarse() {
+template<class T>
+void svm_refinement<T>::uncoarse() {
         std::vector<NodeID> sv_min = result.best().SV_min;
         std::vector<NodeID> sv_maj = result.best().SV_maj;
 
@@ -52,7 +59,8 @@ void svm_refinement::uncoarse() {
         }
 }
 
-svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & maj_sample) {
+template<class T>
+svm_result<T> svm_refinement<T>::step(const svm_data & min_sample, const svm_data & maj_sample) {
         std::cout << "min hierarchy " << min_hierarchy->size()
                   << " -- maj hierarchy " << maj_hierarchy->size() << std::endl;
 
@@ -68,13 +76,13 @@ svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & ma
 
         svm_instance instance;
         instance.read_problem(neighbors_min, neighbors_maj);
-        svm_solver solver(instance);
+	std::unique_ptr<svm_solver<T>> solver = svm_solver_factory::create<T>(instance);
 
         if (neighbors_min.size() + neighbors_maj.size() < this->num_skip_ms) {
                 if (training_inherit) {
-                        result = solver.train_refinement(min_sample, maj_sample, inherit_ud, result.best().C_log, result.best().gamma_log);
+                        result = solver->train_refinement(min_sample, maj_sample, inherit_ud, result.best().C_log, result.best().gamma_log);
                 } else {
-                        result = solver.train_initial(min_sample, maj_sample);
+                        result = solver->train_initial(min_sample, maj_sample);
                 }
         } else {
                 // std::cout << "test over result range" << std::endl;
@@ -83,20 +91,21 @@ svm_result svm_refinement::step(const svm_data & min_sample, const svm_data & ma
 
                 std::cout << "skip training just use log C=" << result.best().C_log
                           << " log gamma=" << result.best().gamma_log << std::endl;
-                solver.set_C(result.best().C);
-                solver.set_gamma(result.best().gamma);
-                solver.train();
-                svm_summary s = solver.build_summary(min_sample, maj_sample);
+                solver->set_C(result.best().C);
+                solver->set_gamma(result.best().gamma);
+                solver->train();
+                svm_summary<T> s = solver->build_summary(min_sample, maj_sample);
                 s.print();
-                std::vector<svm_summary> vec;
+                std::vector<svm_summary<T>> vec;
                 vec.push_back(s);
-                result = svm_result(vec, instance);
+                result = svm_result<T>(vec, instance);
         }
 
         return result;
 }
 
-svm_data svm_refinement::get_SV_neighbors(const graph_access & G,
+template<class T>
+svm_data svm_refinement<T>::get_SV_neighbors(const graph_access & G,
                                           const CoarseMapping & coarse_mapping,
                                           const std::vector<NodeID> & sv) {
         svm_data neighbors;
@@ -118,3 +127,4 @@ svm_data svm_refinement::get_SV_neighbors(const graph_access & G,
         return neighbors;
 }
 
+template class svm_refinement<svm_model>;

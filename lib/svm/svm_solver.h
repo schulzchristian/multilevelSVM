@@ -11,35 +11,38 @@
 #include "svm_summary.h"
 #include "svm_result.h"
 
+template<class T>
 class svm_solver
 {
 public:
         svm_solver();
         svm_solver(const svm_instance & instance);
 
-        void train();
-        svm_result train_initial(const svm_data & min_sample, const svm_data & maj_sample);
-        svm_result train_grid(const svm_data & min_sample, const svm_data & maj_sample);
-        svm_result train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
+        virtual void train() = 0;
+        svm_result<T> train_initial(const svm_data & min_sample, const svm_data & maj_sample);
+        svm_result<T> train_grid(const svm_data & min_sample, const svm_data & maj_sample);
+        svm_result<T> train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
                                     bool inherit_ud, float param_c, float param_g);
-        svm_result train_range(const std::vector<svm_param> & params,
+        svm_result<T> train_range(const std::vector<svm_param> & params,
                                const svm_data & min_sample,
                                const svm_data & maj_sample);
 
-        int predict(const std::vector<svm_node> & node);
+        virtual int predict(const std::vector<svm_node> & node) = 0;
 
-        svm_summary build_summary(const svm_data & min, const svm_data & maj);
+	virtual std::pair<std::vector<NodeID>, std::vector<NodeID>> get_SV() = 0;
+
+        svm_summary<T> build_summary(const svm_data & min, const svm_data & maj);
 
         void set_C(float C);
         void set_gamma(float gamma);
+	virtual void set_model(std::shared_ptr<T> new_model);
 
-private:
-        svm_result make_result(const std::vector<svm_summary> & vec);
+protected:
+        svm_result<T> make_result(const std::vector<svm_summary<T>> & vec);
 
         svm_parameter param;
         svm_instance instance;
-        std::shared_ptr<svm_model> model;
-
+	std::shared_ptr<T> model;
 };
 
 #endif /* SVM_SOLVER_H */

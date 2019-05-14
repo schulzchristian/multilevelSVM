@@ -60,6 +60,7 @@ libkaffpa_files = [ 'lib/data_structure/graph_hierarchy.cpp',
                     ]
 
 libmlsvm_files = [ 'lib/svm/svm_solver.cpp',
+                   'lib/svm/svm_solver_libsvm.cpp',
                    'lib/svm/svm_instance.cpp',
                    'lib/svm/svm_summary.cpp',
                    'lib/svm/svm_result.cpp',

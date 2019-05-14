@@ -7,9 +7,10 @@
 #include "definitions.h"
 #include "svm_instance.h"
 
+template<class T>
 class svm_summary {
 public:
-        svm_summary(std::shared_ptr<svm_model> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn);
+        svm_summary(std::shared_ptr<T> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn, std::vector<NodeID> SV_min, std::vector<NodeID> SV_maj);
 
         void print();
         void print_short();
@@ -21,7 +22,7 @@ public:
                 return (this->Gmean > new_.Gmean);
         }
 
-        std::shared_ptr<svm_model> model;
+        std::shared_ptr<T> model;
 
         int TP;
         int TN;
@@ -44,17 +45,19 @@ public:
         double C_log;
         double gamma_log;
 };
-
+ 
 struct summary_cmp_better_gmean
 {
-  static bool comp(const svm_summary& a, const svm_summary& b) {
-    return a.Gmean > b.Gmean;
-  }
+	template<class T>
+	static bool comp(const svm_summary<T>& a, const svm_summary<T>& b) {
+		return a.Gmean > b.Gmean;
+	}
 };
 
 struct summary_cmp_better_gmean_sn
 {
-        static bool comp(const svm_summary& a, const svm_summary& b) {
+	template<class T>
+        static bool comp(const svm_summary<T>& a, const svm_summary<T>& b) {
                 float filter_range = 0.02;
                 if( (a.Gmean - b.Gmean) > filter_range )         //a has completely better gmean than b
                         return true;
@@ -70,7 +73,8 @@ struct summary_cmp_better_gmean_sn
 
 struct summary_cmp_better_gmean_sv
 {
-        static bool comp(const svm_summary& a, const svm_summary& b) {
+	template<class T>
+        static bool comp(const svm_summary<T>& a, const svm_summary<T>& b) {
                 float filter_range = 0.02;
                 if( (a.Gmean - b.Gmean) > filter_range )         //a has completely better gmean than b
                         return true;

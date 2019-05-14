@@ -6,13 +6,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <memory>
+#include <svm.h>
 
 #include "partition/coarsening/coarsening.h"
 #include "data_structure/graph_access.h"
 #include "data_structure/graph_hierarchy.h"
 #include "io/graph_io.h"
 #include "partition/partition_config.h"
-#include "svm/svm_solver.h"
+#include "svm/svm_solver_libsvm.h"
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
 #include "svm/k_fold_build.h"
@@ -150,13 +151,13 @@ int main(int argn, char *argv[]) {
         svm_instance initial_instance;
         initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
 
-        svm_solver init_solver(initial_instance);
-        svm_result initial_result = init_solver.train_initial(min_sample, maj_sample);
+        svm_solver_libsvm init_solver(initial_instance);
+        auto initial_result = init_solver.train_initial(min_sample, maj_sample);
 
         auto init_train_time = t.elapsed();
         std::cout << "init train time: " << init_train_time << std::endl;
 
-        svm_summary initial_summary = initial_result.best();
+        auto initial_summary = initial_result.best();
         results.setFloat("\tINIT_TRAIN_TIME", init_train_time);
         results.setFloat("INIT_AC  ", initial_summary.Acc);
         results.setFloat("INIT_GM  ", initial_summary.Gmean);
@@ -164,7 +165,7 @@ int main(int argn, char *argv[]) {
         t.restart();
 
         std::cout << "inital validation on testing:" << std::endl;
-        svm_summary initial_test_summary = init_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
+        auto initial_test_summary = init_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
         initial_test_summary.print();
         results.setFloat("INIT_AC_TEST", initial_test_summary.Acc);
         results.setFloat("INIT_GM_TEST", initial_test_summary.Gmean);
@@ -176,9 +177,9 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        svm_refinement refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
+        svm_refinement<svm_model> refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
 
-        std::vector<std::pair<svm_summary, svm_instance>> best_results;
+        std::vector<std::pair<svm_summary<svm_model>, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));
 
         while (!refinement.is_done()) {
@@ -187,7 +188,7 @@ int main(int argn, char *argv[]) {
                 // min_sample = svm_convert::sample_from_graph(*(min_hierarchy.get_finest()), 0.2f);
                 // maj_sample = svm_convert::sample_from_graph(*(maj_hierarchy.get_finest()), 0.2f);
 
-                svm_result current_result = refinement.step(min_sample, maj_sample);
+                auto current_result = refinement.step(min_sample, maj_sample);
 
                 std::cout << "refinement at level " << refinement.get_level()
                         << " took " << t_ref.elapsed() << std::endl;
@@ -230,10 +231,10 @@ int main(int argn, char *argv[]) {
         std::cout << "refinement time " << refinement_time << std::endl;
         results.setFloat("\tREFINEMENT_TIME", refinement_time);
 
-        int best_index = svm_result::get_best_index(best_results);
+        int best_index = svm_result<svm_model>::get_best_index(best_results);
         results.setString("BEST_INDEX", std::to_string(best_index));
 
-        svm_summary best_summary = best_results[best_index].first;
+        auto best_summary = best_results[best_index].first;
         results.setFloat("BEST_AC", best_summary.Acc);
         results.setFloat("BEST_SN", best_summary.Sens);
         results.setFloat("BEST_SP", best_summary.Spec);
@@ -243,11 +244,11 @@ int main(int argn, char *argv[]) {
         t.restart();
 
         std::cout << "best validation on testing data:" << std::endl;
-        svm_solver best_solver(best_results[best_index].second);
+        svm_solver_libsvm best_solver(best_results[best_index].second);
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
-        best_solver.train();
-        svm_summary best_summary_test = best_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
+        best_solver.set_model(best_summary.model);
+        auto best_summary_test = best_solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
         auto test_time = t.elapsed();
         std::cout << "test time " << test_time << std::endl;
         results.setFloat("\tTEST_TIME", test_time);

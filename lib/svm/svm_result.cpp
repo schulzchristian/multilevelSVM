@@ -2,40 +2,47 @@
 
 #include "svm_result.h"
 
-svm_result::svm_result() {
+template<class T>
+svm_result<T>::svm_result() {
 }
 
-svm_result::svm_result(const std::vector<svm_summary> & summaries, const svm_instance & instance)
+template<class T>
+svm_result<T>::svm_result(const std::vector<svm_summary<T>> & summaries, const svm_instance & instance)
         : summaries(summaries), instance(instance) {
 
         this->sort_summaries();
 }
 
-svm_summary svm_result::best() {
+template<class T>
+svm_summary<T> svm_result<T>::best() {
         return summaries[0];
 }
 
-void svm_result::add(const svm_result & result) {
+template<class T>
+void svm_result<T>::add(const svm_result<T> & result) {
         this->add(result.summaries);
 }
 
-void svm_result::add(const std::vector<svm_summary> & to_add) {
+template<class T>
+void svm_result<T>::add(const std::vector<svm_summary<T>> & to_add) {
         this->summaries.insert(this->summaries.end(), to_add.begin(), to_add.end());
 
         this->sort_summaries();
 }
 
-std::vector<svm_param> svm_result::all_params() {
+template<class T>
+std::vector<svm_param> svm_result<T>::all_params() {
         std::vector<svm_param> seq;
 
-        for (const svm_summary & smry : this->summaries) {
+        for (const svm_summary<T> & smry : this->summaries) {
                 seq.push_back(std::make_pair(smry.C_log, smry.gamma_log));
         }
 
         return seq;
 }
 
-void svm_result::sort_summaries() {
+template<class T>
+void svm_result<T>::sort_summaries() {
         // insertion_sort
         int j;
 
@@ -43,7 +50,7 @@ void svm_result::sort_summaries() {
                 j = i;
 
                 while (j > 0 && summary_cmp_better_gmean_sv::comp(this->summaries[j], this->summaries[j-1])) {
-                        svm_summary temp = std::move(this->summaries[j]);
+                        svm_summary<T> temp = std::move(this->summaries[j]);
                         this->summaries[j] = std::move(this->summaries[j-1]);
                         this->summaries[j-1] = std::move(temp);
                         j--;
@@ -51,7 +58,8 @@ void svm_result::sort_summaries() {
         }
 }
 
-static size_t svm_result::get_best_index(const std::vector<std::pair<svm_summary,svm_instance>> vec) {
+template<class T>
+size_t svm_result<T>::get_best_index(const std::vector<std::pair<svm_summary<T>,svm_instance>> vec) {
         size_t best_index = 0;
 
         for (size_t i = 1; i < vec.size(); i++) {
@@ -61,3 +69,5 @@ static size_t svm_result::get_best_index(const std::vector<std::pair<svm_summary
         }
         return best_index;
 }
+
+template class svm_result<svm_model>;
