@@ -1,0 +1,3 @@
+[submodule "extern/thundersvm"]
+	path = extern/thundersvm
+	url = https://github.com/zeyiwen/thundersvm.git

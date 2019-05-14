@@ -13,3 +13,4 @@ parallel/parallel_src/optimized_nooutput
 .sconf_temp
 examples
 data
+compile_commands.json
