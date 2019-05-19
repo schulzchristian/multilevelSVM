@@ -29,7 +29,8 @@ void svm_solver_thunder::train() {
 	param.weight_label = this->param.weight_label;
 	param.weight = this->param.weight;
 	param.probability = this->param.probability;
-	param.max_mem_size = this->param.cache_size * (1 << 20); //MB to Byte
+	// param.max_mem_size = this->param.cache_size * (1 << 20); //MB to Byte
+	param.max_mem_size = -1; // no limit
 
 	DataSet::node2d nodes = instance.node_data_thunder();
 	DataSet dataset(nodes, this->instance.features, *this->instance.labels);
@@ -40,7 +41,7 @@ void svm_solver_thunder::train() {
 std::vector<int> svm_solver_thunder::predict_batch(const svm_data & data) {
 	DataSet::node2d dataset = svm_convert::svmdata_to_dataset(data);
 	//TODO don't use fixed batch size
-	std::vector<double> dRes = this->model->predict(dataset, 50);
+	std::vector<double> dRes = this->model->predict(dataset, -1); //define batch size
 	std::vector<int> iRes(dRes.begin(), dRes.end());
 	return iRes;
 }
