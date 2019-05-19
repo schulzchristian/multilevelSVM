@@ -170,8 +170,7 @@ template<class T>
 svm_summary<T> svm_solver<T>::build_summary(const svm_data & min, const svm_data & maj) {
         size_t tp = 0, tn = 0, fp = 0, fn = 0;
 
-        for (const auto& instance : min) {
-                int res = this->predict(instance);
+        for (int res : this->predict_batch(min)) {
                 if (res == 1) {
                         tp++;
                 } else {
@@ -179,8 +178,7 @@ svm_summary<T> svm_solver<T>::build_summary(const svm_data & min, const svm_data
                 }
         }
 
-        for (const auto& instance : maj) {
-                int res = this->predict(instance);
+        for (int res : this->predict_batch(maj)) {
                 if (res == -1) {
                         tn++;
                 } else {
@@ -191,6 +189,16 @@ svm_summary<T> svm_solver<T>::build_summary(const svm_data & min, const svm_data
 	auto SV_pair = this->get_SV();
 
         return svm_summary<T>(this->model, this->instance, tp, tn, fp, fn, SV_pair.first, SV_pair.second);
+}
+
+template<class T>
+std::vector<int> svm_solver<T>::predict_batch(const svm_data & data) {
+	std::vector<int> result;
+	result.reserve(data.size());
+	for (const auto& instance : data) {
+		result.push_back(this->predict(instance));
+	}
+	return result;
 }
 
 template<class T>

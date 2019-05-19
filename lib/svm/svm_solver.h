@@ -27,6 +27,8 @@ public:
                                const svm_data & min_sample,
                                const svm_data & maj_sample);
 
+
+	virtual std::vector<int> predict_batch(const svm_data & data);
         virtual int predict(const std::vector<svm_node> & node) = 0;
 
 	virtual std::pair<std::vector<NodeID>, std::vector<NodeID>> get_SV() = 0;
