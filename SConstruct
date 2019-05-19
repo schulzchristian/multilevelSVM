@@ -96,6 +96,10 @@ else:
         env.Append(LIBPATH=['./extern/argtable-2.10/lib'])
         env.Append(LIBPATH=['./extern/thundersvm/build/lib'])
 
+# bake shared library paths into executable
+for lib in env["LIBPATH"]:
+    env.Append(RPATH=[env.Literal(os.path.join('\\$$ORIGIN', os.pardir, lib))])
+
 #by D. Luxen
 if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
         print "argtable library not found. Exiting"
