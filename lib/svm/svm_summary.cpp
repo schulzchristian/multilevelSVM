@@ -1,12 +1,12 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <thundersvm/model/svc.h>
 
 #include "svm_summary.h"
 
 template<class T>
-svm_summary<T>::svm_summary(std::shared_ptr<T> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn, std::vector<NodeID> SV_min, std::vector<NodeID> SV_maj) {
-        this->model = model;
+svm_summary<T>::svm_summary(NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
         this->TP = tp;
         this->FP = fp;
         this->TN = tn;
@@ -26,13 +26,6 @@ svm_summary<T>::svm_summary(std::shared_ptr<T> model, const svm_instance & insta
                 this->NPV = (double)tn / (tn+fn);
 
         this->F1 = 2.0*tp / (2*tp+fp+fn);
-
-        this->C = model->param.C;
-        this->gamma = model->param.gamma;
-        this->C_log = std::log(this->C) / std::log(2);
-        this->gamma_log = std::log(this->gamma) / std::log(2);
-	this->SV_min = SV_min;
-	this->SV_maj = SV_maj;
 }
 
 
@@ -86,3 +79,4 @@ NodeID svm_summary<T>::num_SV_maj() {
 }
 
 template class svm_summary<svm_model>;
+template class svm_summary<SVC>;

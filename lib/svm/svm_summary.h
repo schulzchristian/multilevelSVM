@@ -10,7 +10,7 @@
 template<class T>
 class svm_summary {
 public:
-        svm_summary(std::shared_ptr<T> model, const svm_instance & instance, NodeID tp, NodeID tn, NodeID fp, NodeID fn, std::vector<NodeID> SV_min, std::vector<NodeID> SV_maj);
+        svm_summary(NodeID tp, NodeID tn, NodeID fp, NodeID fn);
 
         void print();
         void print_short();

@@ -19,7 +19,7 @@ svm_solver<T>::svm_solver(const svm_instance & instance)
         this->param.gamma = 2;	// doc suggests 1/num_features
         this->param.coef0 = 0;
         this->param.nu = 0.5;
-        this->param.cache_size = 100;
+        this->param.cache_size = static_cast<size_t>(8192);
         this->param.C = 32;
         this->param.eps = 1e-3;
         this->param.p = 0.1;
@@ -188,7 +188,17 @@ svm_summary<T> svm_solver<T>::build_summary(const svm_data & min, const svm_data
 
 	auto SV_pair = this->get_SV();
 
-        return svm_summary<T>(this->model, this->instance, tp, tn, fp, fn, SV_pair.first, SV_pair.second);
+	svm_summary<T> summary(tp, tn, fp, fn);
+
+        summary.model = model;
+	summary.SV_min = SV_pair.first;
+	summary.SV_maj = SV_pair.second;
+	summary.C = this->param.C;
+	summary.gamma = this->param.gamma;
+        summary.C_log = std::log(this->param.C) / std::log(2);
+        summary.gamma_log = std::log(this->param.gamma) / std::log(2);
+
+        return summary;
 }
 
 template<class T>
