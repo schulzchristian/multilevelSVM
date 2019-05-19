@@ -64,12 +64,13 @@ std::pair<std::vector<NodeID>, std::vector<NodeID>> svm_solver_thunder::get_SV()
 	std::vector<NodeID> SV_maj;
 
         for (size_t i = 0; i < SV_ind.size(); i++) {
-		NodeID index = static_cast<NodeID>(SV_ind[i]);
+		int index = SV_ind[i];
+		// std::cout << index << std::endl;
 
                 if (index < instance.num_min) {
 			SV_min.push_back(index);
 		} else {
-			SV_maj.push_back(index);
+			SV_maj.push_back(index - instance.num_min);
 		}
         }
 
