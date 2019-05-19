@@ -14,6 +14,7 @@
 #include "io/graph_io.h"
 #include "partition/partition_config.h"
 #include "svm/svm_solver_libsvm.h"
+#include "svm/svm_solver_thunder.h"
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
 #include "svm/k_fold_build.h"
@@ -24,11 +25,12 @@
 #include "tools/timer.h"
 #include "parse_parameters.h"
 
+
+#include <thundersvm/util/log.h>
 void print_null(const char *s) {}
 
 int main(int argn, char *argv[]) {
-
-        PartitionConfig partition_config;
+	PartitionConfig partition_config;
         std::string filename;
 
         bool suppress_output   = false;
@@ -39,14 +41,23 @@ int main(int argn, char *argv[]) {
                 return -1;
         }
 
+
         // disable libsvm output
         svm_set_print_string_function(&print_null);
+	// disable thundersvm output
+	el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Enabled, "false");
 
-        partition_config.LogDump(stdout);
+
+	if (partition_config.n_cores > 0) {
+		omp_set_num_threads(partition_config.n_cores);
+	}
+
+	partition_config.LogDump(stdout);
         partition_config.k = 1;
         partition_config.cluster_coarsening_factor = 1;
         partition_config.stop_rule = STOP_RULE_FIXED;
 
+        std::cout << "cores: " << partition_config.n_cores << std::endl;
         std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
         std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
         std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
@@ -105,12 +116,12 @@ int main(int argn, char *argv[]) {
                         << " min: " << kfold->getMinTestData()->size()
                         << " maj: " << kfold->getMajTestData()->size() << std::endl;
 
-        auto min_sample = svm_convert::sample_from_graph(*(kfold->getMinGraph()), partition_config.sample_percent);
-        auto maj_sample = svm_convert::sample_from_graph(*(kfold->getMajGraph()), partition_config.sample_percent);
+        auto min_validation = svm_convert::sample_from_graph(*(kfold->getMinGraph()), partition_config.sample_percent);
+        auto maj_validation = svm_convert::sample_from_graph(*(kfold->getMajGraph()), partition_config.sample_percent);
 
         std::cout << "sample -"
-                        << " min: " << min_sample.size()
-                        << " maj: " << maj_sample.size() << std::endl;
+                        << " min: " << min_validation.size()
+                        << " maj: " << maj_validation.size() << std::endl;
 
 
         // ------------- COARSENING -----------------
@@ -151,8 +162,8 @@ int main(int argn, char *argv[]) {
         svm_instance initial_instance;
         initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
 
-        svm_solver_libsvm init_solver(initial_instance);
-        auto initial_result = init_solver.train_initial(min_sample, maj_sample);
+        svm_solver_thunder init_solver(initial_instance);
+        auto initial_result = init_solver.train_initial(min_validation, maj_validation);
 
         auto init_train_time = t.elapsed();
         std::cout << "init train time: " << init_train_time << std::endl;
@@ -177,18 +188,15 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        svm_refinement<svm_model> refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
+        svm_refinement<SVC> refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
 
-        std::vector<std::pair<svm_summary<svm_model>, svm_instance>> best_results;
+        std::vector<std::pair<svm_summary<SVC>, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));
 
         while (!refinement.is_done()) {
                 timer t_ref;
 
-                // min_sample = svm_convert::sample_from_graph(*(min_hierarchy.get_finest()), 0.2f);
-                // maj_sample = svm_convert::sample_from_graph(*(maj_hierarchy.get_finest()), 0.2f);
-
-                auto current_result = refinement.step(min_sample, maj_sample);
+                auto current_result = refinement.step(min_validation, maj_validation);
 
                 std::cout << "refinement at level " << refinement.get_level()
                         << " took " << t_ref.elapsed() << std::endl;
@@ -231,7 +239,7 @@ int main(int argn, char *argv[]) {
         std::cout << "refinement time " << refinement_time << std::endl;
         results.setFloat("\tREFINEMENT_TIME", refinement_time);
 
-        int best_index = svm_result<svm_model>::get_best_index(best_results);
+        int best_index = svm_result<SVC>::get_best_index(best_results);
         results.setString("BEST_INDEX", std::to_string(best_index));
 
         auto best_summary = best_results[best_index].first;
@@ -244,7 +252,7 @@ int main(int argn, char *argv[]) {
         t.restart();
 
         std::cout << "best validation on testing data:" << std::endl;
-        svm_solver_libsvm best_solver(best_results[best_index].second);
+        svm_solver_thunder best_solver(best_results[best_index].second);
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
         best_solver.set_model(best_summary.model);

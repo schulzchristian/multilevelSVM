@@ -29,11 +29,11 @@
 #endif
 
 #if DEBUG
-# define VLOG(x) x
-# define VVLOG(x) x
-#else
-# define VLOG(x)
-# define VVLOG(x)
+/* # define VLOG(x) x */
+/* # define VVLOG(x) x */
+/* #else */
+/* # define VLOG(x) */
+/* # define VVLOG(x) */
 #endif
 
 

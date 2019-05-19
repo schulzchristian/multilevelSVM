@@ -44,6 +44,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_dbl *time_limit                           = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 0s .");
         struct arg_int *timeout                              = arg_int0(NULL, "timeout", NULL, "Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)");
         struct arg_lit *export_graph                         = arg_lit0(NULL, "export_graph","Export the graph at every level (this exits after one multilevel cycle).");
+        struct arg_int *n_cores                              = arg_int0("c", "n_cores", NULL, "How many cores are used (Default: 0 aka. every core)");
 
         // matching/clustering
         struct arg_rex *edge_rating                          = arg_rex0(NULL, "edge_rating", "^(weight|realweight|expansionstar|expansionstar2|expansionstar2deg|punch|expansionstar2algdist|expansionstar2algdist2|algdist|algdist2|sepmultx|sepaddx|sepmax|seplog|r1|r2|r3|r4|r5|r6|r7|r8)$", "RATING", REG_EXTENDED, "Edge rating to use. One of {weight, expansionstar, expansionstar2, punch, sepmultx, sepaddx, sepmax, seplog, " " expansionstar2deg}. Default: weight"  );
@@ -100,6 +101,7 @@ int parse_parameters(int argn, char **argv,
                             timeout,
                             bidirectional,
 			    export_graph,
+			    n_cores,
 #endif
                             end
         };
@@ -146,6 +148,10 @@ int parse_parameters(int argn, char **argv,
 
         if(time_limit->count > 0) {
                 partition_config.time_limit = time_limit->dval[0];
+        }
+
+        if(n_cores->count > 0) {
+                partition_config.n_cores = n_cores->ival[0];
         }
 
         if(num_vert_stop_factor->count > 0) {

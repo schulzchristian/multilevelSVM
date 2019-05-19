@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include <thundersvm/model/svc.h>
 #include "svm_result.h"
 
 template<class T>
@@ -71,3 +72,4 @@ size_t svm_result<T>::get_best_index(const std::vector<std::pair<svm_summary<T>,
 }
 
 template class svm_result<svm_model>;
+template class svm_result<SVC>;

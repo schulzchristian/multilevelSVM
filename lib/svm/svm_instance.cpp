@@ -67,3 +67,7 @@ double* svm_instance::label_data() {
 svm_node** svm_instance::node_data() {
         return this->nodes_meta->data();
 }
+
+DataSet::node2d svm_instance::node_data_thunder() {
+	return svm_convert::svmdata_to_dataset(*this->nodes);
+}

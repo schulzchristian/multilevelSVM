@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unordered_set>
+#include <thundersvm/model/svc.h>
 
 #include "svm/param_search.h"
 #include "svm/svm_refinement.h"
@@ -128,3 +129,4 @@ svm_data svm_refinement<T>::get_SV_neighbors(const graph_access & G,
 }
 
 template class svm_refinement<svm_model>;
+template class svm_refinement<SVC>;

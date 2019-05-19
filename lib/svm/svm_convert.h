@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <svm.h>
+#include <thundersvm/dataset.h>
 #include "data_structure/graph_access.h"
 #include "svm_definitions.h"
 #include "tools/random_functions.h"
@@ -21,6 +22,8 @@ public:
         static std::vector<T> take_sample(const std::vector<T> & data, float percentage);
 
         static svm_data sample_from_graph(const graph_access & G, float amount);
+
+        static DataSet::node2d svmdata_to_dataset(const svm_data & data);
 };
 
 template<typename T>

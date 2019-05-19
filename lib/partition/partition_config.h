@@ -100,6 +100,8 @@ struct PartitionConfig
 
 	bool export_graph = false;
 
+	int n_cores = 0;
+
         //=======================================
         //===========SNW PARTITIONING============
         //=======================================

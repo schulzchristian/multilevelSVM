@@ -75,6 +75,8 @@ env = GetEnvironment()
 env.Append(CPPPATH=['./extern/argtable-2.10/include'])
 env.Append(CPPPATH=['./extern/flann-1.8.4/include'])
 env.Append(CPPPATH=['./extern/libsvm-3.22/include'])
+env.Append(CPPPATH=['./extern/thundersvm/include'])
+env.Append(CPPPATH=['./extern/thundersvm/build']) # need builded config.h
 env.Append(CPPPATH=['./lib'])
 env.Append(CPPPATH=['./lib/partition/uncoarsening/refinement/quotient_graph_refinement/flow_refinement/'])
 env.Append(CPPPATH=['/usr/include/openmpi/'])
@@ -89,8 +91,10 @@ if SYSTEM == 'Darwin':
         env.Append(LIBPATH=['/usr/local/lib/'])
         env.Append(LIBPATH=['/usr/local/lib/openmpi/'])
         env.Append(LIBPATH=['./extern/argtable-2.10/maclib'])
+        env.Append(LIBPATH=['./extern/thundersvm/build/lib'])
 else:
         env.Append(LIBPATH=['./extern/argtable-2.10/lib'])
+        env.Append(LIBPATH=['./extern/thundersvm/build/lib'])
 
 #by D. Luxen
 if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):

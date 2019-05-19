@@ -59,3 +59,17 @@ svm_data svm_convert::graph_part_to_nodes(const graph_access & G, const std::vec
 
         return nodes;
 }
+
+
+DataSet::node2d svm_convert::svmdata_to_dataset(const svm_data & data) {
+	DataSet::node2d result(data.size());
+	for (size_t i = 0; i < data.size(); i++) {
+		result[i].reserve(data[i].size());
+		for (size_t j = 0; j < data[i].size()-1; j++) {
+			svm_node cur = data[i][j];
+			DataSet::node node(cur.index, cur.value);
+			result[i].push_back(node);
+		}
+	}
+	return result;
+}

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <thundersvm/model/svc.h>
 
 #include "svm/param_search.h"
 #include "svm/svm_solver.h"
@@ -208,3 +209,4 @@ void svm_solver<T>::set_model(std::shared_ptr<T> new_model) {
 }
 
 template class svm_solver<svm_model>;
+template class svm_solver<SVC>;
