@@ -86,7 +86,7 @@ if env['program'] == 'mlsvm':
 if env['program'] == 'single_level':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')
         env.Append(CCFLAGS  = '-DMODE_MLSVM')
-        env.Program('single_level_svm', ['app/single_level_svm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','gomp','pthread'])
+        env.Program('single_level_svm', ['app/single_level_svm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','gomp','pthread'])
 
 if env['program'] == 'prepare':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')

@@ -11,15 +11,14 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "balance_configuration.h"
 #include "data_structure/graph_access.h"
-#include "graph_io.h"
-#include "parse_parameters.h"
-#include "partition/partition_config.h"
-#include "coarsening/coarsening.h"
 #include "data_structure/graph_hierarchy.h"
-#include "timer.h"
+#include "io/graph_io.h"
+#include "partition/partition_config.h"
+#include "partition/coarsening/coarsening.h"
 #include "svm/svm_solver.h"
+#include "svm/svm_solver_libsvm.h"
+#include "svm/svm_solver_thunder.h"
 #include "svm/svm_convert.h"
 #include "svm/k_fold.h"
 #include "svm/k_fold_build.h"
@@ -27,6 +26,8 @@
 #include "svm/svm_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
+#include "tools/timer.h"
+#include "parse_parameters.h"
 
 void print_null(const char *s) {}
 
@@ -46,12 +47,12 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
                         << " min: " << kfold->getMinTestData()->size()
                         << " maj: " << kfold->getMajTestData()->size() << std::endl;
 
-        auto min_sample = svm_convert::sample_from_graph(*G_min, partition_config.sample_percent);
-        auto maj_sample = svm_convert::sample_from_graph(*G_maj, partition_config.sample_percent);
+        auto min_validation = svm_convert::sample_from_graph(*G_min, partition_config.sample_percent);
+        auto maj_validation = svm_convert::sample_from_graph(*G_maj, partition_config.sample_percent);
 
         std::cout << "sample -"
-                        << " min: " << min_sample.size()
-                        << " maj: " << maj_sample.size() << std::endl;
+                        << " min: " << min_validation.size()
+                        << " maj: " << maj_validation.size() << std::endl;
 
 
         // ------------- TRAINING -----------------
@@ -61,13 +62,13 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
         svm_instance instance;
         instance.read_problem(*G_min, *G_maj);
 
-        svm_solver solver(instance);
-        svm_result result = solver.train_initial(min_sample, maj_sample);
+        svm_solver_thunder solver(instance);
+        auto result = solver.train_initial(min_validation, maj_validation);
 
         auto train_time = t.elapsed();
         std::cout << "train time: " << train_time << std::endl;
 
-        svm_summary summary = result.best();
+        auto summary = result.best();
 
         results.setFloat("AC", summary.Acc);
         results.setFloat("SN", summary.Sens);
@@ -81,7 +82,7 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
         // ------------- TEST -----------------
 
         std::cout << "validation on test data:" << std::endl;
-        svm_summary summary_test = solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
+        auto summary_test = solver.build_summary(*kfold->getMinTestData(), *kfold->getMajTestData());
         auto test_time = t.elapsed();
         std::cout << "test time " << test_time << std::endl;
         results.setFloat("\tTEST_TIME", test_time);
@@ -116,15 +117,12 @@ void kfold_timeout(int timeout_secs, PartitionConfig& partition_config, std::uni
 }
 
 int main(int argn, char *argv[]) {
-
         PartitionConfig partition_config;
         std::string filename;
 
-        bool is_graph_weighted = false;
         bool suppress_output   = false;
-        bool recursive         = false;
 
-        int ret_code = parse_parameters(argn, argv, partition_config, filename, is_graph_weighted, suppress_output, recursive);
+        int ret_code = parse_parameters(argn, argv, partition_config, filename, suppress_output);
 
         if(ret_code) {
                 return -1;
@@ -132,19 +130,35 @@ int main(int argn, char *argv[]) {
 
         // disable libsvm output
         svm_set_print_string_function(&print_null);
+	// disable thundersvm output
+	el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Enabled, "false");
 
-        partition_config.LogDump(stdout);
+	if (partition_config.n_cores > 0) {
+		omp_set_num_threads(partition_config.n_cores);
+	}
+
+	partition_config.LogDump(stdout);
         partition_config.k = 1;
-        // partition_config.cluster_upperbound = std::numeric_limits<NodeID>::max()/2;
         partition_config.cluster_coarsening_factor = 1;
-        partition_config.upper_bound_partition = std::numeric_limits<NodeID>::max()/2;
         partition_config.stop_rule = STOP_RULE_FIXED;
-        partition_config.matching_type = CLUSTER_COARSENING;
-        partition_config.sep_num_vert_stop = partition_config.fix_num_vert_stop;
-        std::cout << "seed: " << partition_config.seed << std::endl;
-        // std::cout << "using grid_search: " << partition_config.seed << std::endl;
-        std::cout << "timeout: " << partition_config.timeout << std::endl;
 
+        std::cout << "cores: " << partition_config.n_cores << std::endl;
+        std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
+        std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
+        std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
+        std::cout << "bidirectional: " << partition_config.bidirectional << std::endl;
+        std::cout << "stop rule: " << partition_config.stop_rule << std::endl;
+        std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
+        std::cout << "matching type: " << partition_config.matching_type << std::endl;
+        std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
+        std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
+        std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
+        std::cout << "node_ordering: " << partition_config.node_ordering << std::endl;
+        std::cout << "diameter_upperbound: " << partition_config.diameter_upperbound << std::endl;
+        std::cout << "num_skip_ms: " << partition_config.num_skip_ms << std::endl;
+        std::cout << "inherit_ud: " << partition_config.inherit_ud << std::endl;
+        std::cout << "timeout: " << partition_config.timeout << std::endl;
+        std::cout << "seed: " << partition_config.seed << std::endl;
 
         random_functions::setSeed(partition_config.seed);
 
@@ -156,9 +170,9 @@ int main(int argn, char *argv[]) {
                 std::unique_ptr<k_fold> kfold;
 
                 if(partition_config.import_kfold) {
-                        kfold.reset(new k_fold_import(r, partition_config.kfold_iterations, filename));
+                        kfold.reset(new k_fold_import(partition_config, r, filename));
                 } else {
-                        kfold.reset(new k_fold_build(partition_config.num_nn, partition_config.kfold_iterations, filename));
+                        kfold.reset(new k_fold_build(partition_config, filename));
                 }
 
                 timer t_all;
