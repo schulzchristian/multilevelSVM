@@ -29,8 +29,8 @@ void svm_solver_thunder::train() {
 	param.weight_label = this->param.weight_label;
 	param.weight = this->param.weight;
 	param.probability = this->param.probability;
-	// param.max_mem_size = this->param.cache_size * (1 << 20); //MB to Byte
-	param.max_mem_size = -1; // no limit
+	param.max_mem_size = this->param.cache_size * (1 << 20); //MB to Byte
+	// param.max_mem_size = -1; // no limit
 
 	DataSet::node2d nodes = instance.node_data_thunder();
 	DataSet dataset(nodes, this->instance.features, *this->instance.labels);
