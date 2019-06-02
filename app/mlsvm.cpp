@@ -28,6 +28,9 @@
 #include <thundersvm/util/log.h>
 void print_null(const char *s) {}
 
+#define SVM_SOLVER svm_solver_thunder
+#define SVM_MODEL SVC
+
 int main(int argn, char *argv[]) {
 	PartitionConfig partition_config;
         std::string filename;
@@ -138,7 +141,7 @@ int main(int argn, char *argv[]) {
         svm_instance initial_instance;
         initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
 
-        svm_solver_thunder init_solver(initial_instance);
+        SVM_SOLVER init_solver(initial_instance);
         auto initial_result = init_solver.train_initial(min_validation, maj_validation);
 
         auto init_train_time = t.elapsed();
@@ -164,9 +167,9 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        svm_refinement<SVC> refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
+        svm_refinement<SVM_MODEL> refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
 
-        std::vector<std::pair<svm_summary<SVC>, svm_instance>> best_results;
+        std::vector<std::pair<svm_summary<SVM_MODEL>, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));
 
         while (!refinement.is_done()) {
@@ -197,7 +200,7 @@ int main(int argn, char *argv[]) {
                 std::cout << "level " << refinement.get_level()
                         << " validation on hole training data:" << std::endl;
 
-                svm_solver solver(current_result.instance);
+                SVM_SOLVER solver(current_result.instance);
                 solver.set_C(current_result.best().C);
                 solver.set_gamma(current_result.best().gamma);
                 solver.train();
@@ -215,7 +218,7 @@ int main(int argn, char *argv[]) {
         std::cout << "refinement time " << refinement_time << std::endl;
         results.setFloat("\tREFINEMENT_TIME", refinement_time);
 
-        int best_index = svm_result<SVC>::get_best_index(best_results);
+        int best_index = svm_result<SVM_MODEL>::get_best_index(best_results);
         results.setString("BEST_INDEX", std::to_string(best_index));
 
         auto best_summary = best_results[best_index].first;
@@ -229,7 +232,7 @@ int main(int argn, char *argv[]) {
         t.restart();
 
         std::cout << "best validation on testing data:" << std::endl;
-        svm_solver_thunder best_solver(best_results[best_index].second);
+        SVM_SOLVER best_solver(best_results[best_index].second);
         best_solver.set_C(best_summary.C);
         best_solver.set_gamma(best_summary.gamma);
         best_solver.set_model(best_summary.model);

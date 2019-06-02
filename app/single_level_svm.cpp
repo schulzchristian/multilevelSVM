@@ -31,6 +31,9 @@
 
 void print_null(const char *s) {}
 
+#define SVM_SOLVER svm_solver_thunder
+#define SVM_MODEL SVC
+
 void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& kfold, results& results) {
         timer t;
         graph_access *G_min = kfold->getMinGraph();
@@ -62,7 +65,7 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
         svm_instance instance;
         instance.read_problem(*G_min, *G_maj);
 
-        svm_solver_thunder solver(instance);
+        SVM_SOLVER solver(instance);
         auto result = solver.train_initial(min_validation, maj_validation);
 
         auto train_time = t.elapsed();
