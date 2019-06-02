@@ -11,10 +11,10 @@ svm_summary<T>::svm_summary(NodeID tp, NodeID tn, NodeID fp, NodeID fn) {
         this->FP = fp;
         this->TN = tn;
         this->FN = fn;
-        this->Sens = (double)tp / (tp+fn) ;
-        this->Spec = (double)tn / (tn+fp) ;
+        this->Sens = (double)tp / (tp+fn);
+        this->Spec = (double)tn / (tn+fp);
         this->Gmean = std::sqrt(this->Sens * this->Spec);
-        this->Acc = (double)(tp+tn) / (tp+tn+fp+fn) ;
+        this->Acc = (double)(tp+tn) / (tp+tn+fp+fn);
         if (tp+fp == 0)              //prevent nan case
                 this->PPV = 0;
         else

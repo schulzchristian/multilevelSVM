@@ -84,7 +84,7 @@ int graph_io::writeGraphGDF(const graph_access & G_min, const graph_access & G_m
 	} endfor
 
 	forall_nodes(G_maj, node) {
-	  f <<  node + min_nodes << ",1," << G_maj.getPartitionIndex(node) << "," << G_maj.getNodeWeight(node);
+		f <<  node + min_nodes << ",1," << G_maj.getPartitionIndex(node) << "," << G_maj.getNodeWeight(node);
 		for (auto &feature : G_maj.getFeatureVec(node)) {
 			f << "," << feature;
 		}
