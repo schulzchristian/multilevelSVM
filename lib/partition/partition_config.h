@@ -161,7 +161,10 @@ struct PartitionConfig
 
         void LogDump(FILE *out) const {
         }
-};
 
+	void print();
+
+	void apply();
+};
 
 #endif /* end of include guard: PARTITION_CONFIG_DI1ES4T0 */

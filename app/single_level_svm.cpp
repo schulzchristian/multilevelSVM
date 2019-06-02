@@ -133,34 +133,12 @@ int main(int argn, char *argv[]) {
 	// disable thundersvm output
 	el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Enabled, "false");
 
-	if (partition_config.n_cores > 0) {
-		omp_set_num_threads(partition_config.n_cores);
-	}
-
-	partition_config.LogDump(stdout);
         partition_config.k = 1;
         partition_config.cluster_coarsening_factor = 1;
         partition_config.stop_rule = STOP_RULE_FIXED;
 
-        std::cout << "cores: " << partition_config.n_cores << std::endl;
-        std::cout << "num_experiments: " << partition_config.num_experiments << std::endl;
-        std::cout << "kfold_iterations: " << partition_config.kfold_iterations << std::endl;
-        std::cout << "import_kfold: " << partition_config.import_kfold << std::endl;
-        std::cout << "bidirectional: " << partition_config.bidirectional << std::endl;
-        std::cout << "stop rule: " << partition_config.stop_rule << std::endl;
-        std::cout << "fix stop vertices: " << partition_config.fix_num_vert_stop << std::endl;
-        std::cout << "matching type: " << partition_config.matching_type << std::endl;
-        std::cout << "cluster_upperbound: " << partition_config.cluster_upperbound << std::endl;
-        std::cout << "upper_bound_partition: " << partition_config.upper_bound_partition << std::endl;
-        std::cout << "label_iterations: " << partition_config.label_iterations << std::endl;
-        std::cout << "node_ordering: " << partition_config.node_ordering << std::endl;
-        std::cout << "diameter_upperbound: " << partition_config.diameter_upperbound << std::endl;
-        std::cout << "num_skip_ms: " << partition_config.num_skip_ms << std::endl;
-        std::cout << "inherit_ud: " << partition_config.inherit_ud << std::endl;
-        std::cout << "timeout: " << partition_config.timeout << std::endl;
-        std::cout << "seed: " << partition_config.seed << std::endl;
-
-        random_functions::setSeed(partition_config.seed);
+	partition_config.apply();
+	partition_config.print();
 
         results results;
 
