@@ -215,13 +215,15 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & norm
 
         if (filename->count > 0) {
                 inputfile = filename->sval[0];
-                auto last_dot = inputfile.find_last_of('.');
-                if (!last_dot || last_dot == std::string::npos)
+                if (inputfile.substr(inputfile.size()-4,4) == ".csv") {
+			outputfile = inputfile.substr(0, inputfile.size()-4);
+		} else {
                         libsvm = true;
-                outputfile = inputfile.substr(0, last_dot);
-        }
+			outputfile = inputfile;
+		}
+	}
 
-        if (filename_output->count > 0) {
+	if (filename_output->count > 0) {
                 outputfile = filename_output->sval[0];
         }
 
@@ -361,7 +363,7 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & labels) {
                         int index = stoi(item.substr(0, colon_pos));
                         FeatureData value = stod(item.substr(colon_pos+1));
 
-                        while (data.back().size() < index - 1) {
+                        while (static_cast<int>(data.back().size()) < index - 1) {
                                 data.back().push_back(0);
                         }
 
