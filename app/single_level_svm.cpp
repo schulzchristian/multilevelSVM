@@ -50,8 +50,8 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
                         << " min: " << kfold->getMinTestData()->size()
                         << " maj: " << kfold->getMajTestData()->size() << std::endl;
 
-        auto min_validation = svm_convert::sample_from_graph(*G_min, partition_config.sample_percent);
-        auto maj_validation = svm_convert::sample_from_graph(*G_maj, partition_config.sample_percent);
+        auto min_validation = svm_convert::sample_from_graph(*G_min, partition_config.validation_percent);
+        auto maj_validation = svm_convert::sample_from_graph(*G_maj, partition_config.validation_percent);
 
         std::cout << "sample -"
                         << " min: " << min_validation.size()

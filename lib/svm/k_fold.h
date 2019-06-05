@@ -20,8 +20,11 @@ public:
 
         graph_access* getMinGraph();
         graph_access* getMajGraph();
-        std::vector<std::vector<svm_node>>* getMinTestData();
-        std::vector<std::vector<svm_node>>* getMajTestData();
+        svm_data* getMinValData();
+        svm_data* getMajValData();
+        svm_data* getMinTestData();
+        svm_data* getMajTestData();
+
 protected:
         /// do kfold stuff in here
         virtual void next_intern(double & io_time) = 0;
@@ -31,8 +34,10 @@ protected:
 
         graph_access cur_min_graph;
         graph_access cur_maj_graph;
-        std::vector<std::vector<svm_node>> cur_min_test;
-        std::vector<std::vector<svm_node>> cur_maj_test;
+        svm_data cur_min_val;
+        svm_data cur_maj_val;
+        svm_data cur_min_test;
+        svm_data cur_maj_test;
 };
 
 #endif /* KFOLD_H */

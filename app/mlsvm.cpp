@@ -95,8 +95,8 @@ int main(int argn, char *argv[]) {
                         << " min: " << kfold->getMinTestData()->size()
                         << " maj: " << kfold->getMajTestData()->size() << std::endl;
 
-        auto min_validation = svm_convert::sample_from_graph(*(kfold->getMinGraph()), partition_config.sample_percent);
-        auto maj_validation = svm_convert::sample_from_graph(*(kfold->getMajGraph()), partition_config.sample_percent);
+        auto min_validation = svm_convert::sample_from_graph(*(kfold->getMinGraph()), partition_config.validation_percent);
+        auto maj_validation = svm_convert::sample_from_graph(*(kfold->getMajGraph()), partition_config.validation_percent);
 
         std::cout << "sample -"
                         << " min: " << min_validation.size()
