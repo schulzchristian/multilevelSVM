@@ -148,7 +148,9 @@ struct PartitionConfig
         //===============MLSVM===================
         //=======================================
 
-        float sample_percent = 0.1f;
+        float validation_percent = 0.1f;
+
+	bool validation_seperate = false;
 
         int num_nn = 10;
 

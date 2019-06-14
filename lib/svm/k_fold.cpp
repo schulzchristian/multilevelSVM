@@ -5,9 +5,11 @@
 #include "tools/random_functions.h"
 #include "tools/timer.h"
 
-k_fold::k_fold(int num_iter) {
-        this->iterations = num_iter;
+k_fold::k_fold(PartitionConfig config) {
+        this->iterations = config.kfold_iterations;
         this->cur_iteration = -1;
+	this->validation_percent = config.validation_percent;
+	this->validation_seperate = config.validation_seperate;
 }
 
 k_fold::~k_fold() {
@@ -35,6 +37,14 @@ graph_access* k_fold::getMinGraph() {
 
 graph_access* k_fold::getMajGraph() {
         return &this->cur_maj_graph;
+}
+
+std::vector<std::vector<svm_node>>* k_fold::getMinValData() {
+        return &this->cur_min_val;
+}
+
+std::vector<std::vector<svm_node>>* k_fold::getMajValData() {
+        return &this->cur_maj_val;
 }
 
 std::vector<std::vector<svm_node>>* k_fold::getMinTestData() {

@@ -16,6 +16,7 @@ protected:
         void readData(const std::string & filename);
         void calculate_kfold_class(const std::vector<FeatureVec> & features_full,
                                    graph_access & target_graph,
+                                   std::vector<std::vector<svm_node>> & target_val,
                                    std::vector<std::vector<svm_node>> & target_test);
 
         std::vector<FeatureVec> min_features;

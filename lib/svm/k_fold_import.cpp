@@ -7,7 +7,7 @@
 
 
 k_fold_import::k_fold_import(const PartitionConfig & config, int num_exp, const std::string & basename)
-        : k_fold(config.kfold_iterations) {
+        : k_fold(config) {
         this->num_exp = num_exp;
         this->basename = basename;
         this->bidirectional = config.bidirectional;
@@ -23,7 +23,7 @@ void k_fold_import::next_intern(double & io_time) {
         std::string maj_train_name = this->basename + "kfold_n_train_data_exp_" + std::to_string(this->num_exp) + "_fold_" + std::to_string(k_fold::cur_iteration) + "_exp_0.1_data";
         std::string test_name = this->basename + "kfold_test_data_exp_" + std::to_string(this->num_exp) + "_fold_" + std::to_string(k_fold::cur_iteration) + "_exp_0.1_data";
 
-
+	// read min
         std::cout << "reading " << min_train_name << std::endl;
 
         timer t;
@@ -47,6 +47,7 @@ void k_fold_import::next_intern(double & io_time) {
         graph_io::readFeatures(this->cur_min_graph, min_features);
         std::cout << "read features" << std::endl;
 
+	// read maj
         std::cout << "reading " << maj_train_name << std::endl;
 
         t.restart();

@@ -46,16 +46,13 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
                         << " min: " << G_min->number_of_nodes()
                         << " maj: " << G_maj->number_of_nodes() << std::endl;
 
+        std::cout << "val -"
+                        << " min: " << kfold->getMinValData()->size()
+                        << " maj: " << kfold->getMajValData()->size() << std::endl;
+
         std::cout << "test -"
                         << " min: " << kfold->getMinTestData()->size()
                         << " maj: " << kfold->getMajTestData()->size() << std::endl;
-
-        auto min_validation = svm_convert::sample_from_graph(*G_min, partition_config.validation_percent);
-        auto maj_validation = svm_convert::sample_from_graph(*G_maj, partition_config.validation_percent);
-
-        std::cout << "sample -"
-                        << " min: " << min_validation.size()
-                        << " maj: " << maj_validation.size() << std::endl;
 
 
         // ------------- TRAINING -----------------
@@ -66,7 +63,7 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
         instance.read_problem(*G_min, *G_maj);
 
         SVM_SOLVER solver(instance);
-        auto result = solver.train_initial(min_validation, maj_validation);
+        auto result = solver.train_initial(*kfold->getMinValData(), *kfold->getMajValData());
 
         auto train_time = t.elapsed();
         std::cout << "train time: " << train_time << std::endl;
@@ -122,6 +119,7 @@ void kfold_timeout(int timeout_secs, PartitionConfig& partition_config, std::uni
 int main(int argn, char *argv[]) {
         PartitionConfig partition_config;
         std::string filename;
+	partition_config.validation_seperate = true;
 
         bool suppress_output   = false;
 

@@ -7,13 +7,15 @@
 
 #include "definitions.h"
 #include "data_structure/graph_access.h"
+#include "partition/partition_config.h"
 #include "svm.h"
+#include "svm/svm_definitions.h"
 
 
 class k_fold
 {
 public:
-        k_fold(int num_iter);
+        k_fold(PartitionConfig conf);
         virtual ~k_fold();
 
         bool next(double & io_time);
@@ -31,6 +33,8 @@ protected:
 
         int iterations;
         int cur_iteration;
+	float validation_percent;
+	bool validation_seperate;
 
         graph_access cur_min_graph;
         graph_access cur_maj_graph;

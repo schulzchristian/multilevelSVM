@@ -68,9 +68,11 @@ int parse_parameters(int argn, char **argv,
         // MLSVM import
         struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
-        struct arg_lit *bidirectional                           = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
+        struct arg_lit *bidirectional                        = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
 
-        struct arg_dbl *validation_percent                       = arg_dbl0("s", "validation_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
+        struct arg_dbl *validation_percent                   = arg_dbl0("s", "validation_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
+        struct arg_lit *validation_seperate                  = arg_lit0(NULL, "validation_seperate", "Should the validation data be also used for training (Default: yes for single_level no for mlsvm - this flag invertse the choice)");
+
 
         // MLSVM refinement
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
@@ -87,6 +89,7 @@ int parse_parameters(int argn, char **argv,
                             num_experiments,
                             kfold_iterations,
                             validation_percent,
+                            validation_seperate,
                             stop_rule,
                             fix_num_vert_stop,
                             matching_type,
@@ -277,6 +280,10 @@ int parse_parameters(int argn, char **argv,
 
         if(validation_percent->count > 0) {
                 partition_config.validation_percent = validation_percent->dval[0];
+        }
+
+        if(validation_seperate->count > 0) {
+                partition_config.validation_seperate = !partition_config.validation_seperate;
         }
 
         if(import_kfold->count > 0) {
