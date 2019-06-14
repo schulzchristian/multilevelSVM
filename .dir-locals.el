@@ -1,4 +1,7 @@
-((nil . ((projectile-project-compilation-cmd . "scons program=mlsvm variant=optimized-output")
+((nil . ((c-basic-offset . 8)
+	 (projectile-project-compilation-cmd . "scons program=mlsvm variant=optimized_output")
+	 (projectile-project-run-cmd . "./optimized_output/mlsvm -e 1 -k 5 -b examples/rgg_n_2_15_s0 --matching=low_diameter --diameter_upperbound=0.1  --export_graph")
+	 (company-c-headers-path-user "exter" "extern/argtable-2.10/include" (projectile-project-root))
 	 (flycheck-checker . c/c++-gcc)
 	 (flycheck-disabled-checker . c/c++-clang)
 	 ;; (flycheck-gcc-include-path . ((expand-file-name "lib" (projectile-project-root))
