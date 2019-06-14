@@ -118,14 +118,9 @@ void kfold_timeout(int timeout_secs, PartitionConfig& partition_config, std::uni
 
 int main(int argn, char *argv[]) {
         PartitionConfig partition_config;
-        std::string filename;
 	partition_config.validation_seperate = true;
 
-        bool suppress_output   = false;
-
-        int ret_code = parse_parameters(argn, argv, partition_config, filename, suppress_output);
-
-        if(ret_code) {
+        if(parse_parameters(argn, argv, partition_config)) {
                 return -1;
         }
 
@@ -149,9 +144,9 @@ int main(int argn, char *argv[]) {
                 std::unique_ptr<k_fold> kfold;
 
                 if(partition_config.import_kfold) {
-                        kfold.reset(new k_fold_import(partition_config, r, filename));
+                        kfold.reset(new k_fold_import(partition_config, r, partition_config.filename));
                 } else {
-                        kfold.reset(new k_fold_build(partition_config, filename));
+                        kfold.reset(new k_fold_build(partition_config, partition_config.filename));
                 }
 
                 timer t_all;

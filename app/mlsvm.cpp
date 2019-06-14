@@ -33,16 +33,10 @@ void print_null(const char *s) {}
 
 int main(int argn, char *argv[]) {
 	PartitionConfig partition_config;
-        std::string filename;
 
-        bool suppress_output   = false;
-
-        int ret_code = parse_parameters(argn, argv, partition_config, filename, suppress_output);
-
-        if(ret_code) {
+        if(parse_parameters(argn, argv, partition_config)) {
                 return -1;
         }
-
 
         // disable libsvm output
         svm_set_print_string_function(&print_null);
@@ -64,9 +58,9 @@ int main(int argn, char *argv[]) {
         std::unique_ptr<k_fold> kfold;
 
         if(partition_config.import_kfold) {
-                kfold.reset(new k_fold_import(partition_config, r, filename));
+                kfold.reset(new k_fold_import(partition_config, r, partition_config.filename));
         } else {
-                kfold.reset(new k_fold_build(partition_config, filename));
+                kfold.reset(new k_fold_build(partition_config, partition_config.filename));
         }
 
         timer t_all;
@@ -129,7 +123,7 @@ int main(int argn, char *argv[]) {
         int init_level = std::max(min_hierarchy.size(), maj_hierarchy.size());
 	if (partition_config.export_graph) {
 		std::ostringstream initial_out_graph;
-		initial_out_graph << filename << "_graph_" << partition_config.matching_type << "_" << init_level << ".gdf";
+		initial_out_graph << partition_config.filename << "_graph_" << partition_config.matching_type << "_" << init_level << ".gdf";
 		std::cout << "write " << initial_out_graph.str() << std::endl;
 		graph_io::writeGraphGDF(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest(), initial_out_graph.str());
 	}
@@ -191,7 +185,7 @@ int main(int argn, char *argv[]) {
 
 		if (partition_config.export_graph) {
 			std::ostringstream out_graph;
-			out_graph << filename << "_graph_" << partition_config.matching_type << "_" << refinement.get_level() << ".gdf";
+			out_graph << partition_config.filename << "_graph_" << partition_config.matching_type << "_" << refinement.get_level() << ".gdf";
 			std::cout << "write " << out_graph.str() << std::endl;
 			graph_io::writeGraphGDF(*refinement.G_min, *refinement.G_maj, out_graph.str());
 		}

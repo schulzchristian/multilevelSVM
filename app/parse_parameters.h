@@ -28,9 +28,7 @@
 #include <sstream>
 
 int parse_parameters(int argn, char **argv,
-                     PartitionConfig & partition_config,
-                     std::string & graph_filename,
-                     bool & suppress_program_output) {
+                     PartitionConfig & partition_config) {
 
         const char *progname = argv[0];
 
@@ -130,7 +128,7 @@ int parse_parameters(int argn, char **argv,
         }
 
         if(filename->count > 0) {
-                graph_filename = filename->sval[0];
+                partition_config.filename = filename->sval[0];
         }
 
         if(filename_output->count > 0) {

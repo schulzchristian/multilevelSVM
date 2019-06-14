@@ -90,7 +90,7 @@ struct PartitionConfig
 
         int seed = 0;
 
-        std::string graph_filename;
+        std::string filename = "";
 
         std::string filename_output = "";
 
