@@ -77,7 +77,7 @@ class contraction {
 
                 void addWeightedToVec(FeatureVec & vec, const FeatureVec & vecToAdd, NodeWeight weight) const;
 
-		EdgeWeight calcEdgeWeight(const FeatureVec & vec1,  const FeatureVec & vec2) const;
+		EdgeWeight calcFeatureDist(const FeatureVec & vec1,  const FeatureVec & vec2) const;
 };
 
 inline void contraction::visit_edge(graph_access & G,

@@ -175,11 +175,11 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
                 coarser.setFeatureVec(node, combined_feature_vecs[node]);
         endfor }
 
-	//calculate weights based on the distance of the feature vec
+	//calculate edge weights based on the distance of the feature vec
 	forall_nodes(coarser, node) {
 		forall_out_edges(coarser, e, node) {
 			NodeID target = coarser.getEdgeTarget(e);
-			EdgeWeight newWeight = 1 / calcEdgeWeight(coarser.getFeatureVec(node), coarser.getFeatureVec(target));
+			EdgeWeight newWeight = 1 / calcFeatureDist(coarser.getFeatureVec(node), coarser.getFeatureVec(target));
 			coarser.setEdgeWeight(e, newWeight);
 		endfor }
 	endfor }
@@ -292,7 +292,7 @@ void contraction::addWeightedToVec(FeatureVec & vec, const FeatureVec & vecToAdd
         }
 }
 
-EdgeWeight contraction::calcEdgeWeight(const FeatureVec & vec1,  const FeatureVec & vec2) const {
+EdgeWeight contraction::calcFeatureDist(const FeatureVec & vec1,  const FeatureVec & vec2) const {
         size_t features = vec1.size();
 	EdgeWeight dist = 0;
 
