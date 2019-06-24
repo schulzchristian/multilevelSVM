@@ -1,8 +1,8 @@
 #include "k_fold_build.h"
 #include "io/graph_io.h"
 #include "io/svm_io.h"
-#include "svm/svm_flann.h"
 #include "svm/svm_convert.h"
+#include "svm/svm_flann.h"
 #include "tools/random_functions.h"
 #include "tools/timer.h"
 

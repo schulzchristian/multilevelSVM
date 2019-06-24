@@ -12,6 +12,9 @@ public:
 
 protected:
         virtual void next_intern(double & io_time) override;
+	double read_class(const std::string & filename,
+			  graph_access & target_graph,
+			  std::vector<std::vector<svm_node>> & target_val);
 
         std::string basename;
         int num_exp;

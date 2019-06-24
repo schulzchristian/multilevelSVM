@@ -82,19 +82,17 @@ int main(int argn, char *argv[]) {
         G_maj->set_partition_count(partition_config.k);
 
         std::cout << "graph -"
-                        << " min: " << G_min->number_of_nodes()
-                        << " maj: " << G_maj->number_of_nodes() << std::endl;
+		  << " min: " << G_min->number_of_nodes()
+		  << " maj: " << G_maj->number_of_nodes() << std::endl;
 
-        std::cout << "test -"
-                        << " min: " << kfold->getMinTestData()->size()
-                        << " maj: " << kfold->getMajTestData()->size() << std::endl;
+        std::cout << "val -"
+		  << " min: " << kfold->getMinValData()->size()
+		  << " maj: " << kfold->getMajValData()->size() << std::endl;
 
-        auto min_validation = svm_convert::sample_from_graph(*(kfold->getMinGraph()), partition_config.validation_percent);
-        auto maj_validation = svm_convert::sample_from_graph(*(kfold->getMajGraph()), partition_config.validation_percent);
+	std::cout << "test -"
+		  << " min: " << kfold->getMinTestData()->size()
+		  << " maj: " << kfold->getMajTestData()->size() << std::endl;
 
-        std::cout << "sample -"
-                        << " min: " << min_validation.size()
-                        << " maj: " << maj_validation.size() << std::endl;
 
 
         // ------------- COARSENING -----------------
@@ -136,7 +134,8 @@ int main(int argn, char *argv[]) {
         initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
 
         SVM_SOLVER init_solver(initial_instance);
-        auto initial_result = init_solver.train_initial(min_validation, maj_validation);
+        auto initial_result = init_solver.train_initial(*kfold->getMinValData(),
+							*kfold->getMajValData());
 
         auto init_train_time = t.elapsed();
         std::cout << "init train time: " << init_train_time << std::endl;
@@ -169,7 +168,8 @@ int main(int argn, char *argv[]) {
         while (!refinement.is_done()) {
                 timer t_ref;
 
-                auto current_result = refinement.step(min_validation, maj_validation);
+                auto current_result = refinement.step(*kfold->getMinValData(),
+						      *kfold->getMajValData());
 
                 std::cout << "refinement at level " << refinement.get_level()
                         << " took " << t_ref.elapsed() << std::endl;
