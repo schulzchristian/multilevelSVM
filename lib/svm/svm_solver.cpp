@@ -139,15 +139,20 @@ svm_result<T> svm_solver<T>::train_range(const std::vector<svm_param> & params,
 		// (copy ctor) use this instances prob and param values
                 // svm_solver<T> cur_solver(*this);
 
+		timer t;
+
                 param.C = pow(2, p.first);
                 param.gamma = pow(2, p.second);
 
-                this->train();
-
                 std::cout << std::setprecision(2)
                           << std::fixed
-                          << "log C=" << p.first
-                          << "\tlog gamma=" << p.second
+                          << "log C=" << std::setw(6) << p.first
+                          << "\tlog gamma=" << std::setw(6) << p.second
+			  << std::flush;
+
+                this->train();
+
+		std::cout << "\ttime=" << t.elapsed()
                           << std::flush;
 
                 // if (cur_solver.model->l > (cur_solver.instance.num_min + cur_solver.instance.num_maj) * 0.9
