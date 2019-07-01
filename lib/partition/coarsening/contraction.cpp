@@ -23,6 +23,7 @@
 #include "contraction.h"
 #include "partition/uncoarsening/refinement/quotient_graph_refinement/complete_boundary.h"
 #include "tools/macros_assertions.h"
+#include "tools/timer.h"
 
 contraction::contraction() {
 
@@ -175,6 +176,8 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
                 coarser.setFeatureVec(node, combined_feature_vecs[node]);
         endfor }
 
+	timer t;
+
 	//calculate edge weights based on the distance of the feature vec
 	forall_nodes(coarser, node) {
 		forall_out_edges(coarser, e, node) {
@@ -183,6 +186,8 @@ void contraction::contract_clustering(const PartitionConfig & partition_config,
 			coarser.setEdgeWeight(e, newWeight);
 		endfor }
 	endfor }
+
+	std::cout << "calc new weights took " << t.elapsed() << std::endl;
 }
 
 
