@@ -18,14 +18,12 @@ public:
 
 template<>
 std::unique_ptr<svm_solver<svm_model>> svm_solver_factory::create(const svm_instance & instance) {
-	// TODO: c++14 allows for make_unique
-	/* return std::make_unique<svm_solver_libsvm>(instance); */
-	return std::unique_ptr<svm_solver_libsvm>(new svm_solver_libsvm(instance));
+	return std::make_unique<svm_solver_libsvm>(instance);
 }
 
 template<>
 std::unique_ptr<svm_solver<SVC>> svm_solver_factory::create(const svm_instance & instance) {
-	return std::unique_ptr<svm_solver_thunder>(new svm_solver_thunder(instance));
+	return std::make_unique<svm_solver_thunder>(instance);
 }
 
 #endif /* SVM_SOLVER_FACTORY_H */

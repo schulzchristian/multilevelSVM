@@ -20,6 +20,7 @@
 #include "svm/k_fold_build.h"
 #include "svm/k_fold_import.h"
 #include "svm/svm_refinement.h"
+#include "svm/ud_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
 #include "tools/timer.h"
@@ -134,10 +135,11 @@ int main(int argn, char *argv[]) {
         initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
 
         SVM_SOLVER init_solver(initial_instance);
-        auto initial_result = init_solver.train_initial(*kfold->getMinValData(),
-							*kfold->getMajValData());
+        auto initial_result = ud_refinement<SVM_MODEL>::train_ud(init_solver,
+								 *kfold->getMinValData(),
+								 *kfold->getMajValData());
 
-        auto init_train_time = t.elapsed();
+	auto init_train_time = t.elapsed();
         std::cout << "init train time: " << init_train_time << std::endl;
 
         auto initial_summary = initial_result.best();
@@ -160,38 +162,40 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        svm_refinement<SVM_MODEL> refinement(min_hierarchy, maj_hierarchy, initial_result, partition_config.num_skip_ms, partition_config.inherit_ud);
+        std::unique_ptr<svm_refinement<SVM_MODEL>> refinement =
+		std::make_unique<ud_refinement<SVM_MODEL>>(min_hierarchy, maj_hierarchy,
+							   initial_result, partition_config);
 
-        std::vector<std::pair<svm_summary<SVM_MODEL>, svm_instance>> best_results;
+	std::vector<std::pair<svm_summary<SVM_MODEL>, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));
 
-        while (!refinement.is_done()) {
+        while (!refinement->is_done()) {
                 timer t_ref;
 
-                auto current_result = refinement.step(*kfold->getMinValData(),
+                auto current_result = refinement->step(*kfold->getMinValData(),
 						      *kfold->getMajValData());
 
-                std::cout << "refinement at level " << refinement.get_level()
+                std::cout << "refinement at level " << refinement->get_level()
                         << " took " << t_ref.elapsed() << std::endl;
 
                 best_results.push_back(std::make_pair(current_result.best(), current_result.instance));
 
                 std::ostringstream fmt_ac, fmt_gm;
-                fmt_ac << "LEVEL" << refinement.get_level() << "_AC";
-                fmt_gm << "LEVEL" << refinement.get_level() << "_GM";
+                fmt_ac << "LEVEL" << refinement->get_level() << "_AC";
+                fmt_gm << "LEVEL" << refinement->get_level() << "_GM";
                 results.setFloat(fmt_ac.str(), current_result.best().Acc);
                 results.setFloat(fmt_gm.str(), current_result.best().Gmean);
 
 
 		if (partition_config.export_graph) {
 			std::ostringstream out_graph;
-			out_graph << partition_config.filename << "_graph_" << partition_config.matching_type << "_" << refinement.get_level() << ".gdf";
+			out_graph << partition_config.filename << "_graph_" << partition_config.matching_type << "_" << refinement->get_level() << ".gdf";
 			std::cout << "write " << out_graph.str() << std::endl;
-			graph_io::writeGraphGDF(*refinement.G_min, *refinement.G_maj, out_graph.str());
+			graph_io::writeGraphGDF(*refinement->G_min, *refinement->G_maj, out_graph.str());
 		}
 
                 /*
-                std::cout << "level " << refinement.get_level()
+                std::cout << "level " << refinement->get_level()
                         << " validation on hole training data:" << std::endl;
 
                 SVM_SOLVER solver(current_result.instance);

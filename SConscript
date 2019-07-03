@@ -75,6 +75,7 @@ libmlsvm_files = [ 'lib/svm/svm_solver.cpp',
                    'lib/svm/results.cpp',
                    'lib/svm/svm_flann.cpp',
                    'lib/svm/svm_refinement.cpp',
+                   'lib/svm/ud_refinement.cpp',
                    'extern/libsvm-3.22/src/svm.cpp' ]
 
 prepare_files = [  'lib/svm/svm_flann.cpp' ]

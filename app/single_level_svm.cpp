@@ -23,7 +23,7 @@
 #include "svm/k_fold.h"
 #include "svm/k_fold_build.h"
 #include "svm/k_fold_import.h"
-#include "svm/svm_refinement.h"
+#include "svm/ud_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
 #include "tools/timer.h"
@@ -63,7 +63,7 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
         instance.read_problem(*G_min, *G_maj);
 
         SVM_SOLVER solver(instance);
-        auto result = solver.train_initial(*kfold->getMinValData(), *kfold->getMajValData());
+        auto result = ud_refinement<SVM_MODEL>::train_ud(solver, *kfold->getMinValData(), *kfold->getMajValData());
 
         auto train_time = t.elapsed();
         std::cout << "train time: " << train_time << std::endl;

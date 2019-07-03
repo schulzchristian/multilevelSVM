@@ -35,40 +35,6 @@ svm_solver<T>::svm_solver() {
 }
 
 template<class T>
-svm_result<T> svm_solver<T>::train_initial(const svm_data & min_sample, const svm_data & maj_sample) {
-        svm_result<T> result;
-        std::vector<svm_param> params;
-
-        // first search
-        std::cout << "1st sweep with initial logC=0 logGamma=0" << std::endl;
-        params = param_search::ud(-5, 15, -10, 10, true);
-
-        result = train_range(params, min_sample, maj_sample);
-        svm_summary<T> good = result.best();
-
-        std::cout << "2nd sweep with logC=" << good.C_log << " logGamma=" << good.gamma_log << std::endl;
-        good.print();
-
-        // second search
-        params = param_search::ud(-5, 15, -10, 10, false, true, good.C_log, good.gamma_log);
-        params.pop_back();
-
-        svm_result<T> second_res = train_range(params, min_sample, maj_sample);
-        second_res.add(result);
-        svm_summary<T> best = second_res.best();
-
-        std::cout << "BEST (" << best.C_log << "," << best.gamma_log << ")"<< std::endl;
-        best.print();
-
-        // train this solver to the best found parameters
-        this->param.C = best.C;
-        this->param.gamma = best.gamma;
-        this->train();
-
-        return second_res;
-}
-
-template<class T>
 svm_result<T> svm_solver<T>::train_grid(const svm_data & min_sample, const svm_data & maj_sample) {
         svm_result<T> result;
         std::vector<svm_param> params;
@@ -89,51 +55,10 @@ svm_result<T> svm_solver<T>::train_grid(const svm_data & min_sample, const svm_d
 }
 
 template<class T>
-svm_result<T> svm_solver<T>::train_refinement(const svm_data & min_sample, const svm_data & maj_sample,
-                                        bool inherit_ud, float param_c, float param_g) {
-        svm_result<T> result;
-        std::vector<svm_param> params;
-        if (!inherit_ud) {
-                // first search
-                std::cout << "1st sweep with logC=" << param_c << " logGamma="<< param_g << std::endl;
-                params = param_search::ud(-5, 15, -10, 10, true, true, param_c, param_g);
-
-                result = train_range(params, min_sample, maj_sample);
-                svm_summary<T> good = result.best();
-
-                std::cout << "2nd sweep with logC=" << good.C_log << " logGamma=" << good.gamma_log << std::endl;
-                good.print();
-
-                // second search
-                params = param_search::ud(-5, 15, -10, 10, false, true, good.C_log, good.gamma_log);
-                params.pop_back();
-        } else {
-                std::cout << "2nd sweep with logC=" << param_c << " logGamma="<< param_g << std::endl;
-                params = param_search::ud(-5, 15, -10, 10, false, true, param_c, param_g);
-                params.push_back(std::make_pair(param_c, param_g));
-        }
-
-
-        svm_result<T> second_res = train_range(params, min_sample, maj_sample);
-        second_res.add(result);
-        svm_summary<T> best = second_res.best();
-
-        std::cout << "BEST (" << best.C_log << "," << best.gamma_log << ")"<< std::endl;
-        best.print();
-
-        // train this solver to the best found parameters
-        this->param.C = best.C;
-        this->param.gamma = best.gamma;
-        this->model = best.model;
-
-        return second_res;
-}
-
-template<class T>
 svm_result<T> svm_solver<T>::train_range(const std::vector<svm_param> & params,
-                                   const svm_data & min_sample,
-                                   const svm_data & maj_sample) {
-        std::vector<svm_summary<T>> summaries;
+					 const svm_data & min_sample,
+					 const svm_data & maj_sample) {
+	std::vector<svm_summary<T>> summaries;
 
         for (auto&& p : params) {
 		// (copy ctor) use this instances prob and param values
