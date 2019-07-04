@@ -55,11 +55,25 @@ static inline std::string trim_copy(std::string s) {
         return s;
 }
 
+enum NORMALIZE_METHOD {
+	NONE, LINEAR, GAUSS_NORM
+};
 
-int parse_args(int argc, char *argv[],
-	       int & nn_num, int & label_col, string & label_min,
-	       int & normalize, bool & libsvm, bool & processed_csv,
-	       string & inputfile, string & outputfile);
+struct config {
+	int nn_num = 10;
+	int label_col = 0;
+	string label_min = "1";
+	//indicates whether to normalize or scale to [0,1] or neither
+	//scaling can preserve null entries
+	NORMALIZE_METHOD norm = GAUSS_NORM;
+	// read libsvm data instead of csv
+	bool libsvm = false;
+	bool processed_csv = false;
+	string inputfile;
+	string outputfile;
+};
+
+int parse_args(int argc, char *argv[], config & conf);
 
 void read_csv(const string & filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0, const string & label_min = "-1");
 
@@ -69,7 +83,7 @@ void write_csv(const string & filename, const MyMat & data, const vector<int> & 
 
 void normalize(MyMat & data);
 
-void scale(MyMat & data, FeatureData from = 0, FeatureData to = 1);
+void scale(MyMat & data);
 
 void split(const MyMat & data, const vector<int> labels, MyMat & min, MyMat & maj);
 
@@ -78,17 +92,9 @@ void write_metis(const vector<vector<Edge>> & edges, const string output);
 void write_features(const MyMat & data, const string filename);
 
 int main(int argc, char *argv[]) {
-        int nn_num = 10;
-        int label_col = 0;
-	string label_min = "1";
-        int norm = true; //indicates whether to normalize or scale to [0,1] or neither
-                         //scaling can preserve null entries
-        bool libsvm = false; // read libsvm data instead of csv
-        bool processed_csv = false;
-        string inputfile;
-        string outputfile;
+	config conf;
 
-        if (parse_args(argc, argv, nn_num, label_col, label_min, norm, libsvm, processed_csv, inputfile, outputfile)){
+        if (parse_args(argc, argv, conf)) {
                 cout << "parse_args error. exiting..." << endl;
                 return 1;
         }
@@ -98,16 +104,16 @@ int main(int argc, char *argv[]) {
 
         timer t;
 
-        if (libsvm) {
-                read_libsvm(inputfile, data, labels, label_min);
+        if (conf.libsvm) {
+                read_libsvm(conf.inputfile, data, labels, conf.label_min);
                 cout << "read libsvm time " << t.elapsed() << endl;
         } else {
-                read_csv(inputfile, data, labels, label_col, label_min);
+                read_csv(conf.inputfile, data, labels, conf.label_col, conf.label_min);
                 cout << "read csv time " << t.elapsed() << endl;
         }
 
-        if (processed_csv || label_col != 0 || label_min != "1") {
-                write_csv(outputfile + "_processed.csv", data, labels);
+        if (conf.processed_csv || conf.label_col != 0 || conf.label_min != "1") {
+                write_csv(conf.outputfile + "_processed.csv", data, labels);
         }
 
         size_t rows = data.size();
@@ -117,16 +123,16 @@ int main(int argc, char *argv[]) {
 
         t.restart();
 
-	switch (norm) {
-	case 0:
+	switch (conf.norm) {
+	case GAUSS_NORM:
                 normalize(data);
                 cout << "normalization time " << t.elapsed() << endl;
 		break;
-	case 1:
+	case LINEAR:
                 scale(data);
                 cout << "scale time " << t.elapsed() << endl;
 		break;
-	case 2:
+	case NONE:
 		break;
 	}
 
@@ -142,8 +148,8 @@ int main(int argc, char *argv[]) {
         std::cout << "nodes - min " << min_data.size()
                   << " maj " << maj_data.size() << std::endl;
 
-        write_features(min_data, outputfile + "_min_data");
-        write_features(maj_data, outputfile + "_maj_data");
+        write_features(min_data, conf.outputfile + "_min_data");
+        write_features(maj_data, conf.outputfile + "_maj_data");
 
         /*
         t.restart();
@@ -169,8 +175,7 @@ int main(int argc, char *argv[]) {
         return 0;
 }
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & label_min,
-	       int & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile) {
+int parse_args(int argc, char *argv[], config & conf) {
         // Setup argtable parameters.
         struct arg_end *end                 = arg_end(100);
         struct arg_lit *help                = arg_lit0("h", "help","Print help.");
@@ -202,50 +207,52 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & l
         }
 
         if (nearest_neighbors->count > 0) {
-                nn_num = nearest_neighbors->ival[0];
+                conf.nn_num = nearest_neighbors->ival[0];
         }
 
         if (label_column->count > 0) {
-                label_col = label_column->ival[0];
+                conf.label_col = label_column->ival[0];
         }
 
         if (scale->count > 0) {
-                normalize = 1;
-        }
-	else if (no_scale->count > 0) {
-                normalize = 2;
-        }
+                conf.norm = LINEAR;
+        } else if (no_scale->count > 0) {
+                conf.norm = NONE;
+        } else {
+		conf.norm = GAUSS_NORM;
+	}
 
         if (p_csv->count > 0) {
-                processed_csv = true;
+                conf.processed_csv = true;
         }
 
         if (filename->count > 0) {
-                inputfile = filename->sval[0];
-                if (inputfile.substr(inputfile.size()-4,4) == ".csv") {
-			outputfile = inputfile.substr(0, inputfile.size()-4);
+		string file(filename->sval[0]);
+		if (file.substr(file.size()-4,4) == ".csv") {
+			conf.outputfile = file.substr(0, file.size()-4);
 		} else {
-                        libsvm = true;
-			outputfile = inputfile;
+                        conf.libsvm = true;
+			conf.outputfile = conf.file;
 		}
+		conf.inputfile = file;
 	}
 
 	if (filename_output->count > 0) {
-                outputfile = filename_output->sval[0];
+                conf.outputfile = filename_output->sval[0];
         }
 
         if (label_minority->count > 0) {
-                label_min = label_minority->sval[0];
-		outputfile += "_" + label_min;
+                conf.label_min = label_minority->sval[0];
+		conf.outputfile += "_" + conf.label_min;
         }
 
 	if (file_format->count > 0) {
 		string csv_str("csv");
 		cout << csv_str << " compare " << file_format->sval[0] << " = " << (csv_str == file_format->sval[0]) << endl;
 		if (csv_str == (file_format->sval[0])) {
-			libsvm = false;
+			conf.libsvm = false;
 		} else {
-			libsvm = true;
+			conf.libsvm = true;
 		}
 	}
 
@@ -466,7 +473,7 @@ void normalize(MyMat & data) {
         }
 }
 
-void scale(MyMat & data, FeatureData from, FeatureData to) {
+void scale(MyMat & data) {
         size_t rows = data.size();
         size_t cols = data[0].size();
         FeatureVec max = FeatureVec(cols,std::numeric_limits<FeatureData>::min());
