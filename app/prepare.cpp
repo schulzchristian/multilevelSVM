@@ -56,11 +56,14 @@ static inline std::string trim_copy(std::string s) {
 }
 
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile);
+int parse_args(int argc, char *argv[],
+	       int & nn_num, int & label_col, string & label_min,
+	       int & normalize, bool & libsvm, bool & processed_csv,
+	       string & inputfile, string & outputfile);
 
-void read_csv(const string & filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0);
+void read_csv(const string & filename, MyMat & min_data, vector<int> & maj_data, int label_col = 0, const string & label_min = "-1");
 
-void read_libsvm(const string & filename, MyMat & data, vector<int> & labels);
+void read_libsvm(const string & filename, MyMat & data, vector<int> & labels, const string & label_min);
 
 void write_csv(const string & filename, const MyMat & data, const vector<int> & labels);
 
@@ -77,6 +80,7 @@ void write_features(const MyMat & data, const string filename);
 int main(int argc, char *argv[]) {
         int nn_num = 10;
         int label_col = 0;
+	string label_min = "1";
         int norm = true; //indicates whether to normalize or scale to [0,1] or neither
                          //scaling can preserve null entries
         bool libsvm = false; // read libsvm data instead of csv
@@ -84,7 +88,7 @@ int main(int argc, char *argv[]) {
         string inputfile;
         string outputfile;
 
-        if (parse_args(argc, argv, nn_num, label_col, norm, libsvm, processed_csv, inputfile, outputfile)){
+        if (parse_args(argc, argv, nn_num, label_col, label_min, norm, libsvm, processed_csv, inputfile, outputfile)){
                 cout << "parse_args error. exiting..." << endl;
                 return 1;
         }
@@ -95,14 +99,14 @@ int main(int argc, char *argv[]) {
         timer t;
 
         if (libsvm) {
-                read_libsvm(inputfile, data, labels);
+                read_libsvm(inputfile, data, labels, label_min);
                 cout << "read libsvm time " << t.elapsed() << endl;
         } else {
-                read_csv(inputfile, data, labels, label_col);
+                read_csv(inputfile, data, labels, label_col, label_min);
                 cout << "read csv time " << t.elapsed() << endl;
         }
 
-        if (processed_csv || label_col != 0) {
+        if (processed_csv || label_col != 0 || label_min != "1") {
                 write_csv(outputfile + "_processed.csv", data, labels);
         }
 
@@ -165,19 +169,22 @@ int main(int argc, char *argv[]) {
         return 0;
 }
 
-int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile) {
+int parse_args(int argc, char *argv[], int & nn_num, int & label_col, string & label_min,
+	       int & normalize, bool & libsvm, bool & processed_csv, string & inputfile, string & outputfile) {
         // Setup argtable parameters.
         struct arg_end *end                 = arg_end(100);
         struct arg_lit *help                = arg_lit0("h", "help","Print help.");
         struct arg_int *nearest_neighbors   = arg_int0(NULL, "nn", NULL, "Number of nearest neighbors to compute. (default 10)");
         struct arg_int *label_column        = arg_int0(NULL, "label_col", NULL, "column in which the labels are written (starting at 0)");
+        struct arg_str *label_minority      = arg_str0(NULL, "minority", NULL, "label/class of the minority class for binary classifications (default \"1\")");
         struct arg_lit *p_csv               = arg_lit0("c", NULL, "export the csv where the categorical attributes where converted to binary");
         struct arg_lit *scale               = arg_lit0(NULL, "scale", "don't normalize just scale to [0,1]");
         struct arg_lit *no_scale            = arg_lit0(NULL, "no_scale", "neither normalize nor scale to [0,1]");
+        struct arg_str *file_format         = arg_str0(NULL, "file_format", "[csv|libsvm]", "The format of the input file (default behavior is csv if the file ends with \".csv\")");
         struct arg_str *filename            = arg_strn(NULL, NULL, "FILE", 1, 1, "Path to csv file to process.");
-        struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
+        struct arg_str *filename_output     = arg_str0("o", "output_filename", "OUTPUT", "Specify the name of the output file. \"path[_{label_min}]_{min,maj}_{graph,data}\" will be used as output. default: FILE without extension");
 
-        void* argtable[] = {help, nearest_neighbors, label_column, scale, no_scale, p_csv, filename, filename_output
+        void* argtable[] = {help, nearest_neighbors, label_column, label_minority, scale, no_scale, p_csv, file_format, filename, filename_output
                             ,end};
 
         // Parse arguments.
@@ -199,7 +206,7 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & norm
         }
 
         if (label_column->count > 0) {
-                label_col= label_column->ival[0];
+                label_col = label_column->ival[0];
         }
 
         if (scale->count > 0) {
@@ -227,12 +234,27 @@ int parse_args(int argc, char *argv[], int & nn_num, int & label_col, int & norm
                 outputfile = filename_output->sval[0];
         }
 
+        if (label_minority->count > 0) {
+                label_min = label_minority->sval[0];
+		outputfile += "_" + label_min;
+        }
+
+	if (file_format->count > 0) {
+		string csv_str("csv");
+		cout << csv_str << " compare " << file_format->sval[0] << " = " << (csv_str == file_format->sval[0]) << endl;
+		if (csv_str == (file_format->sval[0])) {
+			libsvm = false;
+		} else {
+			libsvm = true;
+		}
+	}
+
         arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 
         return 0;
 }
 
-void read_csv(const string & filename, MyMat & data, vector<int> & labels, int label_col) {
+void read_csv(const string & filename, MyMat & data, vector<int> & labels, int label_col, const string & label_min) {
         enum COL_TYP {
                 LABEL,
                 NUMERICAL,
@@ -261,8 +283,7 @@ void read_csv(const string & filename, MyMat & data, vector<int> & labels, int l
                                 try {
                                         stod(item);
                                         col_typs.push_back(NUMERICAL);
-                                }
-                                catch (...) {
+                                } catch (...) {
                                         col_typs.push_back(CATEGORICAL);
                                 }
                                 col++;
@@ -279,10 +300,15 @@ void read_csv(const string & filename, MyMat & data, vector<int> & labels, int l
                 size_t col=0;
                 for (string item; getline(sep, item, ','); ) {
                         switch (col_typs[col]) {
-                        case LABEL:
-                                {
-                                        int label = stoi(item);
-                                        labels.push_back(label);
+			case LABEL:
+				{
+					if (item == label_min) {
+						labels.push_back(1);
+					} else {
+						labels.push_back(-1);
+					}
+					// int label = stoi(item);
+                                        // labels.push_back(label);
                                         break;
                                 }
 
@@ -341,7 +367,7 @@ void read_csv(const string & filename, MyMat & data, vector<int> & labels, int l
         }
 }
 
-void read_libsvm(const string & filename, MyMat & data, vector<int> & labels) {
+void read_libsvm(const string & filename, MyMat & data, vector<int> & labels, const string & label_min) {
         cout << "begin " << filename << endl;
 
         ifstream file;
@@ -356,9 +382,14 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & labels) {
                 data.back().reserve(feature_size);
 
                 getline(sep, item, ' ');
-                labels.push_back(stoi(item));
+                // labels.push_back(stoi(item));
+		if (item == label_min) {
+			labels.push_back(1);
+		} else {
+			labels.push_back(-1);
+		}
 
-                for (; getline(sep, item, ' '); ) {
+		for (; getline(sep, item, ' '); ) {
                         auto colon_pos = item.find(':');
                         int index = stoi(item.substr(0, colon_pos));
                         FeatureData value = stod(item.substr(colon_pos+1));
@@ -373,13 +404,10 @@ void read_libsvm(const string & filename, MyMat & data, vector<int> & labels) {
                 feature_size = std::max(data.back().size(), feature_size);
         }
 
-        cout << "resize now" << endl;
-
         for (auto&& row : data) {
                 if (row.size() < feature_size)
                         row.resize(feature_size);
         }
-        cout << "done" << endl;
 }
 
 void write_csv(const string & filename, const MyMat& data, const vector<int> & labels) {
@@ -390,10 +418,6 @@ void write_csv(const string & filename, const MyMat& data, const vector<int> & l
         file.open(filename);
 
         timer t;
-
-        cout << "lets write" << "\n";
-        cout << "data " << rows << " " << cols << "\n";
-        cout << "labels " << labels.size() << "\n";
 
         for (size_t i = 0; i < rows; ++i) {
                 file << labels[i] << ",";
