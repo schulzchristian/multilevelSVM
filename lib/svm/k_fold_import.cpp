@@ -38,7 +38,7 @@ void k_fold_import::next_intern(double & io_time) {
 double k_fold_import::read_class(const std::string & filename,
 				 graph_access & target_graph,
 				 std::vector<std::vector<svm_node>> & target_val) {
-	double time;
+	double time = 0;
         timer t;
         std::cout << "reading " << filename << std::endl;
 

@@ -38,6 +38,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_str *filename_output                      = arg_str0(NULL, "output_filename", NULL, "Specify the name of the output file (that contains the partition).");
         struct arg_int *user_seed                            = arg_int0(NULL, "seed", NULL, "Seed to use for the PRNG.");
         struct arg_int *num_experiments                      = arg_int0("e", "num_experiments", NULL, "Number of experiments i.e. full kfold runs (default 1)");
+	struct arg_rex *validation_type                      = arg_rex0(NULL, "validation", "^(kfold|kfold_import|once|train_test_split)$", "TYPE", REG_EXTENDED, "Type of validation. One of {kfold, kfold_import, once, train_test_split} (Default: kfold)"  );
         struct arg_int *kfold_iterations                     = arg_int0("k", "kfold_iterations", NULL, "Number of kfold iterations (Default: 5)");
         struct arg_dbl *time_limit                           = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 0s .");
         struct arg_int *timeout                              = arg_int0(NULL, "timeout", NULL, "Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)");
@@ -64,7 +65,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_dbl *diameter_upperbound                  = arg_dbl0(NULL, "diameter_upperbound", NULL, "Set a size-constraint on the size of a low diameter cluster. Default: 20");
 
         // MLSVM import
-        struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data.");
+        /* struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data."); */
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
         struct arg_lit *bidirectional                        = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
 
@@ -74,7 +75,7 @@ int parse_parameters(int argn, char **argv,
 
         // MLSVM refinement
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
-        struct arg_lit *no_inherit_ud                           = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
+        struct arg_lit *no_inherit_ud                        = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
 
         struct arg_end *end                                  = arg_end(100);
 
@@ -86,22 +87,22 @@ int parse_parameters(int argn, char **argv,
 #if defined MODE_MLSVM
                             num_experiments,
                             kfold_iterations,
+                            validation_type,
                             validation_percent,
                             validation_seperate,
+                            num_nn,
+                            bidirectional,
                             stop_rule,
                             fix_num_vert_stop,
                             matching_type,
                             cluster_upperbound,
                             label_propagation_iterations,
                             diameter_upperbound,
-                            filename_output,
-                            import_kfold,
-                            num_nn,
                             num_skip_ms,
                             no_inherit_ud,
-                            timeout,
-                            bidirectional,
 			    export_graph,
+                            filename_output,
+                            timeout,
 			    n_cores,
 #endif
                             end
@@ -201,7 +202,8 @@ int parse_parameters(int argn, char **argv,
                 } else if (strcmp("r8", edge_rating->sval[0]) == 0) {
                         partition_config.edge_rating = SEPARATOR_R8;
                 } else {
-                        fprintf(stderr, "Invalid edge rating variant: \"%s\"\n", edge_rating->sval[0]);
+                        fprintf(stderr, "Invalid edge rating variant: \"%s\"\n",
+				edge_rating->sval[0]);
                         exit(0);
                 }
         }
@@ -231,7 +233,8 @@ int parse_parameters(int argn, char **argv,
                 } else if (strcmp("good", permutation_quality->sval[0]) == 0) {
                         partition_config.permutation_quality = PERMUTATION_QUALITY_GOOD;
                 } else {
-                        fprintf(stderr, "Invalid permutation quality variant: \"%s\"\n", permutation_quality->sval[0]);
+                        fprintf(stderr, "Invalid permutation quality variant: \"%s\"\n",
+				permutation_quality->sval[0]);
                         exit(0);
                 }
 
@@ -251,10 +254,27 @@ int parse_parameters(int argn, char **argv,
                 } else if (strcmp("low_diameter", matching_type->sval[0]) == 0) {
                         partition_config.matching_type = LOW_DIAMETER;
                 } else {
-                        fprintf(stderr, "Invalid matching variant: \"%s\"\n", matching_type->sval[0]);
+                        fprintf(stderr, "Invalid matching variant: \"%s\"\n",
+				matching_type->sval[0]);
                         exit(0);
                 }
         }
+
+	if (validation_type->count > 0) {
+		if (strcmp("kfold", validation_type->sval[0]) == 0) {
+			partition_config.validation_type = KFOLD;
+		} else if (strcmp("kfold_import", validation_type->sval[0]) == 0) {
+			partition_config.validation_type = KFOLD_IMPORT;
+		} else if (strcmp("once", validation_type->sval[0]) == 0) {
+			partition_config.validation_type = ONCE;
+		} else if (strcmp("train_test_split", validation_type->sval[0]) == 0) {
+			partition_config.validation_type = TRAIN_TEST_SPLIT;
+		} else {
+                        fprintf(stderr, "Invalid validation variant: \"%s\"\n",
+				validation_type->sval[0]);
+                        exit(0);
+		}
+	}
 
         if (label_propagation_iterations->count > 0) {
                 partition_config.label_iterations = label_propagation_iterations->ival[0];
@@ -282,10 +302,6 @@ int parse_parameters(int argn, char **argv,
 
         if(validation_seperate->count > 0) {
                 partition_config.validation_seperate = !partition_config.validation_seperate;
-        }
-
-        if(import_kfold->count > 0) {
-                partition_config.import_kfold = true;
         }
 
         if(num_nn->count > 0) {

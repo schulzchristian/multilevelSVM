@@ -88,7 +88,7 @@ struct PartitionConfig
         // number of blocks the graph should be partitioned in
         PartitionID k = 1;
 
-        int seed = 0;
+        long seed = 0;
 
         std::string filename = "";
 
@@ -148,13 +148,15 @@ struct PartitionConfig
         //===============MLSVM===================
         //=======================================
 
+	ValidationType validation_type = KFOLD;
+
         float validation_percent = 0.1f;
 
 	bool validation_seperate = false;
 
         int num_nn = 10;
 
-        bool import_kfold = false;
+	//MLSVM REFINEMENT
 
         int num_skip_ms = 10000;
 

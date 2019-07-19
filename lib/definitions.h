@@ -186,4 +186,11 @@ typedef enum {
         DEGREE_NODEORDERING
 } NodeOrderingType;
 
+typedef enum {
+	KFOLD,
+	KFOLD_IMPORT,
+	TRAIN_TEST_SPLIT,
+	ONCE
+} ValidationType;
+
 #endif

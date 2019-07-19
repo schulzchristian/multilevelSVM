@@ -8,9 +8,9 @@ void PartitionConfig::print() {
 	std::cout << "cores: " << this->n_cores << std::endl;
 	std::cout << "num_experiments: " << this->num_experiments << std::endl;
 	std::cout << "kfold_iterations: " << this->kfold_iterations << std::endl;
+	std::cout << "validation_type: " << this->validation_type << std::endl;
 	std::cout << "validation_percent: " << this->validation_percent << std::endl;
 	std::cout << "validation_seperate: " << this->validation_seperate << std::endl;
-	std::cout << "import_kfold: " << this->import_kfold << std::endl;
 	std::cout << "bidirectional: " << this->bidirectional << std::endl;
 	std::cout << "stop rule: " << this->stop_rule << std::endl;
 	std::cout << "fix stop vertices: " << this->fix_num_vert_stop << std::endl;

@@ -19,6 +19,7 @@
 #include "svm/k_fold.h"
 #include "svm/k_fold_build.h"
 #include "svm/k_fold_import.h"
+#include "svm/k_fold_once.h"
 #include "svm/svm_refinement.h"
 #include "svm/ud_refinement.h"
 #include "svm/svm_result.h"
@@ -53,16 +54,29 @@ int main(int argn, char *argv[]) {
 
         results results;
 
-        for (int r = 0; r < partition_config.num_experiments; r++) {
-        std::cout << " \\/\\/\\/\\/\\/\\/\\/\\/\\/ EXPERIMENT " << r << " \\/\\/\\/\\/\\/\\/\\/" << std::endl;
+        for (int exp = 0; exp < partition_config.num_experiments; exp++) {
+        std::cout << " \\/\\/\\/\\/\\/\\/\\/\\/\\/ EXPERIMENT " << exp << " \\/\\/\\/\\/\\/\\/\\/" << std::endl;
 
         std::unique_ptr<k_fold> kfold;
 
-        if(partition_config.import_kfold) {
-                kfold.reset(new k_fold_import(partition_config, r, partition_config.filename));
-        } else {
-                kfold.reset(new k_fold_build(partition_config, partition_config.filename));
-        }
+	switch (partition_config.validation_type) {
+	case KFOLD:
+		kfold.reset(new k_fold_build(partition_config,
+					     partition_config.filename));
+		break;
+	case KFOLD_IMPORT:
+		kfold.reset(new k_fold_import(partition_config, exp,
+					      partition_config.filename));
+		break;
+	case ONCE:
+		kfold.reset(new k_fold_once(partition_config,
+					    partition_config.filename));
+		break;
+	// case TRAIN_TEST_SPLIT:
+		// kfold.reset(new k_fold_traintest(partition_config,
+		// 				 partition_config.filename,
+		// 				 partition_config.testname));
+	}
 
         timer t_all;
         timer t;
