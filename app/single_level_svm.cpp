@@ -1,5 +1,6 @@
 #include <argtable2.h>
 #include <iostream>
+#include <iomanip>
 #include <math.h>
 #include <regex.h>
 #include <sstream>
@@ -176,7 +177,8 @@ int main(int argn, char *argv[]) {
 
                         try {
                                 if (partition_config.timeout > 0) {
-                                        kfold_timeout(partition_config.timeout, partition_config, kfold, results);
+                                        kfold_timeout(partition_config.timeout,
+						      partition_config, kfold, results);
                                 }
                                 else {
                                         kfold_instance(partition_config, kfold, results);
@@ -195,7 +197,8 @@ int main(int argn, char *argv[]) {
                         auto time_all = t_all.elapsed();
                         auto time_iteration = time_all - kfold_io_time;
 
-                        std::cout << "iteration time: " << time_iteration << std::endl;
+			std::cout << "iteration time: " << std::setprecision(4) << std::fixed
+				  << time_iteration << std::endl;
                         results.setFloat("TIME", time_iteration);
 
                         kfold_io_time = 0;

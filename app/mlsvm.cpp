@@ -1,5 +1,6 @@
 #include <argtable2.h>
 #include <iostream>
+#include <iomanip>
 #include <math.h>
 #include <regex.h>
 #include <sstream>
@@ -265,7 +266,8 @@ int main(int argn, char *argv[]) {
 
         auto time_iteration = time_all - kfold_io_time - init_test_time;
 
-        std::cout << "iteration time: " << time_iteration << std::endl;
+        std::cout << "iteration time: " << std::setprecision(4) << std::fixed
+		  << time_iteration << std::endl;
 
         results.setFloat("TIME", time_iteration);
 
