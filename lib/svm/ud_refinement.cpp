@@ -105,7 +105,7 @@ svm_result<T> ud_refinement<T>::train_refinement(svm_solver<T> & solver,
         if (!inherit_ud) {
                 // first search
                 std::cout << "1st sweep with logC=" << param_c << " logGamma="<< param_g << std::endl;
-                params = param_search::ud(-5, 10, -10, 10, true, true, param_c, param_g);
+                params = param_search::ud(-5, 15, -10, 10, true, true, param_c, param_g);
 
                 result = solver.train_range(params, min_sample, maj_sample);
                 svm_summary<T> good = result.best();
@@ -114,11 +114,11 @@ svm_result<T> ud_refinement<T>::train_refinement(svm_solver<T> & solver,
                 good.print();
 
                 // second search
-                params = param_search::ud(-5, 10, -10, 10, false, true, good.C_log, good.gamma_log);
+                params = param_search::ud(-5, 15, -10, 10, false, true, good.C_log, good.gamma_log);
                 params.pop_back();
         } else {
                 std::cout << "2nd sweep with logC=" << param_c << " logGamma="<< param_g << std::endl;
-                params = param_search::ud(-5, 10, -10, 10, false, true, param_c, param_g);
+                params = param_search::ud(-5, 15, -10, 10, false, true, param_c, param_g);
                 params.push_back(std::make_pair(param_c, param_g));
         }
 

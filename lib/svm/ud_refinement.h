@@ -20,7 +20,8 @@ public:
 
 
 	static svm_result<T> train_ud(svm_solver<T> & solver,
-				      const svm_data & min_sample, const svm_data & maj_sample);
+				      const svm_data & min_sample,
+				      const svm_data & maj_sample);
 private:
 
 	svm_result<T> train_refinement(svm_solver<T> & solver,
