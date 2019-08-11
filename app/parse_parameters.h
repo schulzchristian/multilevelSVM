@@ -69,7 +69,9 @@ int parse_parameters(int argn, char **argv,
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
         struct arg_lit *bidirectional                        = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
 
-        struct arg_dbl *validation_percent                   = arg_dbl0("s", "validation_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
+        struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample", NULL, "Percentage of data that is use. Usefull if very slow on large datasets (Default: 1.0 aka use all data)");
+
+        struct arg_dbl *validation_percent                   = arg_dbl0(NULL, "validation_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
         struct arg_lit *validation_seperate                  = arg_lit0(NULL, "validation_seperate", "Should the validation data be also used for training (Default: yes for single_level no for mlsvm - this flag invertse the choice)");
 
 
@@ -87,6 +89,7 @@ int parse_parameters(int argn, char **argv,
 #if defined MODE_MLSVM
                             num_experiments,
                             kfold_iterations,
+			    sample_percent,
                             validation_type,
                             validation_percent,
                             validation_seperate,
@@ -295,6 +298,10 @@ int parse_parameters(int argn, char **argv,
         if (kfold_iterations->count > 0) {
                 partition_config.kfold_iterations = kfold_iterations->ival[0];
         }
+
+	if(sample_percent->count > 0) {
+		partition_config.sample_percent = sample_percent->dval[0];
+	}
 
         if(validation_percent->count > 0) {
                 partition_config.validation_percent = validation_percent->dval[0];

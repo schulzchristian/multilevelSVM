@@ -78,3 +78,17 @@ void svm_io::readTestSplit(const std::string & filename, std::vector<svm_feature
                 }
         }
 }
+
+svm_data svm_io::sample_from_graph(const graph_access & G, float amount) {
+        std::vector<std::vector<svm_node>> nodes;
+
+        forall_nodes(G, n) {
+                if (random_functions::next() > amount) {
+                        continue;
+                }
+
+                nodes.push_back(svm_convert::feature_to_node(G.getFeatureVec(n)));
+        } endfor
+
+        return nodes;
+}

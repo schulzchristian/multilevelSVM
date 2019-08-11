@@ -32,20 +32,6 @@ svm_data svm_convert::graph_to_nodes(const graph_access & G) {
         return nodes;
 }
 
-svm_data svm_convert::sample_from_graph(const graph_access & G, float amount) {
-        std::vector<std::vector<svm_node>> nodes;
-
-        forall_nodes(G, n) {
-                if (random_functions::next() > amount) {
-                        continue;
-                }
-
-                nodes.push_back(svm_convert::feature_to_node(G.getFeatureVec(n)));
-        } endfor
-
-        return nodes;
-}
-
 svm_data svm_convert::graph_part_to_nodes(const graph_access & G, const std::vector<NodeID> & sv) {
         svm_data nodes;
 

@@ -23,6 +23,7 @@ protected:
         std::vector<FeatureVec> maj_features;
         int num_nn;
         bool bidirectional;
+	float sample_percent;
 };
 
 #endif /* KFOLD_BUILD_H */

@@ -11,6 +11,7 @@ k_fold_build::k_fold_build(const PartitionConfig & config, const std::string & f
         : k_fold(config) {
         this->num_nn = config.num_nn;
         this->bidirectional = config.bidirectional;
+	this->sample_percent  = config.sample_percent;
         readData(filename);
 }
 
@@ -23,7 +24,12 @@ void k_fold_build::readData(const std::string & filename) {
         svm_io::readFeaturesLines(filename + "_min_data", this->min_features);
         svm_io::readFeaturesLines(filename + "_maj_data", this->maj_features);
 
-        random_functions::permutate_vector_good(this->min_features, false);
+	if (this->sample_percent < 1 - 0.0001f) {
+		this->min_features = svm_io::take_sample(this->min_features, this->sample_percent);
+		this->maj_features = svm_io::take_sample(this->maj_features, this->sample_percent);
+	}
+
+	random_functions::permutate_vector_good(this->min_features, false);
         random_functions::permutate_vector_good(this->maj_features, false);
 
         std::cout << "io time: " << t.elapsed() << std::endl;

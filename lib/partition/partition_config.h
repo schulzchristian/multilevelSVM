@@ -148,6 +148,8 @@ struct PartitionConfig
         //===============MLSVM===================
         //=======================================
 
+	float sample_percent = 1.0f;
+
 	ValidationType validation_type = KFOLD;
 
         float validation_percent = 0.1f;
