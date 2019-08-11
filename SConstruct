@@ -102,10 +102,10 @@ for lib in env["LIBPATH"]:
 
 #by D. Luxen
 if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
-        print "argtable library not found. Exiting"
+        print("argtable library not found. Exiting")
         Exit(-1)
 #if not conf.CheckCXXHeader('mpi.h'):
-        #print "openmpi header not found. Exiting"
+        #print("openmpi header not found. Exiting")
         #Exit(-1)
 #
 
