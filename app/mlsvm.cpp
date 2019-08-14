@@ -138,9 +138,12 @@ int main(int argn, char *argv[]) {
         int init_level = std::max(min_hierarchy.size(), maj_hierarchy.size());
 	if (partition_config.export_graph) {
 		std::ostringstream initial_out_graph;
-		initial_out_graph << partition_config.filename << "_graph_" << partition_config.matching_type << "_" << init_level << ".gdf";
+		initial_out_graph << partition_config.filename << "_graph_"
+				  << partition_config.matching_type << "_" << init_level << ".gdf";
 		std::cout << "write " << initial_out_graph.str() << std::endl;
-		graph_io::writeGraphGDF(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest(), initial_out_graph.str());
+		graph_io::writeGraphGDF(*min_hierarchy.get_coarsest(),
+					*maj_hierarchy.get_coarsest(),
+					initial_out_graph.str());
 	}
 
         // ------------- INITIAL TRAINING -----------------
