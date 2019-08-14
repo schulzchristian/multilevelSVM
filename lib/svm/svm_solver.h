@@ -28,6 +28,10 @@ public:
 				  const svm_data & min_sample,
 				  const svm_data & maj_sample);
 
+	svm_summary<T> train_single(svm_param,
+				    const svm_data & min_sample,
+				    const svm_data & maj_sample);
+
 	virtual std::vector<int> predict_batch(const svm_data & data);
         virtual int predict(const std::vector<svm_node> & node) = 0;
 
@@ -38,6 +42,7 @@ public:
         void set_C(float C);
         void set_gamma(float gamma);
 	virtual void set_model(std::shared_ptr<T> new_model);
+	const svm_instance & get_instance();
 
 protected:
         svm_result<T> make_result(const std::vector<svm_summary<T>> & vec);

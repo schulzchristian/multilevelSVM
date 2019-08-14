@@ -78,5 +78,12 @@ NodeID svm_summary<T>::num_SV_maj() {
         return this->SV_maj.size();
 }
 
+template<class T>
+float svm_summary<T>::eval(const svm_instance & instance) {
+	NodeID SVs = this->num_SV_min() + this->num_SV_maj();
+	NodeID data_size = instance.num_min + instance.num_maj;
+	return (1 - this->Gmean) + 0.2 * (SVs / (float) data_size);
+}
+
 template class svm_summary<svm_model>;
 template class svm_summary<SVC>;

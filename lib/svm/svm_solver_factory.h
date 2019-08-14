@@ -16,12 +16,12 @@ public:
 	static std::unique_ptr<svm_solver<T>> create(const svm_instance & instance);
 };
 
-template<>
+template<> inline
 std::unique_ptr<svm_solver<svm_model>> svm_solver_factory::create(const svm_instance & instance) {
 	return std::make_unique<svm_solver_libsvm>(instance);
 }
 
-template<>
+template<> inline
 std::unique_ptr<svm_solver<SVC>> svm_solver_factory::create(const svm_instance & instance) {
 	return std::make_unique<svm_solver_thunder>(instance);
 }

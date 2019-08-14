@@ -23,6 +23,7 @@
 #include "svm/k_fold_once.h"
 #include "svm/svm_refinement.h"
 #include "svm/ud_refinement.h"
+#include "svm/bayes_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
 #include "tools/timer.h"
@@ -150,10 +151,22 @@ int main(int argn, char *argv[]) {
         initial_instance.read_problem(*min_hierarchy.get_coarsest(), *maj_hierarchy.get_coarsest());
 
         SVM_SOLVER init_solver(initial_instance);
-        auto initial_result = ud_refinement<SVM_MODEL>::train_ud(init_solver,
-								 *kfold->getMinValData(),
-								 *kfold->getMajValData());
 
+	svm_result<SVM_MODEL> initial_result;
+	switch (partition_config.refinement_type) {
+	case UD:
+		initial_result = ud_refinement<SVM_MODEL>::train_ud(init_solver,
+								    *kfold->getMinValData(),
+								    *kfold->getMajValData());
+		break;
+	case BAYES:
+		initial_result = bayes_refinement<SVM_MODEL>::train_bayes(init_solver,
+									  *kfold->getMinValData(),
+									  *kfold->getMajValData(),
+									  partition_config.seed);
+		break;
+	}
+ 
 	auto init_train_time = t.elapsed();
         std::cout << "init train time: " << init_train_time << std::endl;
 
@@ -177,9 +190,21 @@ int main(int argn, char *argv[]) {
 
         t.restart();
 
-        std::unique_ptr<svm_refinement<SVM_MODEL>> refinement =
-		std::make_unique<ud_refinement<SVM_MODEL>>(min_hierarchy, maj_hierarchy,
-							   initial_result, partition_config);
+        std::unique_ptr<svm_refinement<SVM_MODEL>> refinement;
+	switch (partition_config.refinement_type) {
+	case UD:
+		refinement = std::make_unique<ud_refinement<SVM_MODEL>>(min_hierarchy,
+									maj_hierarchy,
+									initial_result,
+									partition_config);
+		break;
+	case BAYES:
+		refinement = std::make_unique<bayes_refinement<SVM_MODEL>>(min_hierarchy,
+									   maj_hierarchy,
+									   initial_result,
+									   partition_config);
+		break;
+	}
 
 	std::vector<std::pair<svm_summary<SVM_MODEL>, svm_instance>> best_results;
         best_results.push_back(std::make_pair(initial_summary, initial_instance));

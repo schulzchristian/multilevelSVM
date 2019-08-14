@@ -60,50 +60,60 @@ svm_result<T> svm_solver<T>::train_range(const std::vector<svm_param> & params,
 					 const svm_data & maj_sample) {
 	std::vector<svm_summary<T>> summaries;
 
-        for (auto&& p : params) {
-		// (copy ctor) use this instances prob and param values
-                // svm_solver<T> cur_solver(*this);
+// #pragma omp parallel for
+	for (auto&& p : params) {
+		auto summary = train_single(p, min_sample, maj_sample);
 
-		timer t;
-
-                param.C = pow(2, p.first);
-                param.gamma = pow(2, p.second);
-
-                std::cout << std::setprecision(2)
-                          << std::fixed
-                          << "log C=" << std::setw(6) << p.first
-                          << "\tlog gamma=" << std::setw(6) << p.second
-			  << std::flush;
-
-                this->train();
-
-		std::cout << "\ttime=" << t.elapsed()
-                          << std::flush;
-
-                // if (cur_solver.model->l > (cur_solver.instance.num_min + cur_solver.instance.num_maj) * 0.9
-                //     && !summaries.empty()) {
-                //         // don't evaluate models which are very likely prone to over fitting
-                //         // but at least evaluate once
-                //         std::cout << "not evaluated " << cur_solver.model->l << std::endl;
-                //         continue;
-                // }
-
-                svm_summary<T> cur_summary = this->build_summary(min_sample, maj_sample);
-                cur_summary.print_short();
-                summaries.push_back(cur_summary);
+// #pragma omp critical
+		{
+                summaries.push_back(summary);
+		}
         }
 
         return svm_result<T>(summaries, this->instance);
 }
 
 template<class T>
-svm_summary<T> svm_solver<T>::build_summary(const svm_data & min, const svm_data & maj) {
-        size_t tp = 0, tn = 0, fp = 0, fn = 0;
+svm_summary<T> svm_solver<T>::train_single(svm_param p,
+					   const svm_data & min_sample,
+					   const svm_data & maj_sample) {
+	timer t;
 
-        for (int res : this->predict_batch(min)) {
-                if (res == 1) {
-                        tp++;
-                } else {
+	this->param.C = pow(2, p.first);
+	this->param.gamma = pow(2, p.second);
+
+	std::cout << std::setprecision(2)
+		  << std::fixed
+		  << "log C=" << std::setw(6) << p.first
+		  << "\tlog gamma=" << std::setw(6) << p.second
+		  << std::flush;
+
+	this->train();
+
+	std::cout << "\ttime=" << t.elapsed()
+		  << std::flush;
+
+	// if (cur_solver.model->l > (cur_solver.instance.num_min + cur_solver.instance.num_maj) * 0.9
+	//     && !summaries.empty()) {
+	//         // don't evaluate models which are very likely prone to over fitting
+	//         // but at least evaluate once
+	//         std::cout << "not evaluated " << cur_solver.model->l << std::endl;
+	//         continue;
+	// }
+
+	svm_summary<T> summary = this->build_summary(min_sample, maj_sample);
+	summary.print_short();
+	return summary;
+}
+
+template<class T>
+svm_summary<T> svm_solver<T>::build_summary(const svm_data & min, const svm_data & maj) {
+	size_t tp = 0, tn = 0, fp = 0, fn = 0;
+
+	for (int res : this->predict_batch(min)) {
+		if (res == 1) {
+			tp++;
+		} else {
                         fn++;
                 }
         }
@@ -154,6 +164,11 @@ void svm_solver<T>::set_gamma(float gamma) {
 template<class T>
 void svm_solver<T>::set_model(std::shared_ptr<T> new_model) {
 	this->model = new_model;
+}
+
+template<class T>
+const svm_instance & svm_solver<T>::get_instance() {
+	return this->instance;
 }
 
 template class svm_solver<svm_model>;

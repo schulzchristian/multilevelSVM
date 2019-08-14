@@ -22,6 +22,8 @@ public:
                 return (this->Gmean > new_.Gmean);
         }
 
+	float eval(const svm_instance & instance);
+
         std::shared_ptr<T> model;
 
         int TP;

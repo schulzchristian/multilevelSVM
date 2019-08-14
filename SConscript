@@ -77,6 +77,7 @@ libmlsvm_files = [ 'lib/svm/svm_solver.cpp',
                    'lib/svm/svm_flann.cpp',
                    'lib/svm/svm_refinement.cpp',
                    'lib/svm/ud_refinement.cpp',
+                   'lib/svm/bayes_refinement.cpp',
                    'extern/libsvm-3.22/src/svm.cpp' ]
 
 prepare_files = [  'lib/svm/svm_flann.cpp' ]
@@ -84,12 +85,12 @@ prepare_files = [  'lib/svm/svm_flann.cpp' ]
 if env['program'] == 'mlsvm':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')
         env.Append(CCFLAGS  = '-DMODE_MLSVM')
-        env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','gomp'], )
+        env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'], )
 
 if env['program'] == 'single_level':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')
         env.Append(CCFLAGS  = '-DMODE_MLSVM')
-        env.Program('single_level_svm', ['app/single_level_svm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','gomp','pthread'])
+        env.Program('single_level_svm', ['app/single_level_svm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp','pthread'])
 
 if env['program'] == 'prepare':
         env.Append(CXXFLAGS = '-DMODE_MLSVM')

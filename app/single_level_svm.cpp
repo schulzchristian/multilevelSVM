@@ -26,6 +26,7 @@
 #include "svm/k_fold_import.h"
 #include "svm/k_fold_once.h"
 #include "svm/ud_refinement.h"
+#include "svm/bayes_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
 #include "tools/timer.h"
@@ -65,7 +66,21 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
         instance.read_problem(*G_min, *G_maj);
 
         SVM_SOLVER solver(instance);
-        auto result = ud_refinement<SVM_MODEL>::train_ud(solver, *kfold->getMinValData(), *kfold->getMajValData());
+
+	svm_result<SVM_MODEL> result;
+	switch (partition_config.refinement_type) {
+	case UD:
+		result = ud_refinement<SVM_MODEL>::train_ud(solver,
+							    *kfold->getMinValData(),
+							    *kfold->getMajValData());
+		break;
+	case BAYES:
+		result = bayes_refinement<SVM_MODEL>::train_bayes(solver,
+								  *kfold->getMinValData(),
+								  *kfold->getMajValData(),
+								  partition_config.seed);
+		break;
+	}
 
         auto train_time = t.elapsed();
         std::cout << "train time: " << train_time << std::endl;

@@ -160,6 +160,8 @@ struct PartitionConfig
 
 	//MLSVM REFINEMENT
 
+	RefinementType refinement_type = UD;
+
         int num_skip_ms = 10000;
 
         bool inherit_ud = true;

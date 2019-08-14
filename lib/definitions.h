@@ -134,52 +134,12 @@ typedef enum {
 } MatchingType;
 
 typedef enum {
-        INITIAL_PARTITIONING_RECPARTITION,
-        INITIAL_PARTITIONING_BIPARTITION
-} InitialPartitioningType;
-
-typedef enum {
-        REFINEMENT_SCHEDULING_FAST,
-        REFINEMENT_SCHEDULING_ACTIVE_BLOCKS,
-        REFINEMENT_SCHEDULING_ACTIVE_BLOCKS_REF_KWAY
-} RefinementSchedulingAlgorithm;
-
-typedef enum {
-        REFINEMENT_TYPE_FM,
-        REFINEMENT_TYPE_FM_FLOW,
-        REFINEMENT_TYPE_FLOW
-} RefinementType;
-
-typedef enum {
         STOP_RULE_FIXED,
         STOP_RULE_SIMPLE,
         STOP_RULE_SIMPLE_FIXED,
         STOP_RULE_MULTIPLE_K,
         STOP_RULE_STRONG
 } StopRule;
-
-typedef enum {
-        BIPARTITION_BFS,
-        BIPARTITION_FM
-} BipartitionAlgorithm ;
-
-typedef enum {
-        KWAY_SIMPLE_STOP_RULE,
-        KWAY_ADAPTIVE_STOP_RULE
-} KWayStopRule;
-
-typedef enum {
-        COIN_RNDTIE,
-        COIN_DIFFTIE,
-        NOCOIN_RNDTIE,
-        NOCOIN_DIFFTIE
-} MLSRule;
-
-typedef enum {
-        CYCLE_REFINEMENT_ALGORITHM_PLAYFIELD,
-        CYCLE_REFINEMENT_ALGORITHM_ULTRA_MODEL,
-        CYCLE_REFINEMENT_ALGORITHM_ULTRA_MODEL_PLUS
-} CycleRefinementAlgorithm;
 
 typedef enum {
         RANDOM_NODEORDERING,
@@ -192,5 +152,10 @@ typedef enum {
 	TRAIN_TEST_SPLIT,
 	ONCE
 } ValidationType;
+
+typedef enum {
+	UD,
+	BAYES
+} RefinementType;
 
 #endif
