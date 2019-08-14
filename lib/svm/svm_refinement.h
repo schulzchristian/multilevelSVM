@@ -22,12 +22,8 @@ public:
 
 	svm_data uncoarse_graph(const graph_access & G,
 				const CoarseMapping & coarse_mapping,
-				const std::vector<NodeID> & sv);
-
-
-	svm_data get_SV_neighbors(const graph_access & G,
-                                  const CoarseMapping & coarse_mapping,
-                                  const std::vector<NodeID> & sv);
+				const std::vector<NodeID> & sv,
+				std::vector<NodeID> & data_mapping);
 
         svm_data get_SV(const graph_access & G, const std::vector<NodeID> & sv);
 
@@ -41,6 +37,8 @@ protected:
         graph_hierarchy * maj_hierarchy;
         svm_data uncoarsed_data_min;
         svm_data uncoarsed_data_maj;
+	std::vector<NodeID> data_mapping_min;
+	std::vector<NodeID> data_mapping_maj;
         svm_result<T> result;
 
         bool training_inherit;
