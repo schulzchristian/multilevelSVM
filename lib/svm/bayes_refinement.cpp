@@ -120,8 +120,8 @@ svm_result<T> bayes_refinement<T>::train_bayes(svm_solver<T> & solver,
 	boost::numeric::ublas::vector<double> lowerBound(2);
 	boost::numeric::ublas::vector<double> upperBound(2);
 	// C range
-	lowerBound[0] = -10;
-	upperBound[0] = 10;
+	lowerBound[0] = -15;
+	upperBound[0] = 15;
 	// gamma range
 	lowerBound[1] = -10;
 	upperBound[1] = 10;
