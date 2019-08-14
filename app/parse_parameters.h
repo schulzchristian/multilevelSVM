@@ -122,7 +122,7 @@ int parse_parameters(int argn, char **argv,
                 arg_print_syntax(stdout, argtable, "\n");
                 arg_print_glossary(stdout, argtable,"  %-40s %s\n");
                 arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
-                return 1;
+                exit(0);
         }
 
 
