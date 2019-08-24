@@ -58,23 +58,11 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
         stop_rule* coarsening_stop_rule = NULL;
 
         switch (partition_config.stop_rule) {
-        case STOP_RULE_FIXED:
-                coarsening_stop_rule = new fixed_stop_rule(copy_of_partition_config);
-                break;
-        case STOP_RULE_SIMPLE:
-                coarsening_stop_rule = new simple_stop_rule(copy_of_partition_config, G.number_of_nodes());
-                break;
         case STOP_RULE_SIMPLE_FIXED:
                 coarsening_stop_rule = new simple_fixed_stop_rule(copy_of_partition_config, G.number_of_nodes());
                 break;
-        case STOP_RULE_MULTIPLE_K:
-                coarsening_stop_rule = new multiple_k_stop_rule(copy_of_partition_config, G.number_of_nodes());
-                break;
-        case STOP_RULE_STRONG:
-                coarsening_stop_rule = new strong_stop_rule(copy_of_partition_config, G.number_of_nodes());
-                break;
         default:
-                coarsening_stop_rule = new simple_stop_rule(copy_of_partition_config, G.number_of_nodes());
+                coarsening_stop_rule = new simple_fixed_stop_rule(copy_of_partition_config, G.number_of_nodes());
         }
 
         coarsening_configurator coarsening_config;
@@ -82,6 +70,7 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
         unsigned int level    = 0;
 
         while (coarsening_stop_rule->stop(no_of_finer_vertices, no_of_coarser_vertices)) {
+		std::cout << no_of_coarser_vertices << " - " << no_of_coarser_vertices << std::endl;
                 graph_access* coarser = new graph_access();
                 coarse_mapping        = new CoarseMapping();
                 Matching edge_matching;

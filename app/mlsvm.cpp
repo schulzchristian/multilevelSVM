@@ -47,9 +47,7 @@ int main(int argn, char *argv[]) {
 	// disable thundersvm output
 	el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Enabled, "false");
 
-        partition_config.k = 1;
         partition_config.cluster_coarsening_factor = 1;
-        partition_config.stop_rule = STOP_RULE_FIXED;
 
 	partition_config.apply();
 	partition_config.print();

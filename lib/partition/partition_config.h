@@ -54,13 +54,11 @@ struct PartitionConfig
 
         unsigned aggressive_random_levels = 3;
 
-        bool disable_max_vertex_weight_constraint = false;
-
         //=======================================
         //=============STOP RULES================
         //=======================================
 
-        StopRule stop_rule = STOP_RULE_SIMPLE;
+        StopRule stop_rule = STOP_RULE_SIMPLE_FIXED;
 
         int num_vert_stop_factor = 20;
 

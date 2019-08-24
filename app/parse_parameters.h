@@ -51,7 +51,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_lit *gpa_grow_internal                    = arg_lit0(NULL, "gpa_grow_internal", "If the graph is allready partitions the paths are grown only block internally.");
         struct arg_rex *permutation_quality                  = arg_rex0(NULL, "permutation_quality", "^(none|fast|good|cacheefficient)$", "QUALITY", REG_EXTENDED, "The quality of permutations to use. One of {none, fast," " good, cacheefficient}."  );
         // stop rule
-        struct arg_rex *stop_rule                            = arg_rex0(NULL, "stop_rule", "^(fix|simple|simple-fix|multiplek|strong)$", "VARIANT", REG_EXTENDED, "Stop rule to use. One of {simple, multiplek, strong}. Default: simple" );
+        struct arg_rex *stop_rule                            = arg_rex0(NULL, "stop_rule", "^(simple-fix)$", "VARIANT", REG_EXTENDED, "Stop rule to use. One of {simple-fix}. Default: simple-fix" );
         struct arg_int *num_vert_stop_factor                 = arg_int0(NULL, "num_vert_stop_factor", NULL, "x*k (for multiple_k stop rule). Default 20.");
         struct arg_int *fix_num_vert_stop                    = arg_int0(NULL, "fix_num_vert_stop", NULL, "Number of vertices to fix stop coarsening at.");
 
@@ -214,16 +214,8 @@ int parse_parameters(int argn, char **argv,
         }
 
         if (stop_rule->count > 0) {
-                if (strcmp("fix", stop_rule->sval[0]) == 0) {
-                        partition_config.stop_rule = STOP_RULE_FIXED;
-                } else if(strcmp("simple", stop_rule->sval[0]) == 0) {
-                        partition_config.stop_rule = STOP_RULE_SIMPLE;
-                } else if(strcmp("simple-fix", stop_rule->sval[0]) == 0) {
+                if(strcmp("simple-fix", stop_rule->sval[0]) == 0) {
                         partition_config.stop_rule = STOP_RULE_SIMPLE_FIXED;
-                } else if (strcmp("multiplek", stop_rule->sval[0]) == 0) {
-                        partition_config.stop_rule = STOP_RULE_MULTIPLE_K;
-                } else if (strcmp("strong", stop_rule->sval[0]) == 0) {
-                        partition_config.stop_rule = STOP_RULE_STRONG;
                 } else {
                         fprintf(stderr, "Invalid stop rule: \"%s\"\n", stop_rule->sval[0]);
                         exit(0);
