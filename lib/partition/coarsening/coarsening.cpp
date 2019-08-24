@@ -70,26 +70,28 @@ void coarsening::perform_coarsening(const PartitionConfig & partition_config, gr
         unsigned int level    = 0;
 
         while (coarsening_stop_rule->stop(no_of_finer_vertices, no_of_coarser_vertices)) {
-		std::cout << no_of_coarser_vertices << " - " << no_of_coarser_vertices << std::endl;
                 graph_access* coarser = new graph_access();
                 coarse_mapping        = new CoarseMapping();
                 Matching edge_matching;
                 NodePermutationMap permutation;
+                no_of_finer_vertices = no_of_coarser_vertices;
 
-                coarsening_config.configure_coarsening(copy_of_partition_config, &edge_matcher, level);
+                coarsening_config.configure_coarsening(copy_of_partition_config,
+						       &edge_matcher, level);
                 rating.rate(*finer, level);
 
-                edge_matcher->match(copy_of_partition_config, *finer, edge_matching,
-                                    *coarse_mapping, no_of_coarser_vertices, permutation);
+                edge_matcher->match(copy_of_partition_config, *finer,
+				    edge_matching, *coarse_mapping,
+				    no_of_coarser_vertices, permutation);
 
                 delete edge_matcher;
 
-                contracter->contract(copy_of_partition_config, *finer, *coarser, edge_matching,
-                                     *coarse_mapping, no_of_coarser_vertices, permutation);
+                contracter->contract(copy_of_partition_config, *finer, *coarser,
+				     edge_matching, *coarse_mapping,
+				     no_of_coarser_vertices, permutation);
 
                 hierarchy.push_back(finer, coarse_mapping);
 
-                no_of_finer_vertices = no_of_coarser_vertices;
                 std::cout <<  "no of coarser vertices " << no_of_coarser_vertices
                           <<  " and no of edges " <<  coarser->number_of_edges() << std::endl;
 
