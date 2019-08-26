@@ -50,8 +50,8 @@ private:
 };
 
 inline bool simple_fixed_stop_rule::stop(NodeID no_of_finer_vertices, NodeID no_of_coarser_vertices ) {
-        double contraction_rate = 1.0 * no_of_finer_vertices / (double)no_of_coarser_vertices;
-        return contraction_rate >= 1.1 && no_of_coarser_vertices >= num_stop;
+        double contraction_rate = no_of_finer_vertices / (double)no_of_coarser_vertices;
+        return contraction_rate >= 1.05 && no_of_coarser_vertices >= num_stop;
 }
 
 #endif /* end of include guard: STOP_RULES_SZ45JQS6 */
