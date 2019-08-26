@@ -1,46 +1,67 @@
 dir=${1-data}
 log_dir=${2-log}
-import_dir=${3-log}
+import_dir=${3}
 
-if [ "$3" ]; then
-    echo "using imports at" "${import_dir}/file/temp"
+
+if [ "$import_dir" ]; then
+    echo "using imports at" "${import_dir}/<file>/temp"
+    import="true"
+fi
+if [ -z "$import_dir" ]; then
+   echo "no import"
 fi
 
+files=$(find data -name "*.csv" -ls | sort -n -k7 |  awk '{ print $NF }')
+
+params=" -e 5 -k 5 -c 32 "
+params="$params --matching=low_diameter"
+
 function calc_my {
-for f in $(find data -type f -name "*.csv" -ls | sort -n -k7 |  awk '{ print $NF }') ; do
-    FILE=$(basename $f .csv)
+for f in $files ; do
+    file=$(basename $f .csv)
+    output="./$log_dir/calc_${file}"
+    _params=$params
     if [ -z "$import_dir" ]; then
-        CMD1="./multilevelSVM/tools/calc.sh $f > ./$log_dir/calc_${FILE} 2>&1 "
+        input="$dir/$file"
     else
-        CMD1="./multilevelSVM/tools/calc.sh ${import_dir}/${FILE}/temp/ > ./$log_dir/calc_${FILE} 2>&1 "
+        input="${import_dir}/${file}/temp/"
+	_params="$_params --validation=kfold_import"
     fi
-    echo "echo \"$CMD1\" && $CMD1"
+    echo "./multilevelSVM/optimized_output/mlsvm ${_params} ${input} > ${output} 2>&1 "
+done
+}
+
+function calc_single {
+for f in $files ; do
+    file=$(basename $f .csv)
+    output="./$log_dir/calc_${file}_single 2>&1"
+    _params=$params
+    if [ -z "$import_dir" ]; then
+        input="$dir/$file"
+    else
+        input="${import_dir}/${file}/temp/"
+	_params="$_params --validation=kfold_import"
+    fi
+    echo "./multilevelSVM/optimized_output/single_level_svm ${_params} ${input} > ${output} 2>&1 "
 done
 }
 
 function calc_mlsvm {
-for f in $(find data -type f -name "*.csv" -ls | sort -n -k7 |  awk '{ print $NF }') ; do
-    FILE=$(basename $f .csv)
-    CMD2="./multilevelSVM/tools/calc_mlsvm.sh $f > ./$log_dir/calc_${FILE}_mlsvm 2>&1 "
-    #echo "screen -dm bash -c \"$CMD2\""
-    echo "echo \"$CMD2\" && $CMD2"
-done
-}
-
-function calc_all {
-for f in $(find data -type f -name "*.csv" -ls | sort -n -k7 |  awk '{ print $NF }') ; do
-    FILE=$(basename $f .csv)
-    CMD1="./multilevelSVM/tools/calc.sh $f > ./$log_dir/calc_${FILE} 2>&1 "
-    echo "echo \"$CMD1\" && $CMD1"
-    CMD2="./multilevelSVM/tools/calc_mlsvm.sh $f > ./$log_dir/calc_${FILE}_mlsvm 2>&1 "
-    echo "echo \"$CMD2\" && $CMD2"
+for f in $files ; do
+    file=$(basename $f .csv)
+    output="./$log_dir/calc_${file} 2>&1"
+    echo "./multilevelSVM/tools/calc_mlsvm.sh $f > ./$log_dir/calc_${file}_mlsvm 2>&1 "
 done
 }
 
 mkdir -p $log_dir
 
-calc_my > calc_my.sh
+echo "set -x" > calc_my.sh
+calc_my >> calc_my.sh
 
-calc_mlsvm > calc_mlsvm.sh
+echo "set -x" > calc_single.sh
+calc_single >> calc_single.sh
 
-calc_all > calc_all.sh
+#calc_mlsvm > calc_mlsvm.sh
+
+paste -d '\n' calc_my.sh calc_single.sh > calc_all.sh
