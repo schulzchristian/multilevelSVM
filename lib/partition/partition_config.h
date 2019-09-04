@@ -164,6 +164,7 @@ struct PartitionConfig
 
         bool inherit_ud = true;
 
+	int bayes_max_steps = 10;
 
         void LogDump(FILE *out) const {
         }

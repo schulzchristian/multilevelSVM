@@ -75,9 +75,12 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
 							    *kfold->getMajValData());
 		break;
 	case BAYES:
+		bayesopt::BOptState state;
 		result = bayes_refinement<SVM_MODEL>::train_bayes(solver,
 								  *kfold->getMinValData(),
 								  *kfold->getMajValData(),
+								  state,
+								  10,
 								  partition_config.seed);
 		break;
 	}

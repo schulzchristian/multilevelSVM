@@ -154,6 +154,8 @@ int main(int argn, char *argv[]) {
         SVM_SOLVER init_solver(initial_instance);
 
 	svm_result<SVM_MODEL> initial_result;
+
+	bayesopt::BOptState state;
 	switch (partition_config.refinement_type) {
 	case UD:
 		initial_result = ud_refinement<SVM_MODEL>::train_ud(init_solver,
@@ -164,6 +166,8 @@ int main(int argn, char *argv[]) {
 		initial_result = bayes_refinement<SVM_MODEL>::train_bayes(init_solver,
 									  *kfold->getMinValData(),
 									  *kfold->getMajValData(),
+									  state,
+									  10,
 									  partition_config.seed);
 		break;
 	}
@@ -203,7 +207,8 @@ int main(int argn, char *argv[]) {
 		refinement = std::make_unique<bayes_refinement<SVM_MODEL>>(min_hierarchy,
 									   maj_hierarchy,
 									   initial_result,
-									   partition_config);
+									   partition_config,
+									   state);
 		break;
 	}
 
