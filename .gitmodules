@@ -3,4 +3,4 @@
 	url = https://github.com/zeyiwen/thundersvm.git
 [submodule "bayesopt"]
 	path = extern/bayesopt
-	url = https://github.com/rmcantin/bayesopt.git
+	url = https://github.com/matzebond/bayesopt.git
