@@ -232,7 +232,7 @@ int parse_args(int argc, char *argv[], config & conf) {
 			conf.outputfile = file.substr(0, file.size()-4);
 		} else {
                         conf.libsvm = true;
-			conf.outputfile = conf.file;
+			conf.outputfile = conf.inputfile;
 		}
 		conf.inputfile = file;
 	}
