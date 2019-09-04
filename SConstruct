@@ -78,6 +78,7 @@ env.Append(CPPPATH=['./extern/libsvm-3.22/include'])
 env.Append(CPPPATH=['./extern/thundersvm/include'])
 env.Append(CPPPATH=['./extern/thundersvm/build']) # need builded config.h
 env.Append(CPPPATH=['./extern/bayesopt/include'])
+env.Append(CPPPATH=['./extern/bayesopt/utils'])
 env.Append(CPPPATH=['./lib'])
 env.Append(CPPPATH=['./lib/partition/uncoarsening/refinement/quotient_graph_refinement/flow_refinement/'])
 env.Append(CPPPATH=['/usr/include/openmpi/'])
