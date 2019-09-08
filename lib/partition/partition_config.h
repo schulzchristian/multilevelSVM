@@ -98,6 +98,8 @@ struct PartitionConfig
 
 	bool export_graph = false;
 
+	std::string export_model_path = "./svm";
+
 	int n_cores = 0;
 
         //=======================================

@@ -5,6 +5,7 @@
 #include "tools/random_functions.h"
 
 void PartitionConfig::print() {
+	std::cout << "file: " << this->filename << std::endl;
 	std::cout << "num_experiments: " << this->num_experiments << std::endl;
 	std::cout << "kfold_iterations: " << this->kfold_iterations << std::endl;
 	std::cout << "sample_percent: " << this->sample_percent << std::endl;

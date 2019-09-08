@@ -27,6 +27,8 @@ public:
         svm_data* getMinTestData();
         svm_data* getMajTestData();
 
+	int getIteration();
+
 protected:
         /// do kfold stuff in here
         virtual void next_intern(double & io_time) = 0;

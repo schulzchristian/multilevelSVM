@@ -36,6 +36,12 @@ int svm_solver_libsvm::predict(const std::vector<svm_node> & nodes) {
         return svm_predict(this->model.get(), nodes.data());
 }
 
+
+void svm_solver_libsvm::export_to_file(const string & path) {
+	int ret = svm_save_model(path.c_str(), this->model.get());
+	assert(ret == 0);
+}
+
 std::pair<std::vector<NodeID>, std::vector<NodeID>> svm_solver_libsvm::get_SV() {
 	std::vector<NodeID> SV_min;
 	SV_min.reserve(model->nSV[0]);

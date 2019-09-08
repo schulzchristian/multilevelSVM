@@ -43,6 +43,7 @@ int parse_parameters(int argn, char **argv,
         struct arg_dbl *time_limit                           = arg_dbl0(NULL, "time_limit", NULL, "Time limit in s. Default 0s .");
         struct arg_int *timeout                              = arg_int0(NULL, "timeout", NULL, "Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)");
         struct arg_lit *export_graph                         = arg_lit0(NULL, "export_graph","Export the graph at every level (this exits after one multilevel cycle).");
+        struct arg_str *export_model_path                    = arg_str0(NULL, "export_model", NULL, "Specify the path of the output model (it contains the trained SVM model for later usage) ( a number and \".model\" will be appended to the path).");
         struct arg_int *n_cores                              = arg_int0("c", "n_cores", NULL, "How many cores are used (Default: 0 aka. every core)");
 
         // matching/clustering
@@ -107,6 +108,7 @@ int parse_parameters(int argn, char **argv,
                             no_inherit_ud,
 			    export_graph,
                             filename_output,
+			    export_model_path,
                             timeout,
 			    n_cores,
 #endif
@@ -335,6 +337,10 @@ int parse_parameters(int argn, char **argv,
 
         if(export_graph->count > 0) {
 		partition_config.export_graph = true;
+        }
+
+        if(export_model_path->count > 0) {
+                partition_config.export_model_path = export_model_path->sval[0];
         }
 
         if(bidirectional->count > 0) {

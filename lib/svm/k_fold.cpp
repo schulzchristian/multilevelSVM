@@ -54,3 +54,7 @@ std::vector<std::vector<svm_node>>* k_fold::getMinTestData() {
 std::vector<std::vector<svm_node>>* k_fold::getMajTestData() {
         return &this->cur_maj_test;
 }
+
+int k_fold::getIteration() {
+	return this->cur_iteration;
+}

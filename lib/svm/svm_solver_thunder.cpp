@@ -59,6 +59,11 @@ int svm_solver_thunder::predict(const std::vector<svm_node> & nodes) {
         return static_cast<int>(res);
 }
 
+
+void svm_solver_thunder::export_to_file(const string & path) {
+	this->model->save_to_file(path);
+}
+
 std::pair<std::vector<NodeID>, std::vector<NodeID>> svm_solver_thunder::get_SV() {
 	const std::vector<int> SV_ind = this->model->get_sv_ind();
 	std::vector<NodeID> SV_min;

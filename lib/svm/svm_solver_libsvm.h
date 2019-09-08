@@ -14,6 +14,7 @@ public:
 
         void train() override;
         int predict(const std::vector<svm_node> & node) override;
+	void export_to_file(const string & path) override;
 	std::pair<std::vector<NodeID>, std::vector<NodeID>> get_SV() override;
 };
 

@@ -307,6 +307,11 @@ int main(int argn, char *argv[]) {
                 exit(123);
         }
 
+	int num = exp * partition_config.kfold_iterations + kfold->getIteration();
+	std::string export_file = partition_config.export_model_path + std::to_string(num) + ".model";
+	std::cout << "Exporting model to " << export_file << std::endl;
+	best_solver.export_to_file(export_file);
+
 	if (partition_config.export_graph) {
                 std::cout << "Exporting graph: Abort after one multilevel cycle." << std::endl;
                 exit(0);
