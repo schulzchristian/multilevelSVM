@@ -18,9 +18,9 @@ ud_refinement<T>::~ud_refinement() {}
 
 template<class T>
 svm_result<T> ud_refinement<T>::step(const svm_data & min_sample, const svm_data & maj_sample) {
-	std::cout << "UD refinement at level " << get_level() << std::endl;
+	std::cout << "UD refinement at level " << this->get_level() << std::endl;
 
-        uncoarse();
+        this->uncoarse();
 
         std::cout << "current level nodes"
                   << " min " << this->uncoarsed_data_min.size()
@@ -63,7 +63,7 @@ svm_result<T> ud_refinement<T>::step(const svm_data & min_sample, const svm_data
 
 template<class T>
 svm_result<T> ud_refinement<T>::train_ud(svm_solver<T> & solver, const svm_data & min_sample, const svm_data & maj_sample) {
-        svm_result<T> result;
+        svm_result<T> result(solver.get_instance());
         std::vector<svm_param> params;
 
         // first search
@@ -100,7 +100,7 @@ svm_result<T> ud_refinement<T>::train_refinement(svm_solver<T> & solver,
 						 const svm_data & min_sample,
 						 const svm_data & maj_sample,
 						 bool inherit_ud, float param_c, float param_g) {
-	svm_result<T> result;
+	svm_result<T> result(solver.get_instance());
         std::vector<svm_param> params;
         if (!inherit_ud) {
                 // first search

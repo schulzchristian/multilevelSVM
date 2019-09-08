@@ -21,6 +21,10 @@ void PartitionConfig::print() {
 	std::cout << "node_ordering: " << this->node_ordering << std::endl;
 	std::cout << "diameter_upperbound: " << this->diameter_upperbound << std::endl;
 	std::cout << "refinement_type: " << this->refinement_type << std::endl;
+	if (this->refinement_type == FIX) {
+		std::cout << "fix_C: " << this->fix_C << std::endl;
+		std::cout << "fix_gamma: " << this->fix_gamma << std::endl;
+	}
 	std::cout << "num_skip_ms: " << this->num_skip_ms << std::endl;
 	std::cout << "inherit_ud: " << this->inherit_ud << std::endl;
 	std::cout << "timeout: " << this->timeout << std::endl;

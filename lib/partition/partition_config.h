@@ -162,6 +162,12 @@ struct PartitionConfig
 
 	RefinementType refinement_type = UD;
 
+	float fix_C = 0;
+
+	float fix_gamma = 1;
+
+	int bayes_init = 10;
+
         int num_skip_ms = 10000;
 
         bool inherit_ud = true;

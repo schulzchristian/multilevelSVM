@@ -16,7 +16,8 @@ bayes_refinement<T>::bayes_refinement(graph_hierarchy & min_hierarchy,
 				      const svm_result<T> & initial_result,
 				      PartitionConfig conf,
 				      bayesopt::BOptState state)
-	: opt_state(state), svm_refinement<T>(min_hierarchy, maj_hierarchy, initial_result, conf) {
+	: svm_refinement<T>(min_hierarchy, maj_hierarchy, initial_result, conf)
+	, opt_state(state) {
 	this->seed = conf.seed;
 	this->fix_num_vert_stop = conf.fix_num_vert_stop;
 	this->bayes_max_steps = conf.bayes_max_steps;
@@ -29,7 +30,7 @@ template<class T>
 svm_result<T> bayes_refinement<T>::step(const svm_data & min_sample, const svm_data & maj_sample) {
 	std::cout << "BAYES refinement at level " << this->get_level() << std::endl;
 
-        uncoarse();
+        this->uncoarse();
 
         std::cout << "current level nodes"
                   << " min " << this->uncoarsed_data_min.size()

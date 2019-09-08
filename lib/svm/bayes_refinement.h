@@ -4,10 +4,7 @@
 #include <bayesopt/bayesopt.hpp>
 #include <bayesopt/parameters.hpp>
 #include <bopt_state.hpp>
-#include "definitions.h"
-#include "data_structure/graph_hierarchy.h"
 #include "svm/svm_definitions.h"
-#include "svm/svm_result.h"
 #include "svm/svm_refinement.h"
 #include "svm/svm_solver.h"
 
@@ -21,7 +18,7 @@ public:
 
 	virtual ~bayes_refinement();
 
-        virtual svm_result<T> step(const svm_data & min_sample, const svm_data & maj_sample);
+        svm_result<T> step(const svm_data & min_sample, const svm_data & maj_sample) override;
 
 
 	static svm_result<T> train_bayes(svm_solver<T> & solver,

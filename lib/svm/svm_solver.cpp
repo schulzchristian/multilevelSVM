@@ -36,7 +36,7 @@ svm_solver<T>::svm_solver() {
 
 template<class T>
 svm_result<T> svm_solver<T>::train_grid(const svm_data & min_sample, const svm_data & maj_sample) {
-        svm_result<T> result;
+        svm_result<T> result(instance);
         std::vector<svm_param> params;
 
         // first search

@@ -24,6 +24,7 @@
 #include "svm/svm_refinement.h"
 #include "svm/ud_refinement.h"
 #include "svm/bayes_refinement.h"
+#include "svm/fix_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
 #include "tools/timer.h"
@@ -153,7 +154,7 @@ int main(int argn, char *argv[]) {
 
         SVM_SOLVER init_solver(initial_instance);
 
-	svm_result<SVM_MODEL> initial_result;
+	svm_result<SVM_MODEL> initial_result(initial_instance);
 
 	bayesopt::BOptState state;
 	switch (partition_config.refinement_type) {
@@ -167,8 +168,15 @@ int main(int argn, char *argv[]) {
 									  *kfold->getMinValData(),
 									  *kfold->getMajValData(),
 									  state,
-									  10,
+									  partition_config.bayes_init,
 									  partition_config.seed);
+		break;
+	case FIX:
+		initial_result = fix_refinement<SVM_MODEL>::train_fix(init_solver,
+								      *kfold->getMinValData(),
+								      *kfold->getMajValData(),
+								      partition_config.fix_C,
+								      partition_config.fix_gamma);
 		break;
 	}
  
@@ -209,6 +217,12 @@ int main(int argn, char *argv[]) {
 									   initial_result,
 									   partition_config,
 									   state);
+		break;
+	case FIX:
+		refinement = std::make_unique<fix_refinement<SVM_MODEL>>(min_hierarchy,
+									 maj_hierarchy,
+									 initial_result,
+									 partition_config);
 		break;
 	}
 

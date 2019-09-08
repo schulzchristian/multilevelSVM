@@ -151,7 +151,8 @@ typedef enum {
 
 typedef enum {
 	UD,
-	BAYES
+	BAYES,
+	FIX
 } RefinementType;
 
 #endif

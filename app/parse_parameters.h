@@ -77,7 +77,9 @@ int parse_parameters(int argn, char **argv,
 
 
         // MLSVM refinement
-	struct arg_rex *refinement_type                      = arg_rex0(NULL, "refinement", "^(ud|bayes)$", "TYPE", REG_EXTENDED, "Type of refinement. One of {ud, bayes} (Default: ud)"  );
+	struct arg_rex *refinement_type                      = arg_rex0(NULL, "refinement", "^(ud|bayes|fix)$", "TYPE", REG_EXTENDED, "Type of refinement. One of {ud, bayes, fix} (Default: ud)"  );
+	struct arg_dbl *fix_C                                = arg_dbl0("C", NULL, NULL, "value of the C parameter when using fix refinement. (use logarithmic scale)");
+	struct arg_dbl *fix_gamma                            = arg_dbl0("g", NULL, NULL, "value of the gamma parameter when using fix refinement. (use logarithmic scale)");
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
         struct arg_lit *no_inherit_ud                        = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
 
@@ -104,6 +106,8 @@ int parse_parameters(int argn, char **argv,
                             label_propagation_iterations,
                             diameter_upperbound,
 			    refinement_type,
+			    fix_C,
+			    fix_gamma,
                             num_skip_ms,
                             no_inherit_ud,
 			    export_graph,
@@ -316,11 +320,21 @@ int parse_parameters(int argn, char **argv,
 			partition_config.refinement_type = UD;
 		} else if (strcmp("bayes", refinement_type->sval[0]) == 0) {
 			partition_config.refinement_type = BAYES;
+		} else if (strcmp("fix", refinement_type->sval[0]) == 0) {
+			partition_config.refinement_type = FIX;
 		} else {
                         fprintf(stderr, "Invalid refinement variant: \"%s\"\n",
 				refinement_type->sval[0]);
                         exit(0);
 		}
+	}
+
+	if(fix_C->count > 0) {
+		partition_config.fix_C = fix_C->dval[0];
+	}
+
+	if(fix_gamma->count > 0) {
+		partition_config.fix_gamma = fix_gamma->dval[0];
 	}
 
         if(num_skip_ms->count > 0) {

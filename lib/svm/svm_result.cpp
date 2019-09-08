@@ -4,7 +4,8 @@
 #include "svm_result.h"
 
 template<class T>
-svm_result<T>::svm_result() {
+svm_result<T>::svm_result(const svm_instance & instance)
+	: instance(instance) {
 }
 
 template<class T>
@@ -27,7 +28,6 @@ void svm_result<T>::add(const svm_result<T> & result) {
 template<class T>
 void svm_result<T>::add(const std::vector<svm_summary<T>> & to_add) {
         this->summaries.insert(this->summaries.end(), to_add.begin(), to_add.end());
-
         this->sort_summaries();
 }
 
@@ -45,9 +45,9 @@ std::vector<svm_param> svm_result<T>::all_params() {
 template<class T>
 void svm_result<T>::sort_summaries() {
         // insertion_sort
-        int j;
+        size_t j;
 
-        for (int i = 0; i < this->summaries.size(); i++){
+        for (size_t i = 0; i < this->summaries.size(); i++){
                 j = i;
 
                 while (j > 0 && summary_cmp_better_gmean_sv::comp(this->summaries[j], this->summaries[j-1])) {

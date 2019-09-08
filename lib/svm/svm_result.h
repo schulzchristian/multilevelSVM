@@ -11,7 +11,7 @@ template<class T>
 class svm_result
 {
 public:
-        svm_result();
+        svm_result(const svm_instance & instance);
         svm_result(const std::vector<svm_summary<T>> & summaries, const svm_instance & instance);
 
         svm_summary<T> best();
