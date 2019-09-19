@@ -27,6 +27,7 @@
 #include "svm/k_fold_once.h"
 #include "svm/ud_refinement.h"
 #include "svm/bayes_refinement.h"
+#include "svm/fix_refinement.h"
 #include "svm/svm_result.h"
 #include "svm/results.h"
 #include "tools/timer.h"
@@ -67,7 +68,8 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
 
         SVM_SOLVER solver(instance);
 
-	svm_result<SVM_MODEL> result;
+	svm_result<SVM_MODEL> result(instance);
+	bayesopt::BOptState state;
 	switch (partition_config.refinement_type) {
 	case UD:
 		result = ud_refinement<SVM_MODEL>::train_ud(solver,
@@ -75,13 +77,19 @@ void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& 
 							    *kfold->getMajValData());
 		break;
 	case BAYES:
-		bayesopt::BOptState state;
 		result = bayes_refinement<SVM_MODEL>::train_bayes(solver,
 								  *kfold->getMinValData(),
 								  *kfold->getMajValData(),
 								  state,
 								  10,
 								  partition_config.seed);
+		break;
+	case FIX:
+		result = fix_refinement<SVM_MODEL>::train_fix(solver,
+							      *kfold->getMinValData(),
+							      *kfold->getMajValData(),
+							      partition_config.fix_C,
+							      partition_config.fix_gamma);
 		break;
 	}
 
