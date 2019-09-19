@@ -35,7 +35,7 @@ cd extern/thundersvm
 git submodule init eigen && git submodule update
 mkdir build && cd build
 cmake -DUSE_CUDA=OFF -DUSE_EIGEN=ON ..
-make -j
+make -j 4
 #+END_SRC
 
 ** BayesOpt
@@ -47,8 +47,9 @@ then
 
 #+BEGIN_SRC sh
 cd extern/bayesopt
-cmake .
-make
+mkdir build && cd build
+cmake ..
+make -j 4
 #+END_SRC
 
 you can test if the compile step worked with

@@ -94,11 +94,11 @@ if SYSTEM == 'Darwin':
         env.Append(LIBPATH=['/usr/local/lib/openmpi/'])
         env.Append(LIBPATH=['./extern/argtable-2.10/maclib'])
         env.Append(LIBPATH=['./extern/thundersvm/build/lib'])
-        env.Append(LIBPATH=['./extern/bayesopt/lib'])
+        env.Append(LIBPATH=['./extern/bayesopt/build/lib'])
 else:
         env.Append(LIBPATH=['./extern/argtable-2.10/lib'])
         env.Append(LIBPATH=['./extern/thundersvm/build/lib'])
-        env.Append(LIBPATH=['./extern/bayesopt/lib'])
+        env.Append(LIBPATH=['./extern/bayesopt/build/lib'])
 
 # bake shared library paths into executable
 for lib in env["LIBPATH"]:
