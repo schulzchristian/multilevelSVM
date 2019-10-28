@@ -19,6 +19,13 @@ k_fold_import::~k_fold_import() {
 }
 
 void k_fold_import::next_intern(double & io_time) {
+        this->cur_min_train.clear();
+        this->cur_maj_train.clear();
+        this->cur_min_val.clear();
+        this->cur_maj_val.clear();
+        this->cur_min_test.clear();
+        this->cur_maj_test.clear();
+
         // TODO don't build the path with hard coded strings, use a path template as argument
         std::string min_train_name = this->basename + "kfold_p_train_data_exp_" + std::to_string(this->num_exp) + "_fold_" + std::to_string(k_fold::cur_iteration) + "_exp_0.1_data";
         std::string maj_train_name = this->basename + "kfold_n_train_data_exp_" + std::to_string(this->num_exp) + "_fold_" + std::to_string(k_fold::cur_iteration) + "_exp_0.1_data";

@@ -42,6 +42,8 @@ void k_fold_build::readData(const std::string & filename) {
 
 
 void k_fold_build::next_intern(double & io_time) {
+        this->cur_min_train.clear();
+        this->cur_maj_train.clear();
         this->cur_min_val.clear();
         this->cur_maj_val.clear();
         this->cur_min_test.clear();
@@ -68,7 +70,7 @@ void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & feature
 		val_end = test_start;
 	} else {
 		val_start = test_end;
-		val_end = val_start + val_size;
+		val_end = test_end + val_size;
 	}
 
         std::vector<FeatureVec> feature_subset(features_full);

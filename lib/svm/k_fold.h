@@ -40,6 +40,9 @@ protected:
 
         graph_access cur_min_graph;
         graph_access cur_maj_graph;
+
+        svm_data cur_min_train;
+        svm_data cur_maj_train;
         svm_data cur_min_val;
         svm_data cur_maj_val;
         svm_data cur_min_test;
