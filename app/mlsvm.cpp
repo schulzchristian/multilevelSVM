@@ -36,6 +36,9 @@ void print_null(const char *s) {}
 #define SVM_SOLVER svm_solver_thunder
 #define SVM_MODEL SVC
 
+// #define SVM_SOLVER svm_solver_libsvm
+// #define SVM_MODEL svm_model
+
 int main(int argn, char *argv[]) {
 	PartitionConfig partition_config;
 

@@ -38,6 +38,9 @@ void print_null(const char *s) {}
 #define SVM_SOLVER svm_solver_thunder
 #define SVM_MODEL SVC
 
+// #define SVM_SOLVER svm_solver_libsvm
+// #define SVM_MODEL svm_model
+
 void kfold_instance(PartitionConfig& partition_config, std::unique_ptr<k_fold>& kfold, results& results) {
         timer t;
         graph_access *G_min = kfold->getMinGraph();
@@ -193,7 +196,6 @@ int main(int argn, char *argv[]) {
 
                 while (kfold->next(kfold_io_time)) {
                         results.next();
-                        bool timedout = false;
 
                         auto kfold_time = t_all.elapsed() - kfold_io_time;
                         std::cout << "fold time: " << kfold_time << std::endl;
@@ -210,10 +212,6 @@ int main(int argn, char *argv[]) {
                         }
                         catch(std::runtime_error& e) {
                                 std::cout << e.what() << std::endl;
-                                timedout = true;
-                        }
-
-                        if(timedout) {
                                 std::cout << "kfold timeout reached... quitting" << std::endl;
                                 exit(123);
                         }
