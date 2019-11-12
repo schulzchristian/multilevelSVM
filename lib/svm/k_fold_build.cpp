@@ -24,11 +24,6 @@ void k_fold_build::readData(const std::string & filename) {
         svm_io::readFeaturesLines(filename + "_min_data", this->min_features);
         svm_io::readFeaturesLines(filename + "_maj_data", this->maj_features);
 
-	if (this->sample_percent < 1 - 0.0001f) {
-		this->min_features = svm_io::take_sample(this->min_features, this->sample_percent);
-		this->maj_features = svm_io::take_sample(this->maj_features, this->sample_percent);
-	}
-
 	random_functions::permutate_vector_good(this->min_features, false);
         random_functions::permutate_vector_good(this->maj_features, false);
 
@@ -83,6 +78,11 @@ void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & feature
 				     feature_subset.begin() + test_end);
 	}
 
+	// apply sampling
+	if (this->sample_percent < 1) {
+		feature_subset = svm_io::take_sample(feature_subset, this->sample_percent);
+	}
+
 	// prepare graph
         std::vector<std::vector<Edge>> edges_subset;
         svm_flann::run_flann(feature_subset, edges_subset, this->num_nn);
@@ -103,6 +103,10 @@ void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & feature
 
         target_val.reserve(val_size);
         for (const FeatureVec & f : val_subset) {
+		// apply sampling
+                if (random_functions::next() > this->sample_percent) {
+			continue;
+		}
                 target_val.push_back(svm_convert::feature_to_node(f));
         }
 

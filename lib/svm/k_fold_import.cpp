@@ -11,8 +11,9 @@ k_fold_import::k_fold_import(const PartitionConfig & config, int num_exp, const 
         : k_fold(config) {
         this->num_exp = num_exp;
         this->basename = basename;
-        this->bidirectional = config.bidirectional;
         this->num_nn = config.num_nn;
+        this->bidirectional = config.bidirectional;
+	this->sample_percent  = config.sample_percent;
 }
 
 k_fold_import::~k_fold_import() {
@@ -63,6 +64,11 @@ double k_fold_import::read_class(const std::string & filename,
 				     feature_subset.end());
 	}
 
+	// apply sampling
+	if (this->sample_percent < 1) {
+		feature_subset = svm_io::take_sample(feature_subset, this->sample_percent);
+	}
+
 	// build graph
         std::vector<std::vector<Edge>> edges_subset;
         svm_flann::run_flann(feature_subset, edges_subset, num_nn);
@@ -82,6 +88,10 @@ double k_fold_import::read_class(const std::string & filename,
 
         target_val.reserve(val_size);
         for (const FeatureVec & f : val_subset) {
+		// apply sampling
+                if (random_functions::next() > this->sample_percent) {
+			continue;
+		}
                 target_val.push_back(svm_convert::feature_to_node(f));
         }
 

@@ -18,8 +18,9 @@ protected:
 
         std::string basename;
         int num_exp;
-        bool bidirectional;
         int num_nn;
+        bool bidirectional;
+	float sample_percent;
 };
 
 #endif /* KFOLD_IMPORT_H */
