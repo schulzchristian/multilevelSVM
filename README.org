@@ -467,3 +467,11 @@ Usage: ./optimized_output/mlsvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k
   --timeout=<int>                          Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)
   -c, --n_cores=<int>                      How many cores are used (Default: 0 aka. every core)
 #+end_example
+
+* Licences
+[[https://github.com/jonathanmarvens/argtable2/blob/master/COPYING][Argtable]] - GNU GENERAL PUBLIC LICENSE Version 2
+[[https://github.com/mariusmuja/flann/blob/master/COPYING][Flann]] - BSD License
+[[https://github.com/mljs/libsvm/blob/master/LICENSE][LibSVM]] - BSD License
+[[https://github.com/Xtra-Computing/thundersvm/blob/master/LICENSE][ThunderSVM]] - Apache License 2.0
+[[https://github.com/rmcantin/bayesopt/blob/master/LICENSE][BayesOpt]] - GNU Affero General Public License v3.0
+[[https://github.com/catchorg/Catch2/blob/master/LICENSE.txt][Catch2]] - Boost Software License 1.0
