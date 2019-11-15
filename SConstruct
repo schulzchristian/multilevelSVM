@@ -76,7 +76,7 @@ env.Append(CPPPATH=['./extern/argtable-2.10/include'])
 env.Append(CPPPATH=['./extern/flann-1.8.4/include'])
 env.Append(CPPPATH=['./extern/libsvm-3.22/include'])
 env.Append(CPPPATH=['./extern/thundersvm/include'])
-env.Append(CPPPATH=['./extern/thundersvm/build']) # need builded config.h
+env.Append(CPPPATH=['./extern/thundersvm/build']) # need build config.h
 env.Append(CPPPATH=['./extern/bayesopt/include'])
 env.Append(CPPPATH=['./extern/bayesopt/utils'])
 env.Append(CPPPATH=['./lib'])
@@ -111,20 +111,19 @@ if not conf.CheckLibWithHeader('argtable2', 'argtable2.h', 'CXX'):
 #if not conf.CheckCXXHeader('mpi.h'):
         #print("openmpi header not found. Exiting")
         #Exit(-1)
-#
 
 env.Append(CXXFLAGS = '-fopenmp')
 if "clang" in env['CC'] or "clang" in env['CXX']:
         if env['variant'] == 'optimized':
-          env.Append(CXXFLAGS = '-DNDEBUG -Wall -funroll-loops -O3 -std=c++14')
-          env.Append(CCFLAGS  = '-O3  -DNDEBUG -funroll-loops -std=c++14')
+          env.Append(CXXFLAGS = '-DNDEBUG -Wall -funroll-loops -O3 -std=c++17')
+          env.Append(CCFLAGS  = '-O3  -DNDEBUG -funroll-loops -std=c++17')
         elif env['variant'] == 'optimized_output':
           # A little bit more output on the console
-          env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -O3 -std=c++14')
-          env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++14')
+          env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -O3 -std=c++17')
+          env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++17')
         elif env['variant'] == 'debug':
-          env.Append(CXXFLAGS = '-O0 -g3 -std=c++14')
-          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++14')
+          env.Append(CXXFLAGS = '-O0 -g3 -std=c++17')
+          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++17')
           # env.Append(LDFLAGS  = '-pg')
           if SYSTEM != 'Darwin':
                 env.Append(CXXFLAGS = '-march=native')
@@ -132,15 +131,15 @@ if "clang" in env['CC'] or "clang" in env['CXX']:
 
 else:
         if env['variant'] == 'optimized':
-          env.Append(CXXFLAGS = '-DNDEBUG -Wall -funroll-loops  -fno-stack-limit -O3 -std=c++14 -fpermissive')
-          env.Append(CCFLAGS  = '-O3  -DNDEBUG -funroll-loops -std=c++14 -fpermissive')
+          env.Append(CXXFLAGS = '-DNDEBUG -Wall -funroll-loops  -fno-stack-limit -O3 -std=c++17 -fpermissive')
+          env.Append(CCFLAGS  = '-O3  -DNDEBUG -funroll-loops -std=c++17 -fpermissive')
         elif env['variant'] == 'optimized_output':
           # A little bit more output on the console
-          env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -fno-stack-limit -O3 -std=c++14 -fpermissive')
-          env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++14 -fpermissive')
+          env.Append(CXXFLAGS = ' -DNDEBUG -funroll-loops -Wall -fno-stack-limit -O3 -std=c++17 -fpermissive')
+          env.Append(CCFLAGS  = '-O3  -DNDEBUG -DKAFFPAOUTPUT  -std=c++17 -fpermissive')
         elif env['variant'] == 'debug':
-          env.Append(CXXFLAGS = '-O0 -g3 -std=c++14 -fpermissive')
-          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++14')
+          env.Append(CXXFLAGS = '-O0 -g3 -std=c++17 -fpermissive')
+          env.Append(CCFLAGS  = '-DKAFFPAOUTPUT -O0 -g -std=c++17')
           env.Append(LDFLAGS  = '-pg')
 
           if SYSTEM != 'Darwin':
