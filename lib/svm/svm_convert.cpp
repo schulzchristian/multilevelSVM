@@ -22,6 +22,21 @@ svm_feature svm_convert::feature_to_node(const FeatureVec & vec) {
         return nodes;
 }
 
+FeatureVec svm_convert::node_to_feature(const svm_feature & data) {
+	FeatureVec result;
+	size_t i = 0;
+	for (const svm_node & node : data) {
+		if (node.index == -1) break;
+		while (result.size() < node.index - 1) {
+			result.push_back(0);
+			i++;
+		}
+		result.push_back(node.value);
+		i++;
+	}
+	return result;
+}
+
 svm_data svm_convert::graph_to_nodes(const graph_access & G) {
         std::vector<std::vector<svm_node>> nodes;
 
@@ -45,6 +60,7 @@ svm_data svm_convert::graph_part_to_nodes(const graph_access & G, const std::vec
 
         return nodes;
 }
+
 
 
 DataSet::node2d svm_convert::svmdata_to_dataset(const svm_data & data) {
