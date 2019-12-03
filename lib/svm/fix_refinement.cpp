@@ -31,6 +31,7 @@ svm_result<T> fix_refinement<T>::step(const svm_data & min_sample, const svm_dat
 
 	svm_summary<T> summary = solver->train_single(this->param, min_sample, maj_sample);
 	svm_result<T> res(std::vector<svm_summary<T>> {summary}, instance);
+	this->result = res;
 	return res;
 }
 
