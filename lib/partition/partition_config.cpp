@@ -20,6 +20,7 @@ void PartitionConfig::print() {
 	std::cout << "label_iterations: " << this->label_iterations << std::endl;
 	std::cout << "node_ordering: " << this->node_ordering << std::endl;
 	std::cout << "diameter_upperbound: " << this->diameter_upperbound << std::endl;
+	std::cout << "beta: " << this->beta << std::endl;
 	std::cout << "refinement_type: " << this->refinement_type << std::endl;
 	if (this->refinement_type == FIX) {
 		std::cout << "fix_C: " << this->fix_C << std::endl;

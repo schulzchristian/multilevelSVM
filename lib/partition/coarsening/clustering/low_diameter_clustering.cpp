@@ -25,7 +25,8 @@ void low_diameter_clustering::match(const PartitionConfig & config,
         std::vector<std::pair<double, double>> delta(G.number_of_nodes());
 
         // double beta = std::log(G.number_of_nodes()) / config.diameter_upperbound;
-        double beta = config.diameter_upperbound;
+        // double beta = config.diameter_upperbound;
+	double beta = config.beta;
 
         for (NodeID i = 0; i < G.number_of_nodes(); ++i) {
                 delta[i].first = random_functions::nextFromExp(beta);

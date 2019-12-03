@@ -80,6 +80,7 @@ int parse_parameters(int argn, char **argv,
 	struct arg_rex *refinement_type                      = arg_rex0(NULL, "refinement", "^(ud|bayes|fix)$", "TYPE", REG_EXTENDED, "Type of refinement. One of {ud, bayes, fix} (Default: ud)"  );
 	struct arg_dbl *fix_C                                = arg_dbl0("C", NULL, NULL, "value of the C parameter when using fix refinement. (use logarithmic scale)");
 	struct arg_dbl *fix_gamma                            = arg_dbl0("g", NULL, NULL, "value of the gamma parameter when using fix refinement. (use logarithmic scale)");
+	struct arg_dbl *beta                                 = arg_dbl0(NULL, "beta", NULL, "value of the beta parameter when using low diameter clustering. (Default: 0.4)");
         struct arg_int *num_skip_ms                          = arg_int0(NULL, "num_skip_ms", NULL, "Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)");
         struct arg_lit *no_inherit_ud                        = arg_lit0(NULL, "no_inherit_ud", "Don't inherit the first UD sweep and do only the second UD sweep in the refinement.");
 
@@ -105,6 +106,7 @@ int parse_parameters(int argn, char **argv,
                             cluster_upperbound,
                             label_propagation_iterations,
                             diameter_upperbound,
+			    beta,
 			    refinement_type,
 			    fix_C,
 			    fix_gamma,
@@ -289,6 +291,10 @@ int parse_parameters(int argn, char **argv,
 
         if (diameter_upperbound->count > 0) {
                 partition_config.diameter_upperbound = diameter_upperbound->dval[0];
+        }
+
+        if (beta->count > 0) {
+                partition_config.beta = beta->dval[0];
         }
 
         if (num_experiments->count > 0) {

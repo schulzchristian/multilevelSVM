@@ -166,6 +166,8 @@ struct PartitionConfig
 
 	float fix_gamma = 1;
 
+	float beta = 0.4;
+
 	int bayes_init = 10;
 
         int num_skip_ms = 10000;
