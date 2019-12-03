@@ -20,7 +20,9 @@ template<class T>
 svm_result<T> ud_refinement<T>::step(const svm_data & min_sample, const svm_data & maj_sample) {
 	std::cout << "UD refinement at level " << this->get_level() << std::endl;
 
-        this->uncoarse();
+        std::vector<NodeID> sv_min = this->result.best().SV_min;
+        std::vector<NodeID> sv_maj = this->result.best().SV_maj;
+        this->uncoarse(sv_min, sv_maj);
 
         std::cout << "current level nodes"
                   << " min " << this->uncoarsed_data_min.size()

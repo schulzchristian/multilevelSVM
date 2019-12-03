@@ -40,43 +40,40 @@ svm_refinement<T>::~svm_refinement() {
 
 template<class T>
 bool svm_refinement<T>::is_done() {
-        return min_hierarchy->isEmpty() && maj_hierarchy->isEmpty();
+        return this->min_hierarchy->isEmpty() && this->maj_hierarchy->isEmpty();
 }
 
 template<class T>
 int svm_refinement<T>::get_level() {
-        return std::max(min_hierarchy->size(), maj_hierarchy->size());
+        return std::max(this->min_hierarchy->size(), this->maj_hierarchy->size());
 }
 
 template<class T>
-void svm_refinement<T>::uncoarse() {
-        std::vector<NodeID> sv_min = result.best().SV_min;
-        std::vector<NodeID> sv_maj = result.best().SV_maj;
-
+void svm_refinement<T>::uncoarse(const std::vector<NodeID> & sv_min,
+				 const std::vector<NodeID> & sv_maj) {
         // if maj_hierarchy is larger then start by only uncoarse the maj graph
         if (!min_hierarchy->isEmpty() && min_hierarchy->size() >= maj_hierarchy->size()) {
                 std::cout << "minority uncoarsed" << std::endl;
-                this->G_min = min_hierarchy->pop_finer_and_project();
-                CoarseMapping* coarse_mapping_min = min_hierarchy->get_mapping_of_current_finer();
-                this->uncoarsed_data_min = uncoarse_graph(*G_min, *coarse_mapping_min, sv_min, data_mapping_min);
+                this->G_min = this->min_hierarchy->pop_finer_and_project();
+                CoarseMapping* coarse_mapping_min = this->min_hierarchy->get_mapping_of_current_finer();
+                this->uncoarsed_data_min = uncoarse_SV(*this->G_min, *coarse_mapping_min, sv_min, this->data_mapping_min);
                 this->training_inherit = true; // after the first uncoarsening of the min data inherit params
         }
         if (!maj_hierarchy->isEmpty()) {
                 std::cout << "majority uncoarsed" << std::endl;
-                this->G_maj = maj_hierarchy->pop_finer_and_project();
-                CoarseMapping* coarse_mapping_maj = maj_hierarchy->get_mapping_of_current_finer();
-                this->uncoarsed_data_maj = uncoarse_graph(*G_maj, *coarse_mapping_maj, sv_maj, data_mapping_maj);
+                this->G_maj = this->maj_hierarchy->pop_finer_and_project();
+                CoarseMapping* coarse_mapping_maj = this->maj_hierarchy->get_mapping_of_current_finer();
+                this->uncoarsed_data_maj = uncoarse_SV(*this->G_maj, *coarse_mapping_maj, sv_maj, this->data_mapping_maj);
         }
 }
 
 template<class T>
-svm_data svm_refinement<T>::uncoarse_graph(const graph_access & G,
-					   const CoarseMapping & coarse_mapping,
-					   const std::vector<NodeID> & sv,
-					   std::vector<NodeID> & data_mapping) {
+svm_data svm_refinement<T>::uncoarse_SV(graph_access & G,
+					const CoarseMapping & coarse_mapping,
+					const std::vector<NodeID> & sv,
+					std::vector<NodeID> & data_mapping) {
 	svm_data new_data;
 
-	// std::unordered_set<NodeID> sv_set{sv.begin(), sv.end()};
 	std::unordered_set<NodeID> sv_set;
 	sv_set.reserve(sv.size());
 	for (NodeID id : sv) {
@@ -92,7 +89,7 @@ svm_data svm_refinement<T>::uncoarse_graph(const graph_access & G,
                         svm_feature feature = svm_convert::feature_to_node(G.getFeatureVec(node));
                         new_data.push_back(std::move(feature));
                 }
-        } endfor
+        endfor }
 
         std::cout << "uncoarsened nodes " << G.number_of_nodes()
                   << " SV " << sv.size()

@@ -16,7 +16,8 @@ public:
 
 	virtual ~ud_refinement();
 
-        virtual svm_result<T> step(const svm_data & min_sample, const svm_data & maj_sample);
+        virtual svm_result<T> step(const svm_data & min_sample,
+				   const svm_data & maj_sample);
 
 
 	static svm_result<T> train_ud(svm_solver<T> & solver,
