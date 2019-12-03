@@ -305,19 +305,19 @@ int parse_parameters(int argn, char **argv,
                 partition_config.kfold_iterations = kfold_iterations->ival[0];
         }
 
-	if(sample_percent->count > 0) {
+	if (sample_percent->count > 0) {
 		partition_config.sample_percent = sample_percent->dval[0];
 	}
 
-        if(validation_percent->count > 0) {
+        if (validation_percent->count > 0) {
                 partition_config.validation_percent = validation_percent->dval[0];
         }
 
-        if(validation_seperate->count > 0) {
+        if (validation_seperate->count > 0) {
                 partition_config.validation_seperate = !partition_config.validation_seperate;
         }
 
-        if(num_nn->count > 0) {
+        if (num_nn->count > 0) {
                 partition_config.num_nn = num_nn->ival[0];
         }
 

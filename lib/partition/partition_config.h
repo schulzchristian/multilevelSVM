@@ -108,7 +108,7 @@ struct PartitionConfig
 
         NodeOrderingType node_ordering = DEGREE_NODEORDERING;
 
-        int cluster_coarsening_factor = 18;
+        int cluster_coarsening_factor = 1;
 
         bool ensemble_clusterings = false;
 

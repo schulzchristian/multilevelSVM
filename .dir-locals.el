@@ -14,5 +14,5 @@
 			(expand-file-name "extern/flann-1.8.4/include" (projectile-project-root))
 			(expand-file-name "extern/libsvm-3.22/include" (projectile-project-root))
 				       )))
-	 (flycheck-gcc-language-standard . "c++11")
+	 (flycheck-gcc-language-standard . "c++17")
 	 )))
