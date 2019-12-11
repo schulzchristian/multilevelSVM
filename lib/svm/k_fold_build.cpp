@@ -104,7 +104,8 @@ void k_fold_build::calculate_kfold_class(const std::vector<FeatureVec> & feature
         target_val.reserve(val_size);
         for (const FeatureVec & f : val_subset) {
 		// apply sampling
-                if (random_functions::next() > this->sample_percent) {
+                if (this->sample_percent < 1 &&
+		    random_functions::next() > this->sample_percent) {
 			continue;
 		}
                 target_val.push_back(svm_convert::feature_to_node(f));
