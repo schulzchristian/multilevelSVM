@@ -172,7 +172,6 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                 unsigned int change_counter = 0;
                 forall_nodes(G, i) {
                         NodeID node = permutation[i];
-                        bool dont_change = false;
                         //now move the node to the cluster that is most common in the neighborhood
 
                         forall_out_edges(G, e, node) {
@@ -190,12 +189,11 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                                 PartitionID cur_block     = cluster_id[target];
                                 PartitionID cur_value     = hash_map[cur_block];
                                 if((cur_value > max_value  || (cur_value == max_value && random_functions::nextBool()))
+				   && (cluster_local_sizes[cur_block] + 1 < partition_config.cluster_upperbound || cur_block == my_block)
                                    && (cluster_sizes[cur_block] + G.getNodeWeight(node) < block_upperbound || cur_block == my_block)
                                    && (!partition_config.graph_allready_partitioned || G.getPartitionIndex(node) == G.getPartitionIndex(target))
-                                   && (!partition_config.combine || G.getSecondPartitionIndex(node) == G.getSecondPartitionIndex(target))
-                                   )
+                                   && (!partition_config.combine || G.getSecondPartitionIndex(node) == G.getSecondPartitionIndex(target)))
                                 {
-                                        dont_change = cluster_local_sizes[cur_block] >= partition_config.cluster_upperbound;
                                         max_value = cur_value;
                                         max_block = cur_block;
                                 }
@@ -203,14 +201,12 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                                 hash_map[cur_block] = 0;
                         } endfor
 
-                        if (!dont_change) {
-                                cluster_sizes[cluster_id[node]]  -= G.getNodeWeight(node);
-                                cluster_local_sizes[cluster_id[node]]--;
-                                cluster_sizes[max_block]         += G.getNodeWeight(node);
-                                cluster_local_sizes[max_block]++;
-                                change_counter                   += (cluster_id[node] != max_block);
-                                cluster_id[node]                  = max_block;
-                        }
+			cluster_sizes[cluster_id[node]]  -= G.getNodeWeight(node);
+			cluster_local_sizes[cluster_id[node]]--;
+			cluster_sizes[max_block]         += G.getNodeWeight(node);
+			cluster_local_sizes[max_block]++;
+			change_counter                   += (cluster_id[node] != max_block);
+			cluster_id[node]                  = max_block;
                 } endfor
         }
 
