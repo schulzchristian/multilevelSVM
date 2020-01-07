@@ -176,7 +176,7 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
 
                         forall_out_edges(G, e, node) {
                                 NodeID target = G.getEdgeTarget(e);
-                                hash_map[cluster_id[target]]++;//+=G.getEdgeWeight(e);
+                                hash_map[cluster_id[target]]+=G.getEdgeWeight(e);
                         } endfor
 
                         //second sweep for finding max and resetting array
