@@ -28,6 +28,8 @@
 # the code.
 import platform
 import sys
+from os import listdir
+from os.path import isfile, join
 
 # Get the current platform.
 SYSTEM = platform.uname()[0]
@@ -60,21 +62,25 @@ libkaffpa_files = [ 'lib/data_structure/graph_hierarchy.cpp',
                     'lib/partition/uncoarsening/refinement/quotient_graph_refinement/partial_boundary.cpp',
                     ]
 
-libmlsvm_files = [ 'lib/svm/svm_solver.cpp',
+base_files = Split("""
+                   lib/svm/k_fold.cpp
+                   lib/svm/k_fold_build.cpp
+                   lib/svm/k_fold_import.cpp
+                   lib/svm/k_fold_once.cpp
+                   lib/svm/svm_flann.cpp
+                   lib/io/svm_io.cpp
+                   lib/svm/svm_convert.cpp
+                   lib/svm/results.cpp
+""")
+
+libkasvm_files = base_files + [
+	       	   'lib/svm/svm_solver.cpp',
                    'lib/svm/svm_solver_libsvm.cpp',
                    'lib/svm/svm_solver_thunder.cpp',
                    'lib/svm/svm_instance.cpp',
                    'lib/svm/svm_summary.cpp',
                    'lib/svm/svm_result.cpp',
-                   'lib/svm/svm_convert.cpp',
                    'lib/svm/param_search.cpp',
-                   'lib/svm/k_fold.cpp',
-                   'lib/svm/k_fold_build.cpp',
-                   'lib/svm/k_fold_import.cpp',
-                   'lib/svm/k_fold_once.cpp',
-                   'lib/io/svm_io.cpp',
-                   'lib/svm/results.cpp',
-                   'lib/svm/svm_flann.cpp',
                    'lib/svm/svm_refinement.cpp',
                    'lib/svm/ud_refinement.cpp',
                    'lib/svm/bayes_refinement.cpp',
@@ -83,17 +89,31 @@ libmlsvm_files = [ 'lib/svm/svm_solver.cpp',
 
 prepare_files = [  'lib/svm/svm_flann.cpp' ]
 
-if env['program'] == 'mlsvm':
-        env.Append(CXXFLAGS = '-DMODE_MLSVM')
-        env.Append(CCFLAGS  = '-DMODE_MLSVM')
-        env.Program('mlsvm', ['app/mlsvm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'], )
+# test_files = [join('test',f) for f in listdir('../test/') if f.endswith(".cpp")]
+test_files = ['test/svm_convert_test.cpp',
+              'test/contraction_test.cpp' ]
+
+if env['program'] == 'kasvm':
+        env.Library('kasvm', libkaffpa_files+libkasvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'])
+
+        env_prog = env.Clone()
+        env_prog.Append(CXXFLAGS = '-DMODE_KASVM')
+        env_prog.Append(CCFLAGS  = '-DMODE_KASVM')
+        env_prog.Append(CXXFLAGS = '-DSVM_SOLVER=svm_solver_thunder')
+        env_prog.Append(CXXFLAGS = '-DSVM_MODEL=SVC')
+        env_prog.Append(LIBPATH=['.'])
+        env_prog.Program('kasvm', ['app/kasvm.cpp'], LIBS=['kasvm', 'libargtable2','thundersvm','bayesopt','nlopt','gomp'])
 
 if env['program'] == 'single_level':
-        env.Append(CXXFLAGS = '-DMODE_MLSVM')
-        env.Append(CCFLAGS  = '-DMODE_MLSVM')
-        env.Program('single_level_svm', ['app/single_level_svm.cpp']+libkaffpa_files+libmlsvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp','pthread'])
+        env.Library('kasvm', libkaffpa_files+libkasvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'])
+
+        env_prog = env.Clone()
+        env_prog.Append(CXXFLAGS = '-DMODE_KASVM')
+        env_prog.Append(CCFLAGS  = '-DMODE_KASVM')
+        env_prog.Append(CXXFLAGS = '-DSVM_SOLVER=svm_solver_thunder')
+        env_prog.Append(CXXFLAGS = '-DSVM_MODEL=SVC')
+        env_prog.Append(LIBPATH=['.'])
+        env_prog.Program('single_level_svm', ['app/single_level_svm.cpp'], LIBS=['kasvm', 'libargtable2','thundersvm','bayesopt','nlopt','gomp','pthread'])
 
 if env['program'] == 'prepare':
-        env.Append(CXXFLAGS = '-DMODE_MLSVM')
-        env.Append(CCFLAGS  = '-DMODE_MLSVM')
         env.Program('prepare', ['app/prepare.cpp']+prepare_files, LIBS=['libargtable2','gomp'])

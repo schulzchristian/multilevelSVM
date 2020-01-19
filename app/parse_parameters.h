@@ -65,7 +65,7 @@ int parse_parameters(int argn, char **argv,
         // low_diameter
         struct arg_dbl *diameter_upperbound                  = arg_dbl0(NULL, "diameter_upperbound", NULL, "Set a size-constraint on the size of a low diameter cluster. Default: 20");
 
-        // MLSVM import
+        // KASVM import
         /* struct arg_lit *import_kfold                         = arg_lit0(NULL, "import_kfold", "Import the kfold crossvalidation instead of computing them from the data."); */
         struct arg_int *num_nn                               = arg_int0("n", "num_nn", NULL, "Number of nearest neighbors to consider when building the graphs. (Default: 10)");
         struct arg_lit *bidirectional                        = arg_lit0("b", "bidirectional", "Make the nearest neighbor graph bidirectional");
@@ -73,10 +73,10 @@ int parse_parameters(int argn, char **argv,
         struct arg_dbl *sample_percent                       = arg_dbl0("s", "sample", NULL, "Percentage of data that is use. Usefull if very slow on large datasets (Default: 1.0 aka use all data)");
 
         struct arg_dbl *validation_percent                   = arg_dbl0(NULL, "validation_percent", NULL, "Percentage of data that is use for validation (Default: 0.1)");
-        struct arg_lit *validation_seperate                  = arg_lit0(NULL, "validation_seperate", "Should the validation data be also used for training (Default: yes for single_level no for mlsvm - this flag invertse the choice)");
+        struct arg_lit *validation_seperate                  = arg_lit0(NULL, "validation_seperate", "Should the validation data be also used for training (Default: 'no' for kasvm  'yes' for single_level - this flag invertse the choice)");
 
 
-        // MLSVM refinement
+        // KASVM refinement
 	struct arg_rex *refinement_type                      = arg_rex0(NULL, "refinement", "^(ud|bayes|fix)$", "TYPE", REG_EXTENDED, "Type of refinement. One of {ud, bayes, fix} (Default: ud)"  );
 	struct arg_dbl *fix_C                                = arg_dbl0("C", NULL, NULL, "value of the C parameter when using fix refinement. (use logarithmic scale)");
 	struct arg_dbl *fix_gamma                            = arg_dbl0("g", NULL, NULL, "value of the gamma parameter when using fix refinement. (use logarithmic scale)");
@@ -91,7 +91,7 @@ int parse_parameters(int argn, char **argv,
                             help,
                             filename,
                             user_seed,
-#if defined MODE_MLSVM
+#if defined MODE_KASVM
                             num_experiments,
                             kfold_iterations,
 			    sample_percent,

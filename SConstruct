@@ -52,14 +52,14 @@ def GetEnvironment():
   """
   opts = Variables()
   opts.Add('variant', 'the variant to build, optimized or optimized with output', 'optimized')
-  opts.Add('program', 'program or interface to compile', 'mlsvm')
+  opts.Add('program', 'program or interface to compile', 'kasvm')
 
   env = Environment(options=opts, ENV=os.environ)
   if not env['variant'] in ['optimized','optimized_output','debug']:
     print('Illegal value for variant: %s' % env['variant'])
     sys.exit(1)
 
-  if not env['program'] in ['mlsvm', 'single_level', 'prepare']:
+  if not env['program'] in ['kasvm', 'single_level', 'prepare', 'knn', 'test']:
     print('Illegal value for program: %s' % env['program'])
     sys.exit(1)
 

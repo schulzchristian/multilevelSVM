@@ -145,7 +145,7 @@ struct PartitionConfig
         bool bidirectional = false;
 
         //=======================================
-        //===============MLSVM===================
+        //===============KASVM===================
         //=======================================
 
 	float sample_percent = 1.0f;
@@ -158,7 +158,7 @@ struct PartitionConfig
 
         int num_nn = 10;
 
-	//MLSVM REFINEMENT
+	//KASVM REFINEMENT
 
 	RefinementType refinement_type = UD;
 
