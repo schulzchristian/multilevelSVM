@@ -64,7 +64,7 @@ Compile KaSVM with with
 
 #+BEGIN_SRC sh
 scons program=prepare variant=optimized_output -j 4
-scons program=mlsvm variant=optimized_output -j 4
+scons program=kasvm variant=optimized_output -j 4
 #+END_SRC
 
 * Usage
@@ -91,31 +91,34 @@ finished writing features to examples/twonorm_maj_data in 0.035835
 #+end_example
 
 ** Classifier
-After the data has been preprocessed run the ~mlsvm~ program.
+After the data has been preprocessed run the ~kasvm~ program.
 As path argument use the path of the original data file without the extension.
 
 #+BEGIN_SRC sh :results output verbatim
-./optimized_output/mlsvm examples/twonorm
+./optimized_output/kasvm examples/twonorm
 #+END_SRC
 
-output of mlsvm
+output of kasvm
 
 # #+RESULTS:
 #+begin_example
+file: examples/twonorm
 num_experiments: 1
 kfold_iterations: 5
 sample_percent: 1
 validation_type: 0
 validation_percent: 0.1
 validation_seperate: 0
-stop rule: 0
-matching type: 3
 bidirectional: 0
+stop rule: 0
+fix_num_vert_stop: 500
+matching type: 3
 cluster_upperbound: 2147483647
 upper_bound_partition: 2147483647
 label_iterations: 10
 node_ordering: 1
 diameter_upperbound: 20
+beta: 0.4
 refinement_type: 0
 num_skip_ms: 10000
 inherit_ud: 1
@@ -123,29 +126,29 @@ timeout: 0
 cores: 0
 seed: 0
  \/\/\/\/\/\/\/\/\/ EXPERIMENT 0 \/\/\/\/\/\/\/
-io time: 0.074208
+io time: 0.134555
 full graph - min: 3703 maj: 3697 features: 20
 ------------- K-FOLD ITERATION 0 -------------
-fold time: 0.0967889
+fold time: 0.111028
 graph - min: 2963 maj: 2958
 val - min: 296 maj: 295
 test - min: 740 maj: 739
-calc new weights took 0.000108957
+calc new weights took 0.000131845
 no of coarser vertices 90 and no of edges 5530
-calc new weights took 0.000106096
+calc new weights took 0.000130177
 no of coarser vertices 86 and no of edges 5198
-coarsening time: 0.0456169
+coarsening time: 0.0519309
 coarse nodes - min: 90 maj: 86
 1st sweep with initial logC=0 logGamma=0
-log C=  5.00	log gamma=  0.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=112 (59,53)
+log C=  5.00	log gamma=  0.00	time=0.01  	ACC=0.501	Gmean=0.000	SVs=112 (59,53)
 log C= -5.00	log gamma= -2.50	time=0.00  	ACC=0.883	Gmean=0.876	SVs=135 (68,67)
-log C= 10.00	log gamma=  7.50	time=0.00  	ACC=0.501	Gmean=0.000	SVs=176 (90,86)
+log C= 10.00	log gamma=  7.50	time=0.01  	ACC=0.501	Gmean=0.000	SVs=176 (90,86)
 log C= -2.50	log gamma=  5.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=176 (90,86)
 log C=  0.00	log gamma= -7.50	time=0.00  	ACC=0.970	Gmean=0.969	SVs=46 (22,24)
 log C= 15.00	log gamma=  2.50	time=0.01  	ACC=0.501	Gmean=0.000	SVs=176 (90,86)
 log C= 12.50	log gamma= -5.00	time=0.00  	ACC=0.959	Gmean=0.959	SVs=15 (7,8)
 log C=  7.50	log gamma=-10.00	time=0.00  	ACC=0.949	Gmean=0.949	SVs=12 (4,8)
-log C=  2.50	log gamma= 10.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=176 (90,86)
+log C=  2.50	log gamma= 10.00	time=0.01  	ACC=0.501	Gmean=0.000	SVs=176 (90,86)
 2nd sweep with logC=12.5 logGamma=-5
 log C: 12.5 log g: -5 AC:0.959 SN:0.973 SP:0.946 PPV:0.947 NPV:0.972 F1:0.960 GM:0.959 SV_min:7 SV_maj:8 TP:288 TN:279 FP:16 FN:8
 log C= 10.00	log gamma= -5.00	time=0.00  	ACC=0.959	Gmean=0.959	SVs=15 (7,8)
@@ -154,10 +157,10 @@ log C= 14.99	log gamma= -7.50	time=0.00  	ACC=0.946	Gmean=0.945	SVs=13 (4,9)
 log C= 15.00	log gamma=  0.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=112 (59,53)
 BEST (15,-7.5)
 log C: 14.994 log g: -7.5 AC:0.946 SN:0.980 SP:0.912 PPV:0.918 NPV:0.978 F1:0.948 GM:0.945 SV_min:4 SV_maj:9 TP:290 TN:269 FP:26 FN:6
-init train time: 0.0884
+init train time: 0.103
 inital validation on testing:
 log C: 14.994 log g: -7.5 AC:0.969 SN:0.977 SP:0.961 PPV:0.961 NPV:0.977 F1:0.969 GM:0.969 SV_min:4 SV_maj:9 TP:723 TN:710 FP:29 FN:17
-init test time: 0.00224
+init test time: 0.0026
 UD refinement at level 1
 minority uncoarsed
 uncoarsened nodes 2963 SV 4 resulting new_data 23
@@ -173,14 +176,15 @@ log C= 15.02	log gamma= -5.00	time=0.00  	ACC=0.932	Gmean=0.931	SVs=50 (15,35)
 log C= 14.99	log gamma= -7.50	time=0.00  	ACC=0.948	Gmean=0.947	SVs=34 (14,20)
 BEST (15,-10)
 log C: 15.019 log g: -10 AC:0.956 SN:0.936 SP:0.976 PPV:0.975 NPV:0.938 F1:0.955 GM:0.956 SV_min:11 SV_maj:12 TP:277 TN:288 FP:7 FN:19
-refinement at level 0 took 0.0298
-refinement time 0.0299
+refinement at level 0 took 0.0337
+refinement time 0.0338
 best validation on testing data:
-test time 0.00274
+test time 0.00313
 log C: 15.019 log g: -10 AC:0.938 SN:0.896 SP:0.980 PPV:0.978 NPV:0.904 F1:0.935 GM:0.937 SV_min:11 SV_maj:12 TP:663 TN:724 FP:15 FN:77
-iteration time: 0.2636
+iteration time: 0.3027
+Exporting model to ./svm0.model
 ------------- K-FOLD ITERATION 1 -------------
-fold time: 0.0968
+fold time: 0.1114
 graph - min: 2963 maj: 2958
 val - min: 296 maj: 295
 test - min: 740 maj: 739
@@ -188,15 +192,15 @@ calc new weights took 0.0001
 no of coarser vertices 86 and no of edges 4774
 calc new weights took 0.0001
 no of coarser vertices 95 and no of edges 6086
-coarsening time: 0.0451
+coarsening time: 0.0519
 coarse nodes - min: 86 maj: 95
 1st sweep with initial logC=0 logGamma=0
 log C=  5.00	log gamma=  0.00	time=0.00  	ACC=0.503	Gmean=0.058	SVs=120 (60,60)
 log C= -5.00	log gamma= -2.50	time=0.00  	ACC=0.981	Gmean=0.981	SVs=142 (71,71)
-log C= 10.00	log gamma=  7.50	time=0.00  	ACC=0.499	Gmean=0.000	SVs=181 (86,95)
+log C= 10.00	log gamma=  7.50	time=0.01  	ACC=0.499	Gmean=0.000	SVs=181 (86,95)
 log C= -2.50	log gamma=  5.00	time=0.00  	ACC=0.499	Gmean=0.000	SVs=181 (86,95)
 log C=  0.00	log gamma= -7.50	time=0.00  	ACC=0.978	Gmean=0.978	SVs=46 (22,24)
-log C= 15.00	log gamma=  2.50	time=0.00  	ACC=0.499	Gmean=0.000	SVs=181 (86,95)
+log C= 15.00	log gamma=  2.50	time=0.01  	ACC=0.499	Gmean=0.000	SVs=181 (86,95)
 log C= 12.50	log gamma= -5.00	time=0.00  	ACC=0.975	Gmean=0.975	SVs=17 (5,12)
 log C=  7.50	log gamma=-10.00	time=0.00  	ACC=0.963	Gmean=0.962	SVs=10 (2,8)
 log C=  2.50	log gamma= 10.00	time=0.01  	ACC=0.499	Gmean=0.000	SVs=181 (86,95)
@@ -208,10 +212,10 @@ log C= 12.50	log gamma= -9.29	time=0.00  	ACC=0.963	Gmean=0.962	SVs=10 (2,8)
 log C= 15.00	log gamma= -5.00	time=0.00  	ACC=0.975	Gmean=0.975	SVs=17 (5,12)
 BEST (12.5,-9.29)
 log C: 12.5 log g: -9.2908 AC:0.963 SN:0.990 SP:0.936 PPV:0.939 NPV:0.989 F1:0.964 GM:0.962 SV_min:2 SV_maj:8 TP:293 TN:276 FP:19 FN:3
-init train time: 0.0813
+init train time: 0.0955
 inital validation on testing:
 log C: 12.5 log g: -9.2908 AC:0.957 SN:0.986 SP:0.927 PPV:0.931 NPV:0.986 F1:0.958 GM:0.956 SV_min:2 SV_maj:8 TP:730 TN:685 FP:54 FN:10
-init test time: 0.00218
+init test time: 0.00253
 UD refinement at level 1
 minority uncoarsed
 uncoarsened nodes 2963 SV 2 resulting new_data 13
@@ -227,22 +231,23 @@ log C= 15.00	log gamma= -6.79	time=0.00  	ACC=0.942	Gmean=0.942	SVs=32 (11,21)
 log C= 12.50	log gamma= -9.29	time=0.00  	ACC=0.949	Gmean=0.949	SVs=21 (9,12)
 BEST (15,-13.9)
 log C: 14.986 log g: -13.875 AC:0.948 SN:0.939 SP:0.956 PPV:0.955 NPV:0.940 F1:0.947 GM:0.948 SV_min:9 SV_maj:9 TP:278 TN:282 FP:13 FN:18
-refinement at level 0 took 0.0182
-refinement time 0.0183
+refinement at level 0 took 0.0211
+refinement time 0.0212
 best validation on testing data:
-test time 0.0021
+test time 0.0026
 log C: 12.5 log g: -9.2908 AC:0.957 SN:0.986 SP:0.927 PPV:0.931 NPV:0.986 F1:0.958 GM:0.956 SV_min:2 SV_maj:8 TP:730 TN:685 FP:54 FN:10
-iteration time: 0.2438
+iteration time: 0.2828
+Exporting model to ./svm1.model
 ------------- K-FOLD ITERATION 2 -------------
-fold time: 0.0969
+fold time: 0.1130
 graph - min: 2963 maj: 2958
 val - min: 296 maj: 295
 test - min: 740 maj: 739
-calc new weights took 0.0001
+calc new weights took 0.0002
 no of coarser vertices 87 and no of edges 5602
 calc new weights took 0.0001
 no of coarser vertices 87 and no of edges 5510
-coarsening time: 0.0443
+coarsening time: 0.0524
 coarse nodes - min: 87 maj: 87
 1st sweep with initial logC=0 logGamma=0
 log C=  5.00	log gamma=  0.00	time=0.00  	ACC=0.499	Gmean=0.000	SVs=109 (53,56)
@@ -262,10 +267,10 @@ log C= 12.50	log gamma= -9.15	time=0.00  	ACC=0.968	Gmean=0.968	SVs=9 (4,5)
 log C= 15.00	log gamma= -5.00	time=0.00  	ACC=0.971	Gmean=0.971	SVs=13 (7,6)
 BEST (12.5,-9.15)
 log C: 12.5 log g: -9.153 AC:0.968 SN:0.980 SP:0.956 PPV:0.957 NPV:0.979 F1:0.968 GM:0.968 SV_min:4 SV_maj:5 TP:290 TN:282 FP:13 FN:6
-init train time: 0.0716
+init train time: 0.0815
 inital validation on testing:
 log C: 12.5 log g: -9.153 AC:0.966 SN:0.965 SP:0.968 PPV:0.967 NPV:0.965 F1:0.966 GM:0.966 SV_min:4 SV_maj:5 TP:714 TN:715 FP:24 FN:26
-init test time: 0.00201
+init test time: 0.00231
 UD refinement at level 1
 minority uncoarsed
 uncoarsened nodes 2963 SV 4 resulting new_data 29
@@ -281,14 +286,15 @@ log C= 15.00	log gamma= -6.65	time=0.00  	ACC=0.931	Gmean=0.930	SVs=24 (12,12)
 log C= 12.50	log gamma= -9.15	time=0.00  	ACC=0.934	Gmean=0.934	SVs=19 (11,8)
 BEST (15,-15.2)
 log C: 15.019 log g: -15.2 AC:0.936 SN:0.929 SP:0.942 PPV:0.942 NPV:0.930 F1:0.935 GM:0.936 SV_min:9 SV_maj:6 TP:275 TN:278 FP:17 FN:21
-refinement at level 0 took 0.0167
-refinement time 0.0167
+refinement at level 0 took 0.0137
+refinement time 0.0138
 best validation on testing data:
-test time 0.00202
+test time 0.00233
 log C: 12.5 log g: -9.153 AC:0.966 SN:0.965 SP:0.968 PPV:0.967 NPV:0.965 F1:0.966 GM:0.966 SV_min:4 SV_maj:5 TP:714 TN:715 FP:24 FN:26
-iteration time: 0.2317
+iteration time: 0.2631
+Exporting model to ./svm2.model
 ------------- K-FOLD ITERATION 3 -------------
-fold time: 0.0988
+fold time: 0.1130
 graph - min: 2963 maj: 2958
 val - min: 296 maj: 295
 test - min: 740 maj: 739
@@ -296,7 +302,7 @@ calc new weights took 0.0001
 no of coarser vertices 79 and no of edges 4394
 calc new weights took 0.0001
 no of coarser vertices 83 and no of edges 4904
-coarsening time: 0.0451
+coarsening time: 0.0518
 coarse nodes - min: 79 maj: 83
 1st sweep with initial logC=0 logGamma=0
 log C=  5.00	log gamma=  0.00	time=0.00  	ACC=0.514	Gmean=0.174	SVs=100 (49,51)
@@ -316,10 +322,10 @@ log C= 12.50	log gamma=-11.54	time=0.00  	ACC=0.971	Gmean=0.971	SVs=13 (8,5)
 log C= 15.00	log gamma= -5.00	time=0.00  	ACC=0.966	Gmean=0.966	SVs=20 (10,10)
 BEST (12.5,-11.5)
 log C: 12.5 log g: -11.537 AC:0.971 SN:0.976 SP:0.966 PPV:0.967 NPV:0.976 F1:0.971 GM:0.971 SV_min:8 SV_maj:5 TP:289 TN:285 FP:10 FN:7
-init train time: 0.0743
+init train time: 0.0807
 inital validation on testing:
 log C: 12.5 log g: -11.537 AC:0.974 SN:0.969 SP:0.978 PPV:0.978 NPV:0.969 F1:0.974 GM:0.974 SV_min:8 SV_maj:5 TP:717 TN:723 FP:16 FN:23
-init test time: 0.00229
+init test time: 0.00264
 UD refinement at level 1
 minority uncoarsed
 uncoarsened nodes 2963 SV 8 resulting new_data 54
@@ -335,14 +341,15 @@ log C= 15.00	log gamma= -9.04	time=0.00  	ACC=0.939	Gmean=0.939	SVs=23 (6,17)
 log C= 12.50	log gamma=-11.54	time=0.00  	ACC=0.941	Gmean=0.941	SVs=20 (6,14)
 BEST (12.5,-11.5)
 log C: 12.5 log g: -11.537 AC:0.941 SN:0.959 SP:0.922 PPV:0.925 NPV:0.958 F1:0.942 GM:0.941 SV_min:6 SV_maj:14 TP:284 TN:272 FP:23 FN:12
-refinement at level 0 took 0.0195
-refinement time 0.0196
+refinement at level 0 took 0.0207
+refinement time 0.0208
 best validation on testing data:
-test time 0.00218
+test time 0.00261
 log C: 12.5 log g: -11.537 AC:0.974 SN:0.969 SP:0.978 PPV:0.978 NPV:0.969 F1:0.974 GM:0.974 SV_min:8 SV_maj:5 TP:717 TN:723 FP:16 FN:23
-iteration time: 0.2401
+iteration time: 0.2691
+Exporting model to ./svm3.model
 ------------- K-FOLD ITERATION 4 -------------
-fold time: 0.0996
+fold time: 0.1152
 graph - min: 2963 maj: 2958
 val - min: 296 maj: 295
 test - min: 740 maj: 739
@@ -350,7 +357,7 @@ calc new weights took 0.0001
 no of coarser vertices 88 and no of edges 5118
 calc new weights took 0.0001
 no of coarser vertices 85 and no of edges 5520
-coarsening time: 0.0462
+coarsening time: 0.0520
 coarse nodes - min: 88 maj: 85
 1st sweep with initial logC=0 logGamma=0
 log C=  5.00	log gamma=  0.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=115 (59,56)
@@ -358,7 +365,7 @@ log C= -5.00	log gamma= -2.50	time=0.00  	ACC=0.662	Gmean=0.567	SVs=135 (68,67)
 log C= 10.00	log gamma=  7.50	time=0.00  	ACC=0.501	Gmean=0.000	SVs=173 (88,85)
 log C= -2.50	log gamma=  5.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=173 (88,85)
 log C=  0.00	log gamma= -7.50	time=0.00  	ACC=0.985	Gmean=0.985	SVs=46 (22,24)
-log C= 15.00	log gamma=  2.50	time=0.00  	ACC=0.501	Gmean=0.000	SVs=173 (88,85)
+log C= 15.00	log gamma=  2.50	time=0.01  	ACC=0.501	Gmean=0.000	SVs=173 (88,85)
 log C= 12.50	log gamma= -5.00	time=0.00  	ACC=0.980	Gmean=0.980	SVs=20 (10,10)
 log C=  7.50	log gamma=-10.00	time=0.00  	ACC=0.983	Gmean=0.983	SVs=10 (7,3)
 log C=  2.50	log gamma= 10.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=173 (88,85)
@@ -366,14 +373,14 @@ log C=  2.50	log gamma= 10.00	time=0.00  	ACC=0.501	Gmean=0.000	SVs=173 (88,85)
 log C: 7.5 log g: -10 AC:0.983 SN:0.980 SP:0.986 PPV:0.986 NPV:0.980 F1:0.983 GM:0.983 SV_min:7 SV_maj:3 TP:290 TN:291 FP:4 FN:6
 log C=  5.00	log gamma=-10.00	time=0.00  	ACC=0.980	Gmean=0.980	SVs=16 (10,6)
 log C=  7.50	log gamma= -2.50	time=0.00  	ACC=0.621	Gmean=0.491	SVs=44 (25,19)
-log C= 12.50	log gamma= -9.74	time=0.00  	ACC=0.983	Gmean=0.983	SVs=10 (7,3)
-log C= 15.00	log gamma= -5.00	time=0.00  	ACC=0.980	Gmean=0.980	SVs=20 (10,10)
+log C= 12.50	log gamma= -9.74	time=0.02  	ACC=0.983	Gmean=0.983	SVs=10 (7,3)
+log C= 15.00	log gamma= -5.00	time=0.01  	ACC=0.980	Gmean=0.980	SVs=20 (10,10)
 BEST (12.5,-9.74)
 log C: 12.5 log g: -9.7435 AC:0.983 SN:0.980 SP:0.986 PPV:0.986 NPV:0.980 F1:0.983 GM:0.983 SV_min:7 SV_maj:3 TP:290 TN:291 FP:4 FN:6
-init train time: 0.075
+init train time: 0.104
 inital validation on testing:
 log C: 12.5 log g: -9.7435 AC:0.983 SN:0.982 SP:0.984 PPV:0.984 NPV:0.982 F1:0.983 GM:0.983 SV_min:7 SV_maj:3 TP:727 TN:727 FP:12 FN:13
-init test time: 0.00209
+init test time: 0.0028
 UD refinement at level 1
 minority uncoarsed
 uncoarsened nodes 2963 SV 7 resulting new_data 58
@@ -389,20 +396,21 @@ log C= 15.00	log gamma= -7.24	time=0.00  	ACC=0.964	Gmean=0.964	SVs=30 (15,15)
 log C= 12.50	log gamma= -9.74	time=0.00  	ACC=0.956	Gmean=0.956	SVs=21 (10,11)
 BEST (15,-11.8)
 log C: 14.997 log g: -11.82 AC:0.956 SN:0.932 SP:0.980 PPV:0.979 NPV:0.935 F1:0.955 GM:0.956 SV_min:10 SV_maj:10 TP:276 TN:289 FP:6 FN:20
-refinement at level 0 took 0.0324
-refinement time 0.0325
+refinement at level 0 took 0.0273
+refinement time 0.0274
 best validation on testing data:
-test time 0.0101
+test time 0.00249
 log C: 12.5 log g: -9.7435 AC:0.983 SN:0.982 SP:0.984 PPV:0.984 NPV:0.982 F1:0.983 GM:0.983 SV_min:7 SV_maj:3 TP:727 TN:727 FP:12 FN:13
-iteration time: 0.2635
+iteration time: 0.3008
+Exporting model to ./svm4.model
 -------------- K-FOLD DONE -------------- 
-KFOLD_TIME	0.0978
-COARSE_TIME	0.0453
+KFOLD_TIME	0.1127
+COARSE_TIME	0.0520
 COARSE_MIN	86.0000
 COARSE_MAJ	87.2000
 HIERARCHY_MIN_SIZE	1.0000
 HIERARCHY_MAJ_SIZE	1.0000
-	INIT_TRAIN_TIME	0.0781
+	INIT_TRAIN_TIME	0.0928
 INIT_AC  	0.9662
 INIT_GM  	0.9659
 INIT_AC_TEST	0.9697
@@ -421,24 +429,25 @@ BEST_SN	0.9723
 BEST_SP	0.9641
 BEST_GM	0.9680
 BEST_F1	0.9683
-	TEST_TIME	0.0038
+	TEST_TIME	0.0026
 BEST_AC_TEST	0.9635
 BEST_SN_TEST	0.9597
 BEST_SP_TEST	0.9673
 BEST_GM_TEST	0.9632
 BEST_F1_TEST	0.9632
-TIME	0.2485
+TIME	0.2837
 #+end_example
+
 
 *** Options
 
 #+BEGIN_SRC sh :results output verbatim
-./optimized_output/mlsvm --help
+./optimized_output/kasvm --help
 #+END_SRC
 
 # #+RESULTS:
 #+begin_example
-Usage: ./optimized_output/mlsvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k <int>] [-s <double>] [--validation=TYPE] [--validation_percent=<double>] [--validation_seperate] [-n <int>] [--stop_rule=VARIANT] [--fix_num_vert_stop=<int>] [--matching=TYPE] [--cluster_upperbound=<int>] [--label_propagation_iterations=<int>] [--diameter_upperbound=<double>] [--refinement=TYPE] [-C <double>] [-g <double>] [--num_skip_ms=<int>] [--no_inherit_ud] [--export_graph] [--output_filename=<string>] [--export_model=<string>] [--timeout=<int>] [-c <int>]
+Usage: ./optimized_output/kasvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k <int>] [-s <double>] [--validation=TYPE] [--validation_percent=<double>] [--validation_seperate] [-n <int>] [--stop_rule=VARIANT] [--fix_num_vert_stop=<int>] [--matching=TYPE] [--cluster_upperbound=<int>] [--label_propagation_iterations=<int>] [--diameter_upperbound=<double>] [--beta=<double>] [--refinement=TYPE] [-C <double>] [-g <double>] [--num_skip_ms=<int>] [--no_inherit_ud] [--export_graph] [--output_filename=<string>] [--export_model=<string>] [--timeout=<int>] [-c <int>]
   --help                                   Print help.
   FILE                                     Path to graph file to partition.
   --seed=<int>                             Seed to use for the PRNG.
@@ -447,7 +456,7 @@ Usage: ./optimized_output/mlsvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k
   -s, --sample=<double>                    Percentage of data that is use. Usefull if very slow on large datasets (Default: 1.0 aka use all data)
   --validation=TYPE                        Type of validation. One of {kfold, kfold_import, once, train_test_split} (Default: kfold)
   --validation_percent=<double>            Percentage of data that is use for validation (Default: 0.1)
-  --validation_seperate                    Should the validation data be also used for training (Default: yes for single_level no for mlsvm - this flag invertse the choice)
+  --validation_seperate                    Should the validation data be also used for training (Default: 'no' for kasvm  'yes' for single_level - this flag invertse the choice)
   -n, --num_nn=<int>                       Number of nearest neighbors to consider when building the graphs. (Default: 10)
   -b, --bidirectional                      Make the nearest neighbor graph bidirectional
   --stop_rule=VARIANT                      Stop rule to use. One of {simple-fix}. Default: simple-fix
@@ -456,6 +465,7 @@ Usage: ./optimized_output/mlsvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k
   --cluster_upperbound=<int>               Set a size-constraint on the size of a cluster. Default: none
   --label_propagation_iterations=<int>     Set the number of label propgation iterations. Default: 10.
   --diameter_upperbound=<double>           Set a size-constraint on the size of a low diameter cluster. Default: 20
+  --beta=<double>                          value of the beta parameter when using low diameter clustering. (Default: 0.4)
   --refinement=TYPE                        Type of refinement. One of {ud, bayes, fix} (Default: ud)
   -C <double>                              value of the C parameter when using fix refinement. (use logarithmic scale)
   -g <double>                              value of the gamma parameter when using fix refinement. (use logarithmic scale)
