@@ -12,9 +12,10 @@ void PartitionConfig::print() {
 	std::cout << "validation_type: " << this->validation_type << std::endl;
 	std::cout << "validation_percent: " << this->validation_percent << std::endl;
 	std::cout << "validation_seperate: " << this->validation_seperate << std::endl;
-	std::cout << "stop rule: " << this->stop_rule << std::endl;
-	std::cout << "matching type: " << this->matching_type << std::endl;
 	std::cout << "bidirectional: " << this->bidirectional << std::endl;
+	std::cout << "stop rule: " << this->stop_rule << std::endl;
+	std::cout << "fix_num_vert_stop: " << this->fix_num_vert_stop << std::endl;
+	std::cout << "matching type: " << this->matching_type << std::endl;
 	std::cout << "cluster_upperbound: " << this->cluster_upperbound << std::endl;
 	std::cout << "upper_bound_partition: " << this->upper_bound_partition << std::endl;
 	std::cout << "label_iterations: " << this->label_iterations << std::endl;
