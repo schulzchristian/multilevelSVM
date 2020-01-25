@@ -228,13 +228,13 @@ int parse_args(int argc, char *argv[], config & conf) {
 
         if (filename->count > 0) {
 		string file(filename->sval[0]);
+		conf.inputfile = file;
 		if (file.substr(file.size()-4,4) == ".csv") {
 			conf.outputfile = file.substr(0, file.size()-4);
 		} else {
                         conf.libsvm = true;
 			conf.outputfile = conf.inputfile;
 		}
-		conf.inputfile = file;
 	}
 
 	if (filename_output->count > 0) {
