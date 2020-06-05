@@ -191,7 +191,6 @@ void size_constraint_label_propagation::label_propagation(const PartitionConfig 
                                 if((cur_value > max_value  || (cur_value == max_value && random_functions::nextBool()))
 				   && (cluster_local_sizes[cur_block] + 1 < partition_config.cluster_upperbound || cur_block == my_block)
                                    && (cluster_sizes[cur_block] + G.getNodeWeight(node) < block_upperbound || cur_block == my_block)
-                                   && (!partition_config.graph_allready_partitioned || G.getPartitionIndex(node) == G.getPartitionIndex(target))
                                    && (!partition_config.combine || G.getSecondPartitionIndex(node) == G.getSecondPartitionIndex(target)))
                                 {
                                         max_value = cur_value;

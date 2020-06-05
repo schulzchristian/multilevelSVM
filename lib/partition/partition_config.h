@@ -136,8 +136,6 @@ struct PartitionConfig
         //=======================================
         //=======================================
 
-        bool graph_allready_partitioned = false;
-
         bool balance_edges;
 
         bool gpa_grow_paths_between_blocks = true;

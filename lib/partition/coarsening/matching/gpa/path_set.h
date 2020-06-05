@@ -130,19 +130,6 @@ inline bool path_set::add_if_applicable(const NodeID & source, const EdgeID & e)
 
         NodeID target = G.getEdgeTarget(e);
 
-        if(config->graph_allready_partitioned && !config->gpa_grow_paths_between_blocks) {
-                // in this case we only grow paths inside blocks
-                if(G.getPartitionIndex(source) != G.getPartitionIndex(target))
-                        return false;
-        
-                if(config->combine) {
-                        if(G.getSecondPartitionIndex(source) != G.getSecondPartitionIndex(target)) {
-                                return false;
-                        }
-                }
-                         
-        }
-
         PathID sourcePathID = m_vertex_to_path[source]; 
         PathID targetPathID = m_vertex_to_path[target]; 
 

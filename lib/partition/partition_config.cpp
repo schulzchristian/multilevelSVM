@@ -12,6 +12,7 @@ void PartitionConfig::print() {
 	std::cout << "validation_type: " << this->validation_type << std::endl;
 	std::cout << "validation_percent: " << this->validation_percent << std::endl;
 	std::cout << "validation_seperate: " << this->validation_seperate << std::endl;
+	std::cout << "num_nn: " << this->num_nn << std::endl;
 	std::cout << "bidirectional: " << this->bidirectional << std::endl;
 	std::cout << "stop rule: " << this->stop_rule << std::endl;
 	std::cout << "fix_num_vert_stop: " << this->fix_num_vert_stop << std::endl;

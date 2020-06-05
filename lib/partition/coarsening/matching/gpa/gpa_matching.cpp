@@ -96,63 +96,42 @@ void gpa_matching::match(const PartitionConfig & partition_config,
         // all matched pairs are now in edge_matching
         // now construct the coarsemapping
         no_of_coarse_vertices = 0;
-        if(!partition_config.graph_allready_partitioned) {
-                forall_nodes(G, n) {
-                        if(partition_config.combine) {
-                                if(G.getSecondPartitionIndex(n) != G.getSecondPartitionIndex(edge_matching[n])) {
-                                        // v cycle... they shouldnt be contraced
-                                        edge_matching[n] = n;
-                                }
-                        }
+	forall_nodes(G, n) {
+		if(G.getPartitionIndex(n) != G.getPartitionIndex(edge_matching[n])) {
+			// v cycle... they shouldnt be contraced
+			edge_matching[n] = n;
+		}
 
-                        if( n < edge_matching[n]) {
-                                coarse_mapping[n]                = no_of_coarse_vertices;
-                                coarse_mapping[edge_matching[n]] = no_of_coarse_vertices;
-                                no_of_coarse_vertices++;
-                        } else if(n == edge_matching[n]) {
-                                coarse_mapping[n] = no_of_coarse_vertices;
-                                no_of_coarse_vertices++;
-                        }
-
-                } endfor
-         } else {
-                 forall_nodes(G, n) {
-                        if(G.getPartitionIndex(n) != G.getPartitionIndex(edge_matching[n])) {
-                                // v cycle... they shouldnt be contraced
-                                edge_matching[n] = n;
-                        }
-
-                        if(partition_config.combine) {
-                                if(G.getSecondPartitionIndex(n) != G.getSecondPartitionIndex(edge_matching[n])) {
-                                        // v cycle... they shouldnt be contraced
-                                        edge_matching[n] = n;
-                                }
-                        }
+		if(partition_config.combine) {
+			if(G.getSecondPartitionIndex(n) != G.getSecondPartitionIndex(edge_matching[n])) {
+				// v cycle... they shouldnt be contraced
+				edge_matching[n] = n;
+			}
+		}
 
 
-                        if( n < edge_matching[n]) {
-                                coarse_mapping[n]                = no_of_coarse_vertices;
-                                coarse_mapping[edge_matching[n]] = no_of_coarse_vertices;
-                                no_of_coarse_vertices++;
-                        } else if(n == edge_matching[n]) {
-                                coarse_mapping[n] = no_of_coarse_vertices;
-                                no_of_coarse_vertices++;
-                        }
+		if( n < edge_matching[n]) {
+			coarse_mapping[n]                = no_of_coarse_vertices;
+			coarse_mapping[edge_matching[n]] = no_of_coarse_vertices;
+			no_of_coarse_vertices++;
+		} else if(n == edge_matching[n]) {
+			coarse_mapping[n] = no_of_coarse_vertices;
+			no_of_coarse_vertices++;
+		}
 
-                } endfor
-         }
+	} endfor
 }
 
 void gpa_matching::init(graph_access & G,
-                        const PartitionConfig & partition_config,
-                        NodePermutationMap & permutation,
-                        Matching & edge_matching,
-                        std::vector<EdgeID>  & edge_permutation,
-                        std::vector<NodeID> & sources) {
+			const PartitionConfig & partition_config,
+			NodePermutationMap & permutation,
+			Matching & edge_matching,
+			std::vector<EdgeID>  & edge_permutation,
+			std::vector<NodeID> & sources) {
 
-        forall_nodes(G, n) {
-                permutation[n]   = n;
-                edge_matching[n] = n;
+	forall_nodes(G, n) {
+		permutation[n]   = n;
+		edge_matching[n] = n;
 
                 forall_out_edges(G, e, n) {
                         sources[e] = n;
