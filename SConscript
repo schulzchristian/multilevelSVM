@@ -102,7 +102,7 @@ if env['program'] == 'kasvm':
         env_prog.Append(CXXFLAGS = '-DSVM_SOLVER=svm_solver_thunder')
         env_prog.Append(CXXFLAGS = '-DSVM_MODEL=SVC')
         env_prog.Append(LIBPATH=['.'])
-        env_prog.Program('kasvm', ['app/kasvm.cpp'], LIBS=['kasvm', 'libargtable2','thundersvm','bayesopt','nlopt','gomp'])
+        env_prog.Program('kasvm', ['app/kasvm-train.cpp'], LIBS=['kasvm', 'libargtable2','thundersvm','bayesopt','nlopt','gomp'])
 
 if env['program'] == 'single_level':
         env.Library('kasvm', libkaffpa_files+libkasvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'])
