@@ -83,8 +83,10 @@ svm_data svm_refinement<T>::uncoarse_SV(graph_access & G,
 	data_mapping.clear();
 
         forall_nodes(G, node) {
+                G.setSVStatus(node, 0);
                 NodeID coarse_node = coarse_mapping[node];
                 if (sv_set.find(coarse_node) != sv_set.end()) {
+			G.setSVStatus(node, 1);
 			data_mapping.push_back(node);
                         svm_feature feature = svm_convert::feature_to_node(G.getFeatureVec(node));
                         new_data.push_back(std::move(feature));

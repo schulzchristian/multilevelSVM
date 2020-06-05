@@ -32,6 +32,7 @@
 
 struct refinementNode {
     PartitionID partitionIndex;
+    NodeID sv_status;
     FeatureVec featureVector;
 };
 
@@ -192,6 +193,9 @@ class graph_access {
                 const FeatureVec & getFeatureVec(NodeID node) const;
                 void setFeatureVec(NodeID node, const FeatureVec & vec);
 
+                const NodeID & getSVStatus(NodeID node) const;
+                void setSVStatus(NodeID node, const NodeID & status);
+
                 //to be called if combine in meta heuristic is used
                 void resizeSecondPartitionIndex(unsigned no_nodes);
 
@@ -332,6 +336,22 @@ inline void graph_access::setFeatureVec(NodeID node, const FeatureVec & vec) {
   graphref->m_refinement_node_props[node].featureVector = vec;
 #else
   graphref->m_refinement_node_props.at(node).featureVector = vec;
+#endif
+}
+
+inline const NodeID & graph_access::getSVStatus(NodeID node) const {
+#ifdef NDEBUG
+  return graphref->m_refinement_node_props[node].sv_status;
+#else
+  return graphref->m_refinement_node_props.at(node).sv_status;
+#endif
+}
+
+inline void graph_access::setSVStatus(NodeID node, const NodeID & status) {
+#ifdef NDEBUG
+  graphref->m_refinement_node_props[node].sv_status = status;
+#else
+  graphref->m_refinement_node_props.at(node).sv_status = status;
 #endif
 }
 

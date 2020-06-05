@@ -117,3 +117,8 @@ if env['program'] == 'single_level':
 
 if env['program'] == 'prepare':
         env.Program('prepare', ['app/prepare.cpp']+prepare_files, LIBS=['libargtable2','gomp'])
+
+if env['program'] == 'test':
+        env.Library('kasvm', libkaffpa_files+libkasvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'])
+
+        env.Program('tests', ['test/test.cpp']+test_files+libkaffpa_files+libkasvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'])
