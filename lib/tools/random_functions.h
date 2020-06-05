@@ -194,6 +194,11 @@ class random_functions {
                         return d(m_mt);
                 }
 
+		static double nextFromNorm(double mean, double stddev) {
+			std::normal_distribution<> d{mean,stddev};
+			return d(m_mt);
+		}
+
                 static void setSeed(int seed) {
                         m_seed = seed;
                         srand(seed);
