@@ -94,11 +94,64 @@ finished writing features to examples/twonorm_maj_data in 0.035835
 After the data has been preprocessed run the ~kasvm~ program.
 As path argument use the path of the original data file without the extension.
 
+*** Parameters
+Please note that to reproduce our experiments usually no special configuration
+is needed as the default values are the values we report in Section 5 of our
+paper.
+
+And that for the reported results we did *not* vary the parameters on a per
+instance basis.
+
+#+BEGIN_SRC sh :results output verbatim
+./optimized_output/kasvm --help
+#+END_SRC
+
+# #+RESULTS:
+#+begin_example
+Usage: ./optimized_output/kasvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k <int>] [-s <double>] [--validation=TYPE] [--validation_percent=<double>] [--validation_seperate] [-n <int>] [--stop_rule=VARIANT] [--fix_num_vert_stop=<int>] [--matching=TYPE] [--cluster_upperbound=<int>] [--label_propagation_iterations=<int>] [--diameter_upperbound=<double>] [--beta=<double>] [--refinement=TYPE] [-C <double>] [-g <double>] [--num_skip_ms=<int>] [--no_inherit_ud] [--export_graph] [--output_filename=<string>] [--export_model=<string>] [--timeout=<int>] [-c <int>]
+  --help                                   Print help.
+  FILE                                     Path to graph file to partition.
+  --seed=<int>                             Seed to use for the PRNG.
+  -e, --num_experiments=<int>              Number of experiments i.e. full kfold runs (default 1)
+  -k, --kfold_iterations=<int>             Number of kfold iterations (Default: 5)
+  -s, --sample=<double>                    Percentage of data that is use. Usefull if very slow on large datasets (Default: 1.0 aka use all data)
+  --validation=TYPE                        Type of validation. One of {kfold, kfold_import, once, train_test_split} (Default: kfold)
+  --validation_percent=<double>            Percentage of data that is use for validation (Default: 0.1)
+  --validation_seperate                    Should the validation data be also used for training (Default: 'no' for kasvm  'yes' for single_level - this flag invertse the choice)
+  -n, --num_nn=<int>                       Number of nearest neighbors to consider when building the graphs. (Default: 10)
+  -b, --bidirectional                      Make the nearest neighbor graph bidirectional
+  --stop_rule=VARIANT                      Stop rule to use. One of {simple-fix}. Default: simple-fix
+  --fix_num_vert_stop=<int>                Number of vertices to fix stop coarsening at.
+  --matching=TYPE                          Type of matchings to use during coarsening. One of {random, gpa, randomgpa, lp_clustering, simple_clustering, low_diameter}.
+  --cluster_upperbound=<int>               Set a size-constraint on the size of a cluster. Default: none
+  --label_propagation_iterations=<int>     Set the number of label propgation iterations. Default: 10.
+  --diameter_upperbound=<double>           Set a size-constraint on the size of a low diameter cluster. Default: 20
+  --beta=<double>                          value of the beta parameter when using low diameter clustering. (Default: 0.4)
+  --refinement=TYPE                        Type of refinement. One of {ud, bayes, fix} (Default: ud)
+  -C <double>                              value of the C parameter when using fix refinement. (use logarithmic scale)
+  -g <double>                              value of the gamma parameter when using fix refinement. (use logarithmic scale)
+  --num_skip_ms=<int>                      Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)
+  --no_inherit_ud                          Don't inherit the first UD sweep and do only the second UD sweep in the refinement.
+  --export_graph                           Export the graph at every level (this exits after one multilevel cycle).
+  --output_filename=<string>               Specify the name of the output file (that contains the partition).
+  --export_model=<string>                  Specify the path of the output model (it contains the trained SVM model for later usage) ( a number and ".model" will be appended to the path).
+  --timeout=<int>                          Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)
+  -c, --n_cores=<int>                      How many cores are used (Default: 0 aka. every core)
+#+end_example
+
+*** Example
+
 #+BEGIN_SRC sh :results output verbatim
 ./optimized_output/kasvm examples/twonorm
 #+END_SRC
 
-output of kasvm
+This will run the ~LPSVM~ variant on the twonorm dataset which is included in the
+repo.
+
+In our paper we report ~BEST_AC_TEST and ~BEST_GM_TEST~ as the "regular" result and
+~INIT_AC_TEST~ and ~INIT_GM_TEST~ as the "fast" result.
+
+Example output:
 
 # #+RESULTS:
 #+begin_example
@@ -439,49 +492,10 @@ TIME	0.2837
 #+end_example
 
 
-*** Options
-
-#+BEGIN_SRC sh :results output verbatim
-./optimized_output/kasvm --help
-#+END_SRC
-
-# #+RESULTS:
-#+begin_example
-Usage: ./optimized_output/kasvm [-b] [--help] FILE [--seed=<int>] [-e <int>] [-k <int>] [-s <double>] [--validation=TYPE] [--validation_percent=<double>] [--validation_seperate] [-n <int>] [--stop_rule=VARIANT] [--fix_num_vert_stop=<int>] [--matching=TYPE] [--cluster_upperbound=<int>] [--label_propagation_iterations=<int>] [--diameter_upperbound=<double>] [--beta=<double>] [--refinement=TYPE] [-C <double>] [-g <double>] [--num_skip_ms=<int>] [--no_inherit_ud] [--export_graph] [--output_filename=<string>] [--export_model=<string>] [--timeout=<int>] [-c <int>]
-  --help                                   Print help.
-  FILE                                     Path to graph file to partition.
-  --seed=<int>                             Seed to use for the PRNG.
-  -e, --num_experiments=<int>              Number of experiments i.e. full kfold runs (default 1)
-  -k, --kfold_iterations=<int>             Number of kfold iterations (Default: 5)
-  -s, --sample=<double>                    Percentage of data that is use. Usefull if very slow on large datasets (Default: 1.0 aka use all data)
-  --validation=TYPE                        Type of validation. One of {kfold, kfold_import, once, train_test_split} (Default: kfold)
-  --validation_percent=<double>            Percentage of data that is use for validation (Default: 0.1)
-  --validation_seperate                    Should the validation data be also used for training (Default: 'no' for kasvm  'yes' for single_level - this flag invertse the choice)
-  -n, --num_nn=<int>                       Number of nearest neighbors to consider when building the graphs. (Default: 10)
-  -b, --bidirectional                      Make the nearest neighbor graph bidirectional
-  --stop_rule=VARIANT                      Stop rule to use. One of {simple-fix}. Default: simple-fix
-  --fix_num_vert_stop=<int>                Number of vertices to fix stop coarsening at.
-  --matching=TYPE                          Type of matchings to use during coarsening. One of {random, gpa, randomgpa, lp_clustering, simple_clustering, low_diameter}.
-  --cluster_upperbound=<int>               Set a size-constraint on the size of a cluster. Default: none
-  --label_propagation_iterations=<int>     Set the number of label propgation iterations. Default: 10.
-  --diameter_upperbound=<double>           Set a size-constraint on the size of a low diameter cluster. Default: 20
-  --beta=<double>                          value of the beta parameter when using low diameter clustering. (Default: 0.4)
-  --refinement=TYPE                        Type of refinement. One of {ud, bayes, fix} (Default: ud)
-  -C <double>                              value of the C parameter when using fix refinement. (use logarithmic scale)
-  -g <double>                              value of the gamma parameter when using fix refinement. (use logarithmic scale)
-  --num_skip_ms=<int>                      Size of the problem on which no model selection is skipped and only the best parameters of the previous level are used (Default: 10000)
-  --no_inherit_ud                          Don't inherit the first UD sweep and do only the second UD sweep in the refinement.
-  --export_graph                           Export the graph at every level (this exits after one multilevel cycle).
-  --output_filename=<string>               Specify the name of the output file (that contains the partition).
-  --export_model=<string>                  Specify the path of the output model (it contains the trained SVM model for later usage) ( a number and ".model" will be appended to the path).
-  --timeout=<int>                          Timeout in seconds after the timeout (for a single kfold) run is readched the program is aborted (Default: 0)
-  -c, --n_cores=<int>                      How many cores are used (Default: 0 aka. every core)
-#+end_example
-
 * Licences
-[[https://github.com/jonathanmarvens/argtable2/blob/master/COPYING][Argtable]] - GNU GENERAL PUBLIC LICENSE Version 2
-[[https://github.com/mariusmuja/flann/blob/master/COPYING][Flann]] - BSD License
-[[https://github.com/mljs/libsvm/blob/master/LICENSE][LibSVM]] - BSD License
-[[https://github.com/Xtra-Computing/thundersvm/blob/master/LICENSE][ThunderSVM]] - Apache License 2.0
-[[https://github.com/rmcantin/bayesopt/blob/master/LICENSE][BayesOpt]] - GNU Affero General Public License v3.0
-[[https://github.com/catchorg/Catch2/blob/master/LICENSE.txt][Catch2]] - Boost Software License 1.0
+- [[https://github.com/jonathanmarvens/argtable2/blob/master/COPYING][Argtable]] - GNU GENERAL PUBLIC LICENSE Version 2
+- [[https://github.com/mariusmuja/flann/blob/master/COPYING][Flann]] - BSD License
+- [[https://github.com/mljs/libsvm/blob/master/LICENSE][LibSVM]] - BSD License
+- [[https://github.com/Xtra-Computing/thundersvm/blob/master/LICENSE][ThunderSVM]] - Apache License 2.0
+- [[https://github.com/rmcantin/bayesopt/blob/master/LICENSE][BayesOpt]] - GNU Affero General Public License v3.0
+- [[https://github.com/catchorg/Catch2/blob/master/LICENSE.txt][Catch2]] - Boost Software License 1.0
