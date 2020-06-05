@@ -117,3 +117,11 @@ if env['program'] == 'single_level':
 
 if env['program'] == 'prepare':
         env.Program('prepare', ['app/prepare.cpp']+prepare_files, LIBS=['libargtable2','gomp'])
+
+if env['program'] == 'knn':
+        env.Library('kasvm', libkaffpa_files+libkasvm_files, LIBS=['libargtable2','thundersvm','bayesopt','nlopt','gomp'])
+
+        env_prog = env.Clone()
+        env_prog.Append(CXXFLAGS = '-DMODE_KASVM')
+        env_prog.Append(CCFLAGS  = '-DMODE_KASVM')
+        env_prog.Program('knn', ['app/knn.cpp'] , LIBS=['kasvm', 'libargtable2','gomp'])
