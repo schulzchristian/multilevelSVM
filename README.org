@@ -99,9 +99,6 @@ Please note that to reproduce our experiments usually no special configuration
 is needed as the default values are the values we report in Section 5 of our
 paper.
 
-And that for the reported results we did *not* vary the parameters on a per
-instance basis.
-
 #+BEGIN_SRC sh :results output verbatim
 ./optimized_output/kasvm --help
 #+END_SRC
